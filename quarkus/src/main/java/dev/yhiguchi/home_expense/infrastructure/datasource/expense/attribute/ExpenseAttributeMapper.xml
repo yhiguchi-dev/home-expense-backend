@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute.ExpenseAttributeMapper">
+
+    <insert id="insert">
+        INSERT INTO expense.attribute(
+          id,
+          category,
+          name
+        ) VALUES (
+          #{expenseAttribute.expenseAttributeIdentifier.value},
+          #{expenseAttribute.expenseCategory},
+          #{expenseAttribute.expenseAttributeName.value}
+        )
+    </insert>
+
+    <resultMap id="ExpenseAttribute" type="dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute">
+        <id property="expenseAttributeIdentifier.value" column="id" />
+        <result property="expenseCategory" column="category" />
+        <result property="expenseAttributeName.value" column="name" />
+    </resultMap>
+
+    <select id="selectBy" resultMap="ExpenseAttribute">
+        SELECT
+          id,
+          category,
+          name
+        FROM
+          expense.attribute
+        WHERE
+          id = #{expenseAttributeIdentifier.value}
+    </select>
+
+    <select id="selectByExpenseAttributeName" resultMap="ExpenseAttribute">
+        SELECT
+          id,
+          category,
+          name
+        FROM
+          expense.attribute
+        WHERE
+          name = #{expenseAttributeName.value}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM expense.attribute
+        WHERE
+        id = #{expenseAttributeIdentifier.value}
+    </delete>
+</mapper>

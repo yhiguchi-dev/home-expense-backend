@@ -1,0 +1,35 @@
+services:
+  database:
+    image: postgres:15.1
+    container_name: expense-db
+    environment:
+      - POSTGRES_USER=expense
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=expense
+    healthcheck:
+      test: pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - 5432:5432
+    volumes:
+      - database_volume:/var/lib/postgresql/data
+  flyway:
+    build: ./database
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://expense-db/expense
+      - FLYWAY_USER=expense
+      - FLYWAY_PASSWORD=password
+      - FLYWAY_CONNECT_RETRIES=60
+      - FLYWAY_CLEAN_DISABLED=false
+      - FLYWAY_BASELINE_VERSION=0.0.0
+      - FLYWAY_SCHEMAS=expense
+      - FLYWAY_DEFAULT_SCHEMA=public
+#    command: clean migrate
+    command: migrate
+    depends_on:
+      database:
+        condition: service_healthy
+volumes:
+  database_volume:
