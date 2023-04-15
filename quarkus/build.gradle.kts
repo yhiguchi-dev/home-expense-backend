@@ -9,13 +9,8 @@ repositories {
   mavenLocal()
 }
 
-val quarkusPlatformGroupId: String by project
-val quarkusPlatformArtifactId: String by project
-val quarkusPlatformVersion: String by project
-
 dependencies {
-  implementation(enforcedPlatform("$quarkusPlatformGroupId:$quarkusPlatformArtifactId:$quarkusPlatformVersion"))
-  implementation("io.quarkus:quarkus-container-image-docker")
+  implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:2.16.6.Final"))
   implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
   implementation("io.quarkus:quarkus-hibernate-validator")
   implementation("io.quarkus:quarkus-jdbc-postgresql")
