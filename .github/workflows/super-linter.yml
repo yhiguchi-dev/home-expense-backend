@@ -23,4 +23,5 @@ jobs:
           DEFAULT_BRANCH: main
           FILTER_REGEX_EXCLUDE: gradlew*
           VALIDATE_JAVA: false
+          VALIDATE_GOOGLE_JAVA_FORMAT: false
           VALIDATE_SQLFLUFF: false
