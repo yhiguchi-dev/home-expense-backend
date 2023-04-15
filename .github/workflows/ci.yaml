@@ -41,6 +41,7 @@ jobs:
       matrix:
         build-context:
           - quarkus
+          - database
     steps:
       - uses: actions/checkout@v3
       - name: Set up Docker Buildx
@@ -70,11 +71,3 @@ jobs:
           ignore-unfixed: true
           vuln-type: os,library
           severity: CRITICAL,HIGH
-      - name: Push ${{ matrix.build-context }}
-        uses: docker/build-push-action@v3
-        with:
-          context: ./${{ matrix.build-context }}
-          push: true
-          tags: ghcr.io/${{ github.repository }}-${{ matrix.build-context }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
