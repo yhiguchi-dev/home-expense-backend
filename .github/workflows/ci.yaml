@@ -29,7 +29,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: delta files
         run: |
-          git diff --name-only --relative=$TARGET_DIR ${{ github.event.pull_request.base.sha }} HEAD
+          changeFiles=$(git diff --name-only --relative=$TARGET_DIR ${{ github.event.pull_request.base.sha }} HEAD)
+          echo "CHANGE_FILES=${changeFiles}" >> $GITHUB_ENV
+          echo {{ env.CHANGE_FILES }}
       - uses: graalvm/setup-graalvm@v1
         with:
           version: ${{ matrix.graalvm-version }}
