@@ -27,10 +27,9 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.sha }}
       - uses: actions/checkout@v3
-      - name: delta files
+      - name: Check changed files
         run: |
-          echo "CHANGE_FILES=$(git diff --name-only --relative=$TARGET_DIR ${{ github.event.pull_request.base.sha }} HEAD | tr '\n' ' ')" >> $GITHUB_ENV
-          echo ${{ env.CHANGE_FILES }}
+          git diff --name-only --relative=$TARGET_DIR ${{ github.event.pull_request.base.sha }} HEAD
       - uses: graalvm/setup-graalvm@v1
         with:
           version: ${{ matrix.graalvm-version }}
@@ -52,7 +51,7 @@ jobs:
       matrix:
         build-context:
           - quarkus
-          - database
+          - flyway
     steps:
       - uses: actions/checkout@v3
       - name: Set up Docker Buildx
