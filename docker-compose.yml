@@ -16,7 +16,7 @@ services:
     volumes:
       - database_volume:/var/lib/postgresql/data
   flyway:
-    build: ./database
+    build: flyway
     environment:
       - FLYWAY_URL=jdbc:postgresql://expense-db/expense
       - FLYWAY_USER=expense

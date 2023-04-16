@@ -20,8 +20,16 @@ jobs:
           - 22.3.1
         java-version:
           - 17
+    env:
+      TARGET_DIR: quarkus
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - uses: actions/checkout@v3
+      - name: delta files
+        run: |
+          git diff --name-only --relative=$TARGET_DIR ${{ github.event.pull_request.base.sha }} HEAD
       - uses: graalvm/setup-graalvm@v1
         with:
           version: ${{ matrix.graalvm-version }}
