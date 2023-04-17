@@ -3,15 +3,12 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
-  ExpenseAttributeMapper expenseAttributeMapper;
-
-  public ExpenseAttributeDataSource(ExpenseAttributeMapper expenseAttributeMapper) {
-    this.expenseAttributeMapper = expenseAttributeMapper;
-  }
+  @Inject ExpenseAttributeMapper expenseAttributeMapper;
 
   @Override
   public void register(ExpenseAttribute expenseAttribute) {

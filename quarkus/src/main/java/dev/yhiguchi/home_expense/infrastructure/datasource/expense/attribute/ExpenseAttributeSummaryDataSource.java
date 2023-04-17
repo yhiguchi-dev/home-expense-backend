@@ -6,15 +6,11 @@ import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryRepository;
 import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 public class ExpenseAttributeSummaryDataSource implements ExpenseAttributeSummaryRepository {
-  ExpenseAttributeSummaryMapper expenseAttributeSummaryMapper;
-
-  public ExpenseAttributeSummaryDataSource(
-      ExpenseAttributeSummaryMapper expenseAttributeSummaryMapper) {
-    this.expenseAttributeSummaryMapper = expenseAttributeSummaryMapper;
-  }
+  @Inject ExpenseAttributeSummaryMapper expenseAttributeSummaryMapper;
 
   @Override
   public ExpenseAttributeSummary find(ExpenseAttributeCriteria criteria) {

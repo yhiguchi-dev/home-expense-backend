@@ -6,15 +6,12 @@ import dev.yhiguchi.home_expense.domain.model.expense.ExpenseNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseRepository;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 public class ExpenseDataSource implements ExpenseRepository {
 
-  ExpenseMapper expenseMapper;
-
-  public ExpenseDataSource(ExpenseMapper expenseMapper) {
-    this.expenseMapper = expenseMapper;
-  }
+  @Inject ExpenseMapper expenseMapper;
 
   @Override
   public void register(Expense expense) {
