@@ -2,6 +2,7 @@ plugins {
   java
   id("io.quarkus")
   id("com.diffplug.spotless")
+  id("org.kordamp.gradle.jandex")
 }
 
 repositories {
