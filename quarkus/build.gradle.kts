@@ -2,7 +2,6 @@ plugins {
   java
   id("io.quarkus")
   id("com.diffplug.spotless")
-  id("org.kordamp.gradle.jandex")
 }
 
 repositories {
@@ -17,7 +16,7 @@ dependencies {
   implementation("io.quarkus:quarkus-jdbc-postgresql")
   implementation("io.quarkus:quarkus-arc")
   implementation("io.quarkus:quarkus-resteasy-reactive")
-  implementation("io.quarkiverse.mybatis:quarkus-mybatis:2.0.0")
+  implementation("io.quarkiverse.mybatis:quarkus-mybatis:1.0.7")
   implementation("io.quarkus:quarkus-logging-json")
   testImplementation("io.quarkus:quarkus-junit5")
 }
