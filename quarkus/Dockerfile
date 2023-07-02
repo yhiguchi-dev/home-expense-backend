@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.1 AS gradle-cache
+FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.2 AS gradle-cache
 
 WORKDIR /work
 
@@ -19,6 +19,8 @@ FROM gcr.io/distroless/static-debian11:nonroot
 WORKDIR /app
 
 COPY --from=builder /work/build/*-runner /app/application
+
+RUN ls -ltar
 
 EXPOSE 8080
 
