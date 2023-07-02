@@ -14,7 +14,7 @@ COPY src/ ./src/
 
 RUN ./gradlew clean build -Dquarkus.package.type=native -x test -x check
 
-FROM gcr.io/distroless/static-debian11:nonroot
+FROM debian:bullseye-20230612-slim
 
 WORKDIR /app
 
