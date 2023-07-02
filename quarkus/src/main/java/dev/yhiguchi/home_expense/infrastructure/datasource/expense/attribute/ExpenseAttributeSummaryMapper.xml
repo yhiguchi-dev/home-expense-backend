@@ -15,6 +15,18 @@
         <result property="expenseAttributeName.value" column="name" />
     </resultMap>
 
+    <select id="selectByPage" resultMap="ExpenseAttribute">
+        SELECT
+        id,
+        category,
+        name
+        FROM
+          expense.attribute
+        ORDER BY attribute.created_at
+        LIMIT #{expenseAttributeCriteria.perPage}
+        OFFSET #{expenseAttributeCriteria.offset}
+    </select>
+
     <select id="selectBy" resultMap="ExpenseAttribute">
         SELECT
           id,
@@ -22,9 +34,7 @@
           name
         FROM
           expense.attribute
-        <if test="expenseAttributeCriteria.expenseCategory != null">
-            WHERE attribute.category = #{expenseAttributeCriteria.expenseCategory}
-        </if>
+        WHERE attribute.category = #{expenseAttributeCriteria.expenseCategory}
         ORDER BY attribute.created_at
         LIMIT #{expenseAttributeCriteria.perPage}
         OFFSET #{expenseAttributeCriteria.offset}
