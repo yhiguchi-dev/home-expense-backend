@@ -14,7 +14,7 @@ COPY src/ ./src/
 
 RUN ./gradlew clean build -Dquarkus.package.type=native -x test -x check
 
-FROM debian:bullseye-20230612
+FROM ubuntu:22.04
 
 WORKDIR /app
 
