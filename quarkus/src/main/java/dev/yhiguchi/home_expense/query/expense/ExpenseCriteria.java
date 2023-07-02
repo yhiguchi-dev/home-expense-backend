@@ -21,11 +21,11 @@ public class ExpenseCriteria {
     return pagination.page();
   }
 
-  int getPerPage() {
+  public int getPerPage() {
     return perPage();
   }
 
-  int getOffset() {
+  public int getOffset() {
     return offset();
   }
 }
