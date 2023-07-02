@@ -22,6 +22,10 @@ public class ExpenseAttributeSummaryDataSource implements ExpenseAttributeSummar
     if (count == 0) {
       return new ExpenseAttributeSummary();
     }
+    if (criteria.hasExpenseCategory()) {
+      List<ExpenseAttribute> list = expenseAttributeSummaryMapper.selectByPage(criteria);
+      return new ExpenseAttributeSummary(count, list);
+    }
     List<ExpenseAttribute> list = expenseAttributeSummaryMapper.selectBy(criteria);
     return new ExpenseAttributeSummary(count, list);
   }

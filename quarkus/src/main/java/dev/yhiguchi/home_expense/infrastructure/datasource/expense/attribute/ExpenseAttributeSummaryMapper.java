@@ -12,6 +12,9 @@ public interface ExpenseAttributeSummaryMapper {
   Integer selectCount(
       @Param("expenseAttributeCriteria") ExpenseAttributeCriteria expenseAttributeCriteria);
 
+  List<ExpenseAttribute> selectByPage(
+      @Param("expenseAttributeCriteria") ExpenseAttributeCriteria expenseAttributeCriteria);
+
   List<ExpenseAttribute> selectBy(
       @Param("expenseAttributeCriteria") ExpenseAttributeCriteria expenseAttributeCriteria);
 }
