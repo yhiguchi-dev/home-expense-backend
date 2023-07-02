@@ -20,8 +20,6 @@ WORKDIR /app
 
 COPY --from=builder /work/build/*-runner /app/application
 
-RUN ls -ltar
-
 EXPOSE 8080
 
 CMD ["/app/application", "-Dquarkus.http.host=0.0.0.0"]
