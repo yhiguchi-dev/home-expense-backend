@@ -28,6 +28,10 @@ public class ExpenseAttributeCriteria {
     return pagination.page();
   }
 
+  public ExpenseCategory getExpenseCategory() {
+    return expenseCategory;
+  }
+
   int getPerPage() {
     return perPage();
   }
