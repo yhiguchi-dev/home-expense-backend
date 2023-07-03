@@ -2,7 +2,6 @@ package dev.yhiguchi.home_expense.query.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.Pagination;
-import java.util.Objects;
 
 public class ExpenseAttributeCriteria {
   ExpenseCategory expenseCategory;
@@ -29,16 +28,11 @@ public class ExpenseAttributeCriteria {
     return pagination.page();
   }
 
-  public boolean hasExpenseCategory() {
-    return Objects.isNull(expenseCategory);
-  }
-
-  public int getPerPage() {
+  int getPerPage() {
     return perPage();
   }
 
-  public int getOffset() {
+  int getOffset() {
     return offset();
   }
-
 }
