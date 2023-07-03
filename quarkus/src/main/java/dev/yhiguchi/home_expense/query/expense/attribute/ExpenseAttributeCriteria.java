@@ -33,12 +33,11 @@ public class ExpenseAttributeCriteria {
     return Objects.isNull(expenseCategory);
   }
 
-  public int getPerPage() {
+  int getPerPage() {
     return perPage();
   }
 
-  public int getOffset() {
+  int getOffset() {
     return offset();
   }
-
 }
