@@ -8,7 +8,6 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 
 @RegisterForReflection
-@JsonInclude(JsonInclude.Include.NON_NULL)
 class ExpenseGetResponse {
   @JsonProperty("total_number")
   Integer totalNumber;
