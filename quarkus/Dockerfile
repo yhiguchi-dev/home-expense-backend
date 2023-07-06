@@ -14,13 +14,11 @@ COPY src/ ./src/
 
 RUN ./gradlew clean build -Dquarkus.package.type=native -x test -x check
 
-FROM debian:bullseye-20230612-slim
+FROM ubuntu:22.04
 
 WORKDIR /app
 
 COPY --from=builder /work/build/*-runner /app/application
-
-RUN ls -ltar
 
 EXPOSE 8080
 

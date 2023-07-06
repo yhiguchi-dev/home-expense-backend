@@ -3,8 +3,10 @@ package dev.yhiguchi.home_expense.presentation.api.expense.attribute;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 
+@RegisterForReflection
 class ExpenseAttributeGetResponse {
   @JsonProperty("total_number")
   Integer totalNumber;
