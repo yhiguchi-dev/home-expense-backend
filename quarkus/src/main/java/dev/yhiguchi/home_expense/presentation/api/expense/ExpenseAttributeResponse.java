@@ -5,8 +5,4 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 record ExpenseAttributeResponse(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,
-    @JsonProperty("category") String category) {
-  ExpenseAttributeResponse() {
-    this(null, null, null);
-  }
-}
+    @JsonProperty("category") String category) {}

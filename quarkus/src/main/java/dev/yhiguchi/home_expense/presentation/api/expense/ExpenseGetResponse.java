@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
@@ -18,6 +19,7 @@ class ExpenseGetResponse {
   Integer perPage;
 
   @JsonProperty("expenses")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   List<ExpenseResponse> list;
 
   ExpenseGetResponse(ExpenseCriteria criteria, ExpenseSummary summary) {
@@ -34,7 +36,7 @@ class ExpenseGetResponse {
                               e.expenseAttribute().expenseAttributeIdentifier().value(),
                               e.expenseAttribute().expenseAttributeName().value(),
                               e.expenseAttribute().expenseCategory().name())
-                          : new ExpenseAttributeResponse();
+                          : null;
                   return new ExpenseResponse(
                       e.expenseIdentifier().value(),
                       e.description().value(),
