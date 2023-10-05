@@ -1,7 +1,7 @@
 plugins {
   java
-  id("io.quarkus")
-  id("com.diffplug.spotless")
+  alias(libs.plugins.io.quarkus)
+  alias(libs.plugins.com.diffplug.spotless)
 }
 
 repositories {
@@ -10,19 +10,23 @@ repositories {
 }
 
 dependencies {
-  implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:2.16.6.Final"))
-  implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
-  implementation("io.quarkus:quarkus-hibernate-validator")
-  implementation("io.quarkus:quarkus-jdbc-postgresql")
-  implementation("io.quarkus:quarkus-arc")
-  implementation("io.quarkus:quarkus-resteasy-reactive")
-  implementation("io.quarkiverse.mybatis:quarkus-mybatis:1.0.7")
-  implementation("io.quarkus:quarkus-logging-json")
-  testImplementation("io.quarkus:quarkus-junit5")
+  implementation(enforcedPlatform(libs.quarkus.bom))
+  implementation(libs.quarkus.resteasy.reactive.jackson)
+  implementation(libs.quarkus.hibernate.validator)
+  implementation(libs.quarkus.jdbc.postgresql)
+  implementation(libs.quarkus.arc)
+  implementation(libs.quarkus.resteasy.reactive)
+  implementation(libs.quarkus.mybatis)
+  implementation(libs.quarkus.logging.json)
+  testImplementation(libs.quarkus.junit5)
 }
 
 group = "dev.yhiguchi.home_expense"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT${System.getenv("FOO") ?: ""}"
+
+task("printVersion") {
+  println(version)
+}
 
 java {
   sourceCompatibility = JavaVersion.VERSION_17

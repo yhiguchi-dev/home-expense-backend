@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.presentation.validation;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.util.Objects;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 public class ExpenseCategoryValidator implements ConstraintValidator<ExpenseCategory, String> {
   @Override

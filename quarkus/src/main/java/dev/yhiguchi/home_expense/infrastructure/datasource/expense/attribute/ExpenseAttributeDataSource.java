@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Optional;
-import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {

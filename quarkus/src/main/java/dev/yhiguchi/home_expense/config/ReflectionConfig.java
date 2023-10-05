@@ -15,4 +15,4 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
       Expense.class,
       ExpenseIdentifier.class
     })
-public class MyReflectionConfig {}
+public class ReflectionConfig {}

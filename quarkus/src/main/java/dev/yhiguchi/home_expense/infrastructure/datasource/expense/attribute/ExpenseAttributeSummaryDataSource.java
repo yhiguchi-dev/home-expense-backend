@@ -4,8 +4,8 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
-import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ExpenseAttributeSummaryDataSource implements ExpenseAttributeSummaryRepository {

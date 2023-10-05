@@ -3,7 +3,7 @@ package dev.yhiguchi.home_expense.application.service.expense.attribute;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryRepository;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ExpenseAttributeSummaryService {

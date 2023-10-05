@@ -3,7 +3,7 @@ package dev.yhiguchi.home_expense.application.service.expense;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummaryRepository;
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ExpenseSummaryService {

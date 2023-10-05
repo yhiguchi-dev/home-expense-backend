@@ -5,10 +5,10 @@ import dev.yhiguchi.home_expense.domain.model.expense.Description;
 import dev.yhiguchi.home_expense.domain.model.expense.PaymentDate;
 import dev.yhiguchi.home_expense.domain.model.expense.Price;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 record ExpensePostRequest(
     @NotNull(message = "descriptionは必須入力です") @JsonProperty("description") String description,

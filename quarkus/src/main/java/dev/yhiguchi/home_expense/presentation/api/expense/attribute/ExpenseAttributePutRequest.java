@@ -3,7 +3,7 @@ package dev.yhiguchi.home_expense.presentation.api.expense.attribute;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 record ExpenseAttributePutRequest(
     @NotBlank(message = "nameは必須入力です") @JsonProperty("name") String name,

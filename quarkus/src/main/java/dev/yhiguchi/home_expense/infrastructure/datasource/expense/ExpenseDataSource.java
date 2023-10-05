@@ -4,8 +4,8 @@ import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Optional;
-import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ExpenseDataSource implements ExpenseRepository {
