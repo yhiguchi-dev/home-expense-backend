@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-  implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:2.16.6.Final"))
+  implementation(enforcedPlatform("io.quarkus.platform:quarkus-bom:3.4.2"))
   implementation("io.quarkus:quarkus-resteasy-reactive-jackson")
   implementation("io.quarkus:quarkus-hibernate-validator")
   implementation("io.quarkus:quarkus-jdbc-postgresql")
