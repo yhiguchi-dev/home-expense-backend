@@ -5,4 +5,4 @@ pluginManagement {
     mavenLocal()
   }
 }
-rootProject.name = "quarkus"
+rootProject.name = "app"
