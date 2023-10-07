@@ -9,14 +9,17 @@ jobs:
   lint:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/lint-with-gradle.yaml@main
     with:
-      node-version: ${{ matrix.node-version }}
-      lint-command: lint
+      graalvm-version: ${{ matrix.graalvm-version }}
+      java-version: ${{ matrix.java-version }}
+      lint-command: check
       working-directory: app
     strategy:
       fail-fast: false
       matrix:
-        node-version:
-          - 20
+        graalvm-version:
+          - 22.3.1
+        java-version:
+          - 17
 
   pre-build:
     runs-on: ubuntu-latest
