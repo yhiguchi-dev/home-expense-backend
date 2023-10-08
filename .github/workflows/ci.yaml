@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         java-version:
-          - 17
+          - 21
 
   pre-build:
     runs-on: ubuntu-latest
