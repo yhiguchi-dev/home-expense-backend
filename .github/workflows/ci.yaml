@@ -48,3 +48,4 @@ jobs:
       matrix:
         build-context:
           - app
+          - flyway
