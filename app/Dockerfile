@@ -6,15 +6,15 @@ COPY gradle/ ./gradle/
 COPY *.gradle *.gradle.kts gradlew ./
 
 RUN microdnf install -y findutils-1:4.8.0-5.el9 && microdnf clean all
-RUN ./gradlew --console=plain -q dependencies
+RUN ./gradlew --console=plain --no-daemon -q dependencies
 
 FROM gradle-cache AS builder
 
 COPY src/ ./src/
 
-RUN ./gradlew --console=plain -q clean build -Dquarkus.native.native-image-xmx=1g -x check
+RUN ./gradlew --console=plain --no-daemon -q clean build -x check
 
-FROM gcr.io/distroless/base-debian12
+FROM gcr.io/distroless/base-debian12:nonroot
 
 WORKDIR /app
 
