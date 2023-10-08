@@ -6,7 +6,7 @@ COPY gradle/ ./gradle/
 COPY *.gradle *.gradle.kts gradlew ./
 
 RUN microdnf install -y findutils-1:4.8.0-5.el9 && microdnf clean all
-RUN ./gradlew --console=plain --no-daemon -q dependencies
+RUN ./gradlew --console=plain --no-daemon -q printVersion
 
 FROM gradle-cache AS builder
 
