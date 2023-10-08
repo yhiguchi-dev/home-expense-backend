@@ -22,15 +22,16 @@ dependencies {
 }
 
 group = "dev.yhiguchi.home_expense"
-version = "1.0.0-SNAPSHOT${System.getenv("FOO") ?: ""}"
 
-task("printVersion") {
-  println(version)
+version = "1.0.0"
+
+System.getenv("DEPLOY_ENV")?.let { deployEnv ->
+  version = "$version-$deployEnv"
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
 sourceSets {
@@ -48,6 +49,12 @@ tasks.withType<Test> {
 tasks.withType<JavaCompile> {
   options.encoding = "UTF-8"
   options.compilerArgs.add("-parameters")
+}
+
+task("printVersion") {
+  doFirst {
+    println(version)
+  }
 }
 
 spotless {
