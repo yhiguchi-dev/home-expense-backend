@@ -1,5 +1,5 @@
 name: CI
-run-name: Push Docker Image (By Event ${{ github.event_name }}, Actor ${{ github.actor }} )
+run-name: Push Docker Image
 on:
   pull_request:
     branches:
