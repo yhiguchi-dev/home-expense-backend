@@ -39,7 +39,7 @@ jobs:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image-push-to-ghcr.yaml@main
     with:
       build-context: ${{ matrix.build-context }}
-      version: ${{ needs.pre-build.outputs.version }}
+      version: ${{ needs.pre-build-and-push.outputs.version }}
     needs:
       - pre-build-and-push
       - lint
