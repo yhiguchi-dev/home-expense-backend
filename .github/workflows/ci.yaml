@@ -41,7 +41,7 @@ jobs:
       build-context: ${{ matrix.build-context }}
       version: ${{ needs.pre-build.outputs.version }}
     needs:
-      - pre-build
+      - pre-build-and-push
       - lint
     strategy:
       fail-fast: false
