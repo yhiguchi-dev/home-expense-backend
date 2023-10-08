@@ -19,7 +19,7 @@ jobs:
         run: ./gradlew check
         working-directory: app
 
-  pre-build:
+  pre-build-and-push:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set-version.outputs.version }}
@@ -35,7 +35,7 @@ jobs:
         run: |
           echo "version=$(./gradlew --console=plain --no-daemon -q printVersion)" >> "${GITHUB_OUTPUT}"
         working-directory: app
-  build:
+  build-and-push:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image-push-to-ghcr.yaml@main
     with:
       build-context: ${{ matrix.build-context }}
