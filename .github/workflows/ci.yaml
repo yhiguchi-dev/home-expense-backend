@@ -16,7 +16,7 @@ jobs:
           java-version: 17
           cache: gradle
       - name: Gradle lint
-        run: ./gradlew check
+        run: ./gradlew --console=plain --no-daemon -q check
         working-directory: app
 
   pre-build-and-push:
