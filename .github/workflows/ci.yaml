@@ -43,6 +43,7 @@ jobs:
     with:
       build-context: ${{ matrix.build-context }}
       version: ${{ needs.pre-build-and-push.outputs.version }}
+      platform: ${{ matrix.platform }}
     needs:
       - pre-build-and-push
       - lint
@@ -52,3 +53,6 @@ jobs:
         build-context:
           - app
           - flyway
+        platform:
+          - linux/amd64
+          - linux/arm64/v8
