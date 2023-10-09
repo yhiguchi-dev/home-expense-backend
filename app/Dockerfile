@@ -1,19 +1,17 @@
-FROM amazoncorretto:17-al2023 AS gradle-cache
+FROM ghcr.io/graalvm/native-image:muslib-ol9-java17-22.3.3 AS gradle-cache
 
 WORKDIR /work
 
 COPY gradle/ ./gradle/
 COPY *.gradle *.gradle.kts gradlew ./
-RUN \
-  yum update && \
-  yum install -y findutils gcc glibc-devel zlib-devel libstdc++-static
+RUN microdnf install -y findutils-1:4.8.0-5.el9 && microdnf clean all
 RUN ./gradlew --console=plain --no-daemon -q printVersion
 
 FROM gradle-cache AS builder
 
 COPY src/ ./src/
 
-RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true -x check
+RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -Dquarkus.native.additional-build-args="--static","--libc=musl" -x check
 
 FROM gcr.io/distroless/base-debian12:nonroot
 
