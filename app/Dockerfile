@@ -1,18 +1,17 @@
-FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.2 AS gradle-cache
+FROM amazoncorretto:17-al2023 AS gradle-cache
 
 WORKDIR /work
 
 COPY gradle/ ./gradle/
 COPY *.gradle *.gradle.kts gradlew ./
 
-RUN microdnf install -y findutils-1:4.8.0-5.el9 && microdnf clean all
 RUN ./gradlew --console=plain --no-daemon -q printVersion
 
 FROM gradle-cache AS builder
 
 COPY src/ ./src/
 
-RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -x check
+RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -Dquarkus.native.container-build=true -x check
 
 FROM gcr.io/distroless/base-debian12:nonroot
 
