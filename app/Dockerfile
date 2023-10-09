@@ -12,7 +12,7 @@ FROM gradle-cache AS builder
 
 COPY src/ ./src/
 
-RUN ./gradlew --console=plain --no-daemon -q clean build -x check
+RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -x check
 
 FROM gcr.io/distroless/base-debian12:nonroot
 
