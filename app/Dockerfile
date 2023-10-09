@@ -6,7 +6,7 @@ COPY gradle/ ./gradle/
 COPY *.gradle *.gradle.kts gradlew ./
 RUN \
   yum update && \
-  yum install findutils gcc glibc-devel zlib-devel libstdc++-static
+  yum install -y findutils gcc glibc-devel zlib-devel libstdc++-static
 RUN ./gradlew --console=plain --no-daemon -q printVersion
 
 FROM gradle-cache AS builder
