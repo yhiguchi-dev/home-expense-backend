@@ -13,7 +13,7 @@ COPY src/ ./src/
 
 RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -x check
 
-FROM gcr.io/distroless/base-debian12:nonroot
+FROM quay.io/quarkus/quarkus-distroless-image:2.0
 
 WORKDIR /app
 
