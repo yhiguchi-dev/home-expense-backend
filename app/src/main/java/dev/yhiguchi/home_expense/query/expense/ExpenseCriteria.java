@@ -18,7 +18,7 @@ public class ExpenseCriteria {
   }
 
   public int page() {
-    return pagination.page();
+    return pagination.currentPage();
   }
 
   int getPerPage() {

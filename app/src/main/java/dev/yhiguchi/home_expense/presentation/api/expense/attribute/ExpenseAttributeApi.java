@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.application.service.ExpenseAttributeUpdateServi
 import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeSummaryService;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.*;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
@@ -25,7 +26,7 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 @Path("/v1/expense-attributes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ExpenseAttributeApi {
+public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   ExpenseAttributeRegistrationService expenseAttributeRegistrationService;
   ExpenseAttributeSummaryService expenseAttributeSummaryService;
@@ -74,22 +75,22 @@ public class ExpenseAttributeApi {
   public Response get(
       @RestQuery("category") @ExpenseCategory String category,
       @RestQuery("page") @DefaultValue("1") Integer page,
-      @RestQuery("per_page") @DefaultValue("20") Integer perPage) {
-    ExpenseAttributeCriteria criteria = toExpenseAttributeCriteria(category, page, perPage);
-    ExpenseAttributeSummary expenseAttributeSummary = expenseAttributeSummaryService.find(criteria);
-    ExpenseAttributeGetResponse response =
-        new ExpenseAttributeGetResponse(criteria, expenseAttributeSummary);
-    return Response.ok(response).build();
-  }
-
-  ExpenseAttributeCriteria toExpenseAttributeCriteria(
-      String category, Integer page, Integer perPage) {
+      @RestQuery("per_page") @DefaultValue("20") Integer perPage,
+      @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    if (Objects.nonNull(category)) {
-      return new ExpenseAttributeCriteria(
-          dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category), pagination);
-    }
-    return new ExpenseAttributeCriteria(pagination);
+    ExpenseAttributeCriteria criteria =
+        Objects.nonNull(category)
+            ? new ExpenseAttributeCriteria(
+                dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category),
+                pagination)
+            : new ExpenseAttributeCriteria(pagination);
+    ExpenseAttributeSummary expenseAttributeSummary = expenseAttributeSummaryService.find(criteria);
+    ExpenseAttributeGetSummaryResponse response =
+        new ExpenseAttributeGetSummaryResponse(expenseAttributeSummary);
+    Response.ResponseBuilder responseBuilder = Response.ok(response);
+    responseBuilder.header(
+        "Link", create(uriInfo, pagination, expenseAttributeSummary.totalNumber()));
+    return responseBuilder.build();
   }
 
   @ServerExceptionMapper

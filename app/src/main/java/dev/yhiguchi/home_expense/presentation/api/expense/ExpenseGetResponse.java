@@ -1,47 +1,30 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.yhiguchi.home_expense.query.expense.ExpenseCriteria;
-import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
+import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import java.util.List;
 
 @RegisterForReflection
-class ExpenseGetResponse {
-  @JsonProperty("total_number")
-  Integer totalNumber;
+record ExpenseGetResponse(
+    @JsonProperty("id") String id,
+    @JsonProperty("description") String description,
+    @JsonProperty("price") Integer price,
+    @JsonProperty("payment_date") String paymentDate,
+    @JsonProperty("expense_attribute") ExpenseAttributeResponse expenseAttributeResponse) {
 
-  @JsonProperty("page")
-  Integer page;
-
-  @JsonProperty("per_page")
-  Integer perPage;
-
-  @JsonProperty("expenses")
-  List<ExpenseResponse> list;
-
-  ExpenseGetResponse(ExpenseCriteria criteria, ExpenseSummary summary) {
-    this.totalNumber = summary.totalNumber();
-    this.page = criteria.page();
-    this.perPage = criteria.perPage();
-    this.list =
-        summary.list().stream()
-            .map(
-                e -> {
-                  ExpenseAttributeResponse expenseAttributeResponse =
-                      e.hasAttribute()
-                          ? new ExpenseAttributeResponse(
-                              e.expenseAttribute().expenseAttributeIdentifier().value(),
-                              e.expenseAttribute().expenseAttributeName().value(),
-                              e.expenseAttribute().expenseCategory().name())
-                          : null;
-                  return new ExpenseResponse(
-                      e.expenseIdentifier().value(),
-                      e.description().value(),
-                      e.price().value(),
-                      e.paymentDate().value(),
-                      expenseAttributeResponse);
-                })
-            .toList();
+  static ExpenseGetResponse from(Expense expense) {
+    ExpenseAttributeResponse expenseAttributeResponse =
+        expense.hasAttribute()
+            ? new ExpenseAttributeResponse(
+                expense.expenseAttribute().expenseAttributeIdentifier().value(),
+                expense.expenseAttribute().expenseAttributeName().value(),
+                expense.expenseAttribute().expenseCategory().name())
+            : null;
+    return new ExpenseGetResponse(
+        expense.expenseIdentifier().value(),
+        expense.description().value(),
+        expense.price().value(),
+        expense.paymentDate().value(),
+        expenseAttributeResponse);
   }
 }

@@ -1,4 +1,4 @@
-FROM ghcr.io/graalvm/native-image:muslib-ol9-java17-22.3.3 AS gradle-cache
+FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.3 AS gradle-cache
 
 WORKDIR /work
 
@@ -11,7 +11,7 @@ FROM gradle-cache AS builder
 
 COPY src/ ./src/
 
-RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -Dquarkus.native.additional-build-args="--static","--libc=musl" -x check
+RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -x check
 
 FROM gcr.io/distroless/base-debian12:nonroot
 
