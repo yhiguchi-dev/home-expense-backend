@@ -13,4 +13,8 @@ class ExpenseGetSummaryResponse {
   ExpenseGetSummaryResponse(ExpenseSummary summary) {
     this.list = summary.list().stream().map(ExpenseGetResponse::from).toList();
   }
+
+  ExpenseGetSummaryResponse() {
+    this.list = List.of();
+  }
 }

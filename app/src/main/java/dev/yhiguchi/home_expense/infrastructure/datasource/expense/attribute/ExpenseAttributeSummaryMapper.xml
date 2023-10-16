@@ -7,6 +7,9 @@
           COUNT(*)
         FROM
         expense.attribute
+        <if test="expenseAttributeCriteria.expenseCategory != null">
+            WHERE attribute.category = #{expenseAttributeCriteria.expenseCategory}
+        </if>
     </select>
 
     <resultMap id="ExpenseAttribute" type="dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute">

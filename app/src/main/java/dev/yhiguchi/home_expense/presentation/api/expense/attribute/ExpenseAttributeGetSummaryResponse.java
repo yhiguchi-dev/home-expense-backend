@@ -9,17 +9,13 @@ import java.util.List;
 class ExpenseAttributeGetSummaryResponse {
 
   @JsonProperty("expense_attributes")
-  List<ExpenseAttributeResponse> list;
+  List<ExpenseAttributeGetResponse> list;
 
   ExpenseAttributeGetSummaryResponse(ExpenseAttributeSummary summary) {
-    this.list =
-        summary.list().stream()
-            .map(
-                e ->
-                    new ExpenseAttributeResponse(
-                        e.expenseAttributeIdentifier().value(),
-                        e.expenseAttributeName().value(),
-                        e.expenseCategory().name()))
-            .toList();
+    this.list = summary.list().stream().map(ExpenseAttributeGetResponse::from).toList();
+  }
+
+  ExpenseAttributeGetSummaryResponse() {
+    this.list = List.of();
   }
 }

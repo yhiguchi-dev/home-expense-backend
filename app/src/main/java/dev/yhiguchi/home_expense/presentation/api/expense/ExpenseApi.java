@@ -81,7 +81,10 @@ public class ExpenseApi implements LinkHeaderCreatable {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     ExpenseCriteria criteria = new ExpenseCriteria(pagination);
     ExpenseSummary expenseSummary = expenseGettingService.findSummary(criteria);
-    ExpenseGetSummaryResponse response = new ExpenseGetSummaryResponse(expenseSummary);
+    ExpenseGetSummaryResponse response =
+        page <= expenseSummary.totalNumber()
+            ? new ExpenseGetSummaryResponse(expenseSummary)
+            : new ExpenseGetSummaryResponse();
     Response.ResponseBuilder responseBuilder = Response.ok(response);
     responseBuilder.header("Link", create(uriInfo, pagination, expenseSummary.totalNumber()));
     return responseBuilder.build();

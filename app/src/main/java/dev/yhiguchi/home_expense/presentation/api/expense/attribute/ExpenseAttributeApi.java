@@ -1,9 +1,10 @@
 package dev.yhiguchi.home_expense.presentation.api.expense.attribute;
 
 import dev.yhiguchi.home_expense.application.service.ExpenseAttributeDeletionService;
+import dev.yhiguchi.home_expense.application.service.ExpenseAttributeGettingService;
 import dev.yhiguchi.home_expense.application.service.ExpenseAttributeRegistrationService;
 import dev.yhiguchi.home_expense.application.service.ExpenseAttributeUpdateService;
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeSummaryService;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
@@ -29,18 +30,18 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   ExpenseAttributeRegistrationService expenseAttributeRegistrationService;
-  ExpenseAttributeSummaryService expenseAttributeSummaryService;
+  ExpenseAttributeGettingService expenseAttributeGettingService;
   ExpenseAttributeUpdateService expenseAttributeUpdateService;
 
   ExpenseAttributeDeletionService expenseAttributeDeletionService;
 
   public ExpenseAttributeApi(
       ExpenseAttributeRegistrationService expenseAttributeRegistrationService,
-      ExpenseAttributeSummaryService expenseAttributeSummaryService,
+      ExpenseAttributeGettingService expenseAttributeGettingService,
       ExpenseAttributeUpdateService expenseAttributeUpdateService,
       ExpenseAttributeDeletionService expenseAttributeDeletionService) {
     this.expenseAttributeRegistrationService = expenseAttributeRegistrationService;
-    this.expenseAttributeSummaryService = expenseAttributeSummaryService;
+    this.expenseAttributeGettingService = expenseAttributeGettingService;
     this.expenseAttributeUpdateService = expenseAttributeUpdateService;
     this.expenseAttributeDeletionService = expenseAttributeDeletionService;
   }
@@ -84,13 +85,25 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
                 dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category),
                 pagination)
             : new ExpenseAttributeCriteria(pagination);
-    ExpenseAttributeSummary expenseAttributeSummary = expenseAttributeSummaryService.find(criteria);
+    ExpenseAttributeSummary expenseAttributeSummary =
+        expenseAttributeGettingService.findSummary(criteria);
     ExpenseAttributeGetSummaryResponse response =
-        new ExpenseAttributeGetSummaryResponse(expenseAttributeSummary);
+        page <= expenseAttributeSummary.totalNumber()
+            ? new ExpenseAttributeGetSummaryResponse(expenseAttributeSummary)
+            : new ExpenseAttributeGetSummaryResponse();
     Response.ResponseBuilder responseBuilder = Response.ok(response);
     responseBuilder.header(
         "Link", create(uriInfo, pagination, expenseAttributeSummary.totalNumber()));
     return responseBuilder.build();
+  }
+
+  @GET
+  @Path("{id}")
+  public Response get(@PathParam("id") String id) {
+    ExpenseAttribute expenseAttribute =
+        expenseAttributeGettingService.get(new ExpenseAttributeIdentifier(id));
+    ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(expenseAttribute);
+    return Response.ok(response).build();
   }
 
   @ServerExceptionMapper
