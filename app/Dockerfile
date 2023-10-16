@@ -1,3 +1,5 @@
+FROM alpine as lib
+
 FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.3 AS gradle-cache
 
 WORKDIR /work
@@ -17,6 +19,7 @@ FROM gcr.io/distroless/base-debian11:nonroot
 
 WORKDIR /app
 
+COPY --from=lib /lib/libz.so.1 /lib/libz.so.1
 COPY --chown=nonroot:nonroot --from=builder /work/build/*-runner /app/application
 
 EXPOSE 8080
