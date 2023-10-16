@@ -13,13 +13,14 @@ COPY src/ ./src/
 
 RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -x check
 
-FROM quay.io/quarkus/quarkus-micro-image:2.0
+FROM gcr.io/distroless/base-debian11:nonroot
 
 WORKDIR /app
 
-COPY --from=builder /work/build/*-runner /app/application
+COPY --chown=nonroot:nonroot --from=builder /work/build/*-runner /app/application
 
 EXPOSE 8080
+USER nonroot
 
 ENV PORT 8080
 
