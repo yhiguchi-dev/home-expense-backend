@@ -17,10 +17,9 @@ FROM quay.io/quarkus/quarkus-micro-image:2.0
 
 WORKDIR /app
 
-COPY --chown=nonroot:nonroot --from=builder /work/build/*-runner /app/application
+COPY --from=builder /work/build/*-runner /app/application
 
 EXPOSE 8080
-USER nonroot
 
 ENV PORT 8080
 
