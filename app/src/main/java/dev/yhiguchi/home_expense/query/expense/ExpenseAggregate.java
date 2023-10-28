@@ -12,7 +12,9 @@ public class ExpenseAggregate {
     this.variableDetail = variableDetail;
   }
 
-  ExpenseAggregate() {}
+  ExpenseAggregate() {
+    this(new ExpenseAggregateDetail(), new ExpenseAggregateDetail());
+  }
 
   public Integer totalAmount() {
     return fixedDetail().totalAmount() + variableDetail().totalAmount();
