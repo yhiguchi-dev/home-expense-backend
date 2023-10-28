@@ -4,23 +4,21 @@ import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpenseSummary {
-
-  Integer totalCount;
-
+public class ExpenseAggregateDetail {
+  Integer totalAmount;
   List<Expense> list;
 
-  public ExpenseSummary(Integer totalCount, List<Expense> list) {
-    this.totalCount = totalCount;
+  public ExpenseAggregateDetail(Integer totalAmount, List<Expense> list) {
+    this.totalAmount = totalAmount;
     this.list = list;
   }
 
-  public ExpenseSummary() {
+  ExpenseAggregateDetail() {
     this(0, new ArrayList<>());
   }
 
-  public Integer totalCount() {
-    return totalCount;
+  public Integer totalAmount() {
+    return totalAmount;
   }
 
   public List<Expense> list() {

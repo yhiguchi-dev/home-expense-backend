@@ -6,15 +6,15 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 
 @RegisterForReflection
-class ExpenseGetSummaryResponse {
+class ExpenseGetListResponse {
   @JsonProperty("expenses")
   List<ExpenseGetResponse> list;
 
-  ExpenseGetSummaryResponse(ExpenseSummary summary) {
+  ExpenseGetListResponse(ExpenseSummary summary) {
     this.list = summary.list().stream().map(ExpenseGetResponse::from).toList();
   }
 
-  ExpenseGetSummaryResponse() {
+  ExpenseGetListResponse() {
     this.list = List.of();
   }
 }

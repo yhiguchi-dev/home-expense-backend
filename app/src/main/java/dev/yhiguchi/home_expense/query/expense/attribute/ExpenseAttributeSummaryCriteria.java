@@ -3,15 +3,15 @@ package dev.yhiguchi.home_expense.query.expense.attribute;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.Pagination;
 
-public class ExpenseAttributeCriteria {
+public class ExpenseAttributeSummaryCriteria {
   ExpenseCategory expenseCategory;
   Pagination pagination;
 
-  public ExpenseAttributeCriteria(Pagination pagination) {
+  public ExpenseAttributeSummaryCriteria(Pagination pagination) {
     this.pagination = pagination;
   }
 
-  public ExpenseAttributeCriteria(ExpenseCategory expenseCategory, Pagination pagination) {
+  public ExpenseAttributeSummaryCriteria(ExpenseCategory expenseCategory, Pagination pagination) {
     this.expenseCategory = expenseCategory;
     this.pagination = pagination;
   }

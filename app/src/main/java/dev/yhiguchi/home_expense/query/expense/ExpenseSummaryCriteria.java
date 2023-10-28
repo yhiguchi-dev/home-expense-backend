@@ -2,11 +2,13 @@ package dev.yhiguchi.home_expense.query.expense;
 
 import dev.yhiguchi.home_expense.query.Pagination;
 
-public class ExpenseCriteria {
+public class ExpenseSummaryCriteria {
   Pagination pagination;
+  SortOrder sortOrder;
 
-  public ExpenseCriteria(Pagination pagination) {
+  public ExpenseSummaryCriteria(Pagination pagination, SortOrder sortOrder) {
     this.pagination = pagination;
+    this.sortOrder = sortOrder;
   }
 
   public int offset() {
@@ -19,6 +21,10 @@ public class ExpenseCriteria {
 
   public int page() {
     return pagination.currentPage();
+  }
+
+  public SortOrder sortOrder() {
+    return sortOrder;
   }
 
   int getPerPage() {

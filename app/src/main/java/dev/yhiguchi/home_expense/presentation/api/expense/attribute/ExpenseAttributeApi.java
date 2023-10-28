@@ -10,8 +10,8 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.*;
-import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -79,21 +79,21 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
       @RestQuery("per_page") @DefaultValue("20") Integer perPage,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    ExpenseAttributeCriteria criteria =
+    ExpenseAttributeSummaryCriteria criteria =
         Objects.nonNull(category)
-            ? new ExpenseAttributeCriteria(
+            ? new ExpenseAttributeSummaryCriteria(
                 dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category),
                 pagination)
-            : new ExpenseAttributeCriteria(pagination);
+            : new ExpenseAttributeSummaryCriteria(pagination);
     ExpenseAttributeSummary expenseAttributeSummary =
         expenseAttributeGettingService.findSummary(criteria);
     ExpenseAttributeGetSummaryResponse response =
-        page <= expenseAttributeSummary.totalNumber()
+        page <= expenseAttributeSummary.totalCount()
             ? new ExpenseAttributeGetSummaryResponse(expenseAttributeSummary)
             : new ExpenseAttributeGetSummaryResponse();
     Response.ResponseBuilder responseBuilder = Response.ok(response);
     responseBuilder.header(
-        "Link", create(uriInfo, pagination, expenseAttributeSummary.totalNumber()));
+        "Link", create(uriInfo, pagination, expenseAttributeSummary.totalCount()));
     return responseBuilder.build();
   }
 

@@ -19,7 +19,7 @@ public enum ExpenseCategory {
     return name().toLowerCase();
   }
 
-  public static boolean hasName(String name) {
+  public static boolean has(String name) {
     return Arrays.stream(values()).anyMatch(e -> e.name().equals(name));
   }
 

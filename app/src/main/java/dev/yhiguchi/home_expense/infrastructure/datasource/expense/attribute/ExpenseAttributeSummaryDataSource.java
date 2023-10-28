@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
@@ -17,7 +17,7 @@ public class ExpenseAttributeSummaryDataSource implements ExpenseAttributeSummar
   }
 
   @Override
-  public ExpenseAttributeSummary find(ExpenseAttributeCriteria criteria) {
+  public ExpenseAttributeSummary find(ExpenseAttributeSummaryCriteria criteria) {
     int count = expenseAttributeSummaryMapper.selectCount(criteria);
     if (count == 0) {
       return new ExpenseAttributeSummary();
