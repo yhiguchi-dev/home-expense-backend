@@ -3,14 +3,14 @@ package dev.yhiguchi.home_expense.config;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.query.expense.ExpenseCriteria;
-import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
+import dev.yhiguchi.home_expense.query.expense.ExpenseSummaryCriteria;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection(
     targets = {
-      ExpenseCriteria.class,
-      ExpenseAttributeCriteria.class,
+      ExpenseSummaryCriteria.class,
+      ExpenseAttributeSummaryCriteria.class,
       ExpenseAttribute.class,
       Expense.class,
       ExpenseIdentifier.class

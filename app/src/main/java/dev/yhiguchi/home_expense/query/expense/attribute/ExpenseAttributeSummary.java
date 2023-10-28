@@ -6,12 +6,12 @@ import java.util.List;
 
 public class ExpenseAttributeSummary {
 
-  Integer totalNumber;
+  Integer totalCount;
 
   List<ExpenseAttribute> list;
 
-  public ExpenseAttributeSummary(Integer totalNumber, List<ExpenseAttribute> list) {
-    this.totalNumber = totalNumber;
+  public ExpenseAttributeSummary(Integer totalCount, List<ExpenseAttribute> list) {
+    this.totalCount = totalCount;
     this.list = list;
   }
 
@@ -19,8 +19,8 @@ public class ExpenseAttributeSummary {
     this(0, new ArrayList<>());
   }
 
-  public Integer totalNumber() {
-    return totalNumber;
+  public Integer totalCount() {
+    return totalCount;
   }
 
   public List<ExpenseAttribute> list() {

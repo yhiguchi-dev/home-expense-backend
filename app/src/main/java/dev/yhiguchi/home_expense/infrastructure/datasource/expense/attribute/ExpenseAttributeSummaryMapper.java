@@ -1,7 +1,7 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeCriteria;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -10,8 +10,8 @@ import org.apache.ibatis.annotations.Param;
 public interface ExpenseAttributeSummaryMapper {
 
   Integer selectCount(
-      @Param("expenseAttributeCriteria") ExpenseAttributeCriteria expenseAttributeCriteria);
+      @Param("criteria") ExpenseAttributeSummaryCriteria expenseAttributeSummaryCriteria);
 
   List<ExpenseAttribute> selectBy(
-      @Param("expenseAttributeCriteria") ExpenseAttributeCriteria expenseAttributeCriteria);
+      @Param("criteria") ExpenseAttributeSummaryCriteria expenseAttributeSummaryCriteria);
 }

@@ -7,6 +7,9 @@
           COUNT(*)
         FROM
         expense.attribute
+        <if test="criteria.expenseCategory != null">
+            WHERE attribute.category = #{criteria.expenseCategory}
+        </if>
     </select>
 
     <resultMap id="ExpenseAttribute" type="dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute">
@@ -22,11 +25,11 @@
           name
         FROM
           expense.attribute
-        <if test="expenseAttributeCriteria.expenseCategory != null">
-            WHERE attribute.category = #{expenseAttributeCriteria.expenseCategory}
+        <if test="criteria.expenseCategory != null">
+            WHERE attribute.category = #{criteria.expenseCategory}
         </if>
         ORDER BY attribute.created_at
-        LIMIT #{expenseAttributeCriteria.perPage}
-        OFFSET #{expenseAttributeCriteria.offset}
+        LIMIT #{criteria.perPage}
+        OFFSET #{criteria.offset}
     </select>
 </mapper>

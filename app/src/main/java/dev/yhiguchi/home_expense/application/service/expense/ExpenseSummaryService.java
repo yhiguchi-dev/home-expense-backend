@@ -1,7 +1,7 @@
 package dev.yhiguchi.home_expense.application.service.expense;
 
-import dev.yhiguchi.home_expense.query.expense.ExpenseCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
+import dev.yhiguchi.home_expense.query.expense.ExpenseSummaryCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummaryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -14,7 +14,7 @@ public class ExpenseSummaryService {
     this.expenseSummaryRepository = expenseSummaryRepository;
   }
 
-  public ExpenseSummary find(ExpenseCriteria criteria) {
+  public ExpenseSummary find(ExpenseSummaryCriteria criteria) {
     return expenseSummaryRepository.find(criteria);
   }
 }
