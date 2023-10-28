@@ -15,8 +15,10 @@ public class ExpenseAggregateDataSource implements ExpenseAggregateRepository {
 
   @Override
   public ExpenseAggregate find(ExpenseAggregateCriteria criteria) {
-    int fixedTotalAmount = expenseAggregateMapper.selectTotalAmountByFixedCategory(criteria);
-    int variableTotalAmount = expenseAggregateMapper.selectTotalAmountByVariableCategory(criteria);
+    int fixedTotalAmount =
+        expenseAggregateMapper.selectTotalAmountByFixedCategory(criteria).orElse(0);
+    int variableTotalAmount =
+        expenseAggregateMapper.selectTotalAmountByVariableCategory(criteria).orElse(0);
     List<Expense> fixedExpenses = expenseAggregateMapper.selectByFixedCategory(criteria);
     List<Expense> variableExpenses = expenseAggregateMapper.selectByVariableCategory(criteria);
     return new ExpenseAggregate(
