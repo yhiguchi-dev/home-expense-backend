@@ -13,7 +13,11 @@ public class ExpenseAggregateCriteria {
     this.month = month;
   }
 
-  String getYearMonth() {
+  String yearMonth() {
     return YearMonth.of(year, month).toString();
+  }
+
+  String getYearMonth() {
+    return yearMonth();
   }
 }
