@@ -5,7 +5,6 @@ import dev.yhiguchi.home_expense.query.expense.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.reactive.RestQuery;
 
 @Path("/v1/expenses/aggregate")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -19,7 +18,7 @@ public class ExpenseAggregateApi {
   }
 
   @GET
-  public Response get(@RestQuery("year") int year, @RestQuery("month") int month) {
+  public Response get(@QueryParam("year") int year, @QueryParam("month") int month) {
     ExpenseAggregateCriteria criteria = new ExpenseAggregateCriteria(year, month);
     ExpenseAggregate aggregate = expenseGettingService.findAggregate(criteria);
     ExpenseGetAggregateResponse response = new ExpenseGetAggregateResponse(aggregate);

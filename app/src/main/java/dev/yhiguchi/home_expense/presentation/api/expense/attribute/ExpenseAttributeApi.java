@@ -20,7 +20,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.util.Objects;
-import org.jboss.resteasy.reactive.RestQuery;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
@@ -67,16 +66,16 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   @DELETE
   @Path("{id}")
-  public Response delete(@PathParam("id") String id, @Valid ExpenseAttributePutRequest request) {
+  public Response delete(@PathParam("id") String id) {
     expenseAttributeDeletionService.delete(new ExpenseAttributeIdentifier(id));
     return Response.noContent().build();
   }
 
   @GET
   public Response get(
-      @RestQuery("category") @ExpenseCategory String category,
-      @RestQuery("page") @DefaultValue("1") Integer page,
-      @RestQuery("per_page") @DefaultValue("20") Integer perPage,
+      @QueryParam("category") @ExpenseCategory String category,
+      @QueryParam("page") @DefaultValue("1") Integer page,
+      @QueryParam("per_page") @DefaultValue("20") Integer perPage,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     ExpenseAttributeSummaryCriteria criteria =

@@ -7,7 +7,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.Price;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.time.LocalDate;
 
-record ExpensePutRequest(
+public record ExpensePutRequest(
     @JsonProperty("description") String description,
     @JsonProperty("price") Integer price,
     @JsonProperty("payment_date") String paymentDate,
