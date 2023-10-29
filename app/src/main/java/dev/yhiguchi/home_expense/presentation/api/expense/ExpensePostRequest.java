@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
-record ExpensePostRequest(
+public record ExpensePostRequest(
     @NotNull(message = "descriptionは必須入力です") @JsonProperty("description") String description,
     @NotNull(message = "priceは必須入力です") @JsonProperty("price") Integer price,
     @NotBlank(message = "payment_dateは必須入力です")

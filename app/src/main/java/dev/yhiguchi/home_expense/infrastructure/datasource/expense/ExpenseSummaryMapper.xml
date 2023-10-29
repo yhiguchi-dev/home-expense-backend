@@ -36,6 +36,9 @@
         LEFT JOIN attribute
           ON attribute.id = fixed_expense.attribute_id
             OR attribute.id = variable_expense.attribute_id
+        <if test="criteria.year != null and criteria.month != null">
+            WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        </if>
         ORDER BY expense.payment_date DESC
         LIMIT #{criteria.perPage}
         OFFSET #{criteria.offset}

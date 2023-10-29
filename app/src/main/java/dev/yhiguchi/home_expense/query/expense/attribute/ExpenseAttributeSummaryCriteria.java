@@ -8,7 +8,7 @@ public class ExpenseAttributeSummaryCriteria {
   Pagination pagination;
 
   public ExpenseAttributeSummaryCriteria(Pagination pagination) {
-    this.pagination = pagination;
+    this(null, pagination);
   }
 
   public ExpenseAttributeSummaryCriteria(ExpenseCategory expenseCategory, Pagination pagination) {

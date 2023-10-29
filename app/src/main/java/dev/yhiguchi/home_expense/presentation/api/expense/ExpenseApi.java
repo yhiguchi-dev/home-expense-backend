@@ -21,7 +21,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
-import org.jboss.resteasy.reactive.RestQuery;
 
 @Path("/v1/expenses")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -77,12 +76,15 @@ public class ExpenseApi implements LinkHeaderCreatable {
 
   @GET
   public Response get(
-      @RestQuery("page") @DefaultValue("1") Integer page,
-      @RestQuery("per_page") @DefaultValue("20") Integer perPage,
-      @RestQuery("sort") @DefaultValue("desc") @Sort String sort,
+      @QueryParam("page") @DefaultValue("1") Integer page,
+      @QueryParam("per_page") @DefaultValue("20") Integer perPage,
+      @QueryParam("year") Integer year,
+      @QueryParam("month") Integer month,
+      @QueryParam("sort") @DefaultValue("desc") @Sort String sort,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    ExpenseSummaryCriteria criteria = new ExpenseSummaryCriteria(pagination, SortOrder.of(sort));
+    ExpenseSummaryCriteria criteria =
+        new ExpenseSummaryCriteria(pagination, year, month, SortOrder.of(sort));
     ExpenseSummary expenseSummary = expenseGettingService.findSummary(criteria);
     ExpenseGetListResponse response =
         page <= expenseSummary.totalCount()

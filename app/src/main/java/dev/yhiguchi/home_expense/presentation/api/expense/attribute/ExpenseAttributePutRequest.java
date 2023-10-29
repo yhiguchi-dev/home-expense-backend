@@ -5,7 +5,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import jakarta.validation.constraints.NotBlank;
 
-record ExpenseAttributePutRequest(
+public record ExpenseAttributePutRequest(
     @NotBlank(message = "nameは必須入力です") @JsonProperty("name") String name,
     @NotBlank(message = "categoryは必須入力です") @ExpenseCategory @JsonProperty("category")
         String category) {
