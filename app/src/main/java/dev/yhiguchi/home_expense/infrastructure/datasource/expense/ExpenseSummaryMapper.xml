@@ -7,6 +7,9 @@
           COUNT(*)
         FROM
         expense.expense
+        <if test="criteria.year != null and criteria.month != null">
+            WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        </if>
     </select>
 
     <resultMap id="Expense" type="dev.yhiguchi.home_expense.domain.model.expense.Expense">
