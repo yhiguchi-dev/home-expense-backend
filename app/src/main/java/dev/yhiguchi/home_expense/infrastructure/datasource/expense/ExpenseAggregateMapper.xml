@@ -2,14 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dev.yhiguchi.home_expense.infrastructure.datasource.expense.ExpenseAggregateMapper">
 
-    <resultMap id="Expense" type="dev.yhiguchi.home_expense.domain.model.expense.Expense">
-        <id property="expenseIdentifier.value" column="id" />
-        <result property="description.value" column="description" />
-        <result property="price.value" column="price" />
-        <result property="paymentDate.value" column="payment_date" />
-        <result property="expenseAttribute.expenseAttributeIdentifier.value" column="attribute_id" />
-        <result property="expenseAttribute.expenseCategory" column="category" />
-        <result property="expenseAttribute.expenseAttributeName.value" column="attribute_name" />
+    <resultMap id="ExpenseAttributeAggregate" type="dev.yhiguchi.home_expense.query.expense.ExpenseAttributeAggregate">
+        <id property="expenseAttributeIdentifier.value" column="id" />
+        <result property="expenseAttributeName.value" column="name" />
+        <result property="totalAmount" column="total_amount" />
     </resultMap>
 
     <select id="selectTotalAmountByFixedCategory" resultType="int">
@@ -24,15 +20,11 @@
         AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
     </select>
 
-    <select id="selectByFixedCategory" resultMap="Expense">
+    <select id="selectByFixedCategory" resultMap="ExpenseAttributeAggregate">
         SELECT
-          expense.id,
-          expense.description,
-          expense.price,
-          expense.payment_date,
-          attribute.id AS attribute_id,
-          attribute.category,
-          attribute.name AS attribute_name
+        attribute.id,
+        attribute.name,
+        sum(expense.expense.price) AS total_amount
         FROM expense.expense
         LEFT JOIN fixed_expense
         ON expense.id = fixed_expense.expense_id
@@ -40,6 +32,8 @@
         ON attribute.id = fixed_expense.attribute_id
         WHERE attribute.id IS NOT NULL
         AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        group by attribute.id
+        order by attribute.created_at
     </select>
 
     <select id="selectTotalAmountByVariableCategory" resultType="int">
@@ -54,15 +48,11 @@
         AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
     </select>
 
-    <select id="selectByVariableCategory" resultMap="Expense">
+    <select id="selectByVariableCategory" resultMap="ExpenseAttributeAggregate">
         SELECT
-        expense.id,
-        expense.description,
-        expense.price,
-        expense.payment_date,
-        attribute.id AS attribute_id,
-        attribute.category,
-        attribute.name AS attribute_name
+        attribute.id,
+        attribute.name,
+        sum(expense.expense.price) AS total_amount
         FROM expense.expense
         LEFT JOIN variable_expense
         ON expense.id = variable_expense.expense_id
@@ -70,5 +60,7 @@
         ON attribute.id = variable_expense.attribute_id
         WHERE attribute.id IS NOT NULL
         AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        group by attribute.id
+        order by attribute.created_at
     </select>
 </mapper>

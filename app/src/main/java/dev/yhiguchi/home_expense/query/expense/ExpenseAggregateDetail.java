@@ -1,14 +1,13 @@
 package dev.yhiguchi.home_expense.query.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ExpenseAggregateDetail {
   Integer totalAmount;
-  List<Expense> list;
+  List<ExpenseAttributeAggregate> list;
 
-  public ExpenseAggregateDetail(Integer totalAmount, List<Expense> list) {
+  public ExpenseAggregateDetail(Integer totalAmount, List<ExpenseAttributeAggregate> list) {
     this.totalAmount = totalAmount;
     this.list = list;
   }
@@ -21,7 +20,7 @@ public class ExpenseAggregateDetail {
     return totalAmount;
   }
 
-  public List<Expense> list() {
+  public List<ExpenseAttributeAggregate> list() {
     return list;
   }
 }
