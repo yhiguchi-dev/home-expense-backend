@@ -42,7 +42,7 @@
         <if test="criteria.year != null and criteria.month != null">
             WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
         </if>
-        ORDER BY expense.payment_date DESC
+        ORDER BY attribute.category DESC, expense.payment_date DESC
         LIMIT #{criteria.perPage}
         OFFSET #{criteria.offset}
     </select>

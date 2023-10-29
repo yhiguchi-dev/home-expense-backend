@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.query.expense.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
@@ -19,10 +18,12 @@ public class ExpenseAggregateDataSource implements ExpenseAggregateRepository {
         expenseAggregateMapper.selectTotalAmountByFixedCategory(criteria).orElse(0);
     int variableTotalAmount =
         expenseAggregateMapper.selectTotalAmountByVariableCategory(criteria).orElse(0);
-    List<Expense> fixedExpenses = expenseAggregateMapper.selectByFixedCategory(criteria);
-    List<Expense> variableExpenses = expenseAggregateMapper.selectByVariableCategory(criteria);
+    List<ExpenseAttributeAggregate> fixedAttributeAggregate =
+        expenseAggregateMapper.selectByFixedCategory(criteria);
+    List<ExpenseAttributeAggregate> variableAttributeAggregate =
+        expenseAggregateMapper.selectByVariableCategory(criteria);
     return new ExpenseAggregate(
-        new ExpenseAggregateDetail(fixedTotalAmount, fixedExpenses),
-        new ExpenseAggregateDetail(variableTotalAmount, variableExpenses));
+        new ExpenseAggregateDetail(fixedTotalAmount, fixedAttributeAggregate),
+        new ExpenseAggregateDetail(variableTotalAmount, variableAttributeAggregate));
   }
 }

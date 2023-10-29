@@ -6,16 +6,16 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 
 @RegisterForReflection
-class ExpenseGetAggregateDetailResponse {
+class ExpenseAggregateDetailResponse {
 
   @JsonProperty("total_amount")
   int totalAmount;
 
-  @JsonProperty("expenses")
-  List<ExpenseGetResponse> list;
+  @JsonProperty("attribute_aggregates")
+  List<ExpenseAttributeAggregateResponse> list;
 
-  ExpenseGetAggregateDetailResponse(ExpenseAggregateDetail detail) {
+  ExpenseAggregateDetailResponse(ExpenseAggregateDetail detail) {
     this.totalAmount = detail.totalAmount();
-    this.list = detail.list().stream().map(ExpenseGetResponse::from).toList();
+    this.list = detail.list().stream().map(ExpenseAttributeAggregateResponse::from).toList();
   }
 }

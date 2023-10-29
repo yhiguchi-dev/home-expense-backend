@@ -10,14 +10,14 @@ class ExpenseGetAggregateResponse {
   Integer totalAmount;
 
   @JsonProperty("fixed_expense_detail")
-  ExpenseGetAggregateDetailResponse fixedDetail;
+  ExpenseAggregateDetailResponse fixedDetail;
 
   @JsonProperty("variable_expense_detail")
-  ExpenseGetAggregateDetailResponse variableDetail;
+  ExpenseAggregateDetailResponse variableDetail;
 
   ExpenseGetAggregateResponse(ExpenseAggregate aggregate) {
     this.totalAmount = aggregate.totalAmount();
-    this.fixedDetail = new ExpenseGetAggregateDetailResponse(aggregate.fixedDetail());
-    this.variableDetail = new ExpenseGetAggregateDetailResponse(aggregate.variableDetail());
+    this.fixedDetail = new ExpenseAggregateDetailResponse(aggregate.fixedDetail());
+    this.variableDetail = new ExpenseAggregateDetailResponse(aggregate.variableDetail());
   }
 }
