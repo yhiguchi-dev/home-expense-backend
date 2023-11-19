@@ -1,3 +1,3 @@
-FROM flyway/flyway:9.22.3
+FROM flyway/flyway:10.0.1
 
 COPY ./migration /flyway/sql
