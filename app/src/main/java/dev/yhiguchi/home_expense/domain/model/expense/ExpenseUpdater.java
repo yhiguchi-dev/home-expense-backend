@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/** 経費の更新者 */
 public class ExpenseUpdater {
 
   Function<ExpenseIdentifier, Expense> getFn;

@@ -1,6 +1,9 @@
 package dev.yhiguchi.home_expense.application.service;
 
+import dev.yhiguchi.home_expense.application.service.expense.ExpenseService;
 import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
+import dev.yhiguchi.home_expense.domain.model.expense.ExpenseAttributeDeleter;
+import dev.yhiguchi.home_expense.domain.model.expense.Expenses;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -12,9 +15,12 @@ import java.util.function.Function;
 public class ExpenseAttributeDeletionService {
 
   ExpenseAttributeService expenseAttributeService;
+  ExpenseService expenseService;
 
-  public ExpenseAttributeDeletionService(ExpenseAttributeService expenseAttributeService) {
+  public ExpenseAttributeDeletionService(
+      ExpenseAttributeService expenseAttributeService, ExpenseService expenseService) {
     this.expenseAttributeService = expenseAttributeService;
+    this.expenseService = expenseService;
   }
 
   public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
@@ -22,7 +28,9 @@ public class ExpenseAttributeDeletionService {
         identifier -> expenseAttributeService.get(identifier);
     Consumer<ExpenseAttributeIdentifier> deleteFn =
         attribute -> expenseAttributeService.delete(expenseAttributeIdentifier);
-    ExpenseAttributeDeleter deleter = new ExpenseAttributeDeleter(getFn, deleteFn);
+    Function<ExpenseAttribute, Expenses> getExpensesFn =
+        expenseAttribute -> expenseService.find(expenseAttribute);
+    ExpenseAttributeDeleter deleter = new ExpenseAttributeDeleter(getFn, deleteFn, getExpensesFn);
     deleter.delete(expenseAttributeIdentifier);
   }
 }

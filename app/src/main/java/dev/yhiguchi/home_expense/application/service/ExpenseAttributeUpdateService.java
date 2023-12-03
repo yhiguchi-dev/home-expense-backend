@@ -1,11 +1,11 @@
 package dev.yhiguchi.home_expense.application.service;
 
 import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
+import dev.yhiguchi.home_expense.domain.model.expense.ExpenseAttributeUpdater;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeUpdater;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.function.Consumer;

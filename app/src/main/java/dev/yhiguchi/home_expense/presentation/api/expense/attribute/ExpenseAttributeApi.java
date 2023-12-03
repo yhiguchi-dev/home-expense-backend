@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.application.service.ExpenseAttributeRegistratio
 import dev.yhiguchi.home_expense.application.service.ExpenseAttributeUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
@@ -108,5 +109,10 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @ServerExceptionMapper
   public RestResponse<String> mapException(ExpenseAttributeAlreadyExistsException e) {
     return RestResponse.status(Response.Status.BAD_REQUEST, "既に登録されています");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<String> mapException(ExpenseAttributeConstraintException e) {
+    return RestResponse.status(Response.Status.BAD_REQUEST, "制約があるため削除できません");
   }
 }

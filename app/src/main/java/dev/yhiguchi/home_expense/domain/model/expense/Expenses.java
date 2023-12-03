@@ -1,5 +1,7 @@
 package dev.yhiguchi.home_expense.domain.model.expense;
 
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,6 +11,14 @@ public class Expenses implements Iterable<Expense> {
 
   public Expenses(List<Expense> values) {
     this.values = values;
+  }
+
+  public Expenses() {
+    this.values = new ArrayList<>();
+  }
+
+  public boolean has(ExpenseAttribute expenseAttribute) {
+    return values.stream().anyMatch(expense -> expense.expenseAttribute().equals(expenseAttribute));
   }
 
   @Override

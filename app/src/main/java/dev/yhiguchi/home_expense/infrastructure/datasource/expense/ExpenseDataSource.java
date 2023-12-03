@@ -1,10 +1,9 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseNotFoundException;
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseRepository;
+import dev.yhiguchi.home_expense.domain.model.expense.*;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -37,6 +36,12 @@ public class ExpenseDataSource implements ExpenseRepository {
   public Expense find(ExpenseIdentifier expenseIdentifier) {
     Optional<Expense> expense = expenseMapper.selectBy(expenseIdentifier);
     return expense.orElse(new Expense());
+  }
+
+  @Override
+  public Expenses find(ExpenseAttribute expenseAttribute) {
+    Optional<List<Expense>> expense = expenseMapper.selectByExpenseAttribute(expenseAttribute);
+    return expense.map(Expenses::new).orElseGet(Expenses::new);
   }
 
   @Override
