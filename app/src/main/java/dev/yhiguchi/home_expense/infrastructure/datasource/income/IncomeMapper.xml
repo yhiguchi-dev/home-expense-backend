@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.yhiguchi.home_expense.infrastructure.datasource.income.IncomeMapper">
+
+    <insert id="insert">
+        INSERT INTO expense.income(
+          id,
+          description,
+          price,
+          payment_date
+        ) VALUES (
+          #{expense.expenseIdentifier.value},
+          #{expense.description.value},
+          #{expense.price.value},
+          #{expense.paymentDate.value}
+        )
+    </insert>
+
+    <insert id="insertFixedExpense">
+        INSERT INTO expense.fixed_expense(
+          expense_id,
+          attribute_id
+        ) VALUES (
+          #{expense.expenseIdentifier.value},
+          #{expense.expenseAttribute.expenseAttributeIdentifier.value}
+        )
+    </insert>
+
+    <insert id="insertVariableExpense">
+        INSERT INTO expense.variable_expense(
+          expense_id,
+          attribute_id
+        ) VALUES (
+          #{expense.expenseIdentifier.value},
+          #{expense.expenseAttribute.expenseAttributeIdentifier.value}
+        )
+    </insert>
+
+    <resultMap id="Expense" type="dev.yhiguchi.home_expense.domain.model.expense.Expense">
+        <id property="expenseIdentifier.value" column="id" />
+        <result property="description.value" column="description" />
+        <result property="price.value" column="price" />
+        <result property="paymentDate.value" column="payment_date" />
+        <result property="expenseAttribute.expenseAttributeIdentifier.value" column="attribute_id" />
+        <result property="expenseAttribute.expenseCategory" column="category" />
+        <result property="expenseAttribute.expenseAttributeName.value" column="attribute_name" />
+    </resultMap>
+
+    <select id="selectBy" resultMap="Expense">
+        SELECT
+          expense.id,
+          expense.description,
+          expense.price,
+          expense.payment_date,
+          attribute.id AS attribute_id,
+          attribute.category,
+          attribute.name AS attribute_name
+        FROM expense.expense
+        LEFT JOIN fixed_expense
+          ON expense.id = fixed_expense.expense_id
+        LEFT JOIN variable_expense
+          ON expense.id = variable_expense.expense_id
+        LEFT JOIN attribute
+          ON attribute.id = fixed_expense.attribute_id
+            OR attribute.id = variable_expense.attribute_id
+        WHERE expense.id = #{expenseIdentifier.value}
+    </select>
+
+    <select id="selectByExpenseAttribute" resultMap="Expense">
+        SELECT
+        expense.id,
+        expense.description,
+        expense.price,
+        expense.payment_date,
+        attribute.id AS attribute_id,
+        attribute.category,
+        attribute.name AS attribute_name
+        FROM expense.expense
+        LEFT JOIN fixed_expense
+        ON expense.id = fixed_expense.expense_id
+        LEFT JOIN variable_expense
+        ON expense.id = variable_expense.expense_id
+        LEFT JOIN attribute
+        ON attribute.id = fixed_expense.attribute_id
+        OR attribute.id = variable_expense.attribute_id
+        WHERE attribute_id.id = #{expenseAttribute.expenseAttributeIdentifier.value}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM expense.expense
+        WHERE expense.id = #{expenseIdentifier.value}
+    </delete>
+</mapper>

@@ -7,13 +7,10 @@ import dev.yhiguchi.home_expense.application.service.ExpenseUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
-import dev.yhiguchi.home_expense.presentation.validation.Sort;
-import dev.yhiguchi.home_expense.query.Page;
-import dev.yhiguchi.home_expense.query.Pagination;
-import dev.yhiguchi.home_expense.query.PerPage;
+import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
+import dev.yhiguchi.home_expense.query.expense.ExpenseCriteriaCreator;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummaryCriteria;
-import dev.yhiguchi.home_expense.query.expense.SortOrder;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -80,18 +77,18 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @QueryParam("per_page") @DefaultValue("20") Integer perPage,
       @QueryParam("year") Integer year,
       @QueryParam("month") Integer month,
-      @QueryParam("sort") @DefaultValue("desc") @Sort String sort,
+      @QueryParam("category") @ExpenseCategory String category,
       @Context UriInfo uriInfo) {
-    Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     ExpenseSummaryCriteria criteria =
-        new ExpenseSummaryCriteria(pagination, year, month, SortOrder.of(sort));
+        ExpenseCriteriaCreator.create(page, perPage, year, month, category);
     ExpenseSummary expenseSummary = expenseGettingService.findSummary(criteria);
     ExpenseGetListResponse response =
         page <= expenseSummary.totalCount()
             ? new ExpenseGetListResponse(expenseSummary)
             : new ExpenseGetListResponse();
     Response.ResponseBuilder responseBuilder = Response.ok(response);
-    responseBuilder.header("Link", create(uriInfo, pagination, expenseSummary.totalCount()));
+    responseBuilder.header(
+        "Link", create(uriInfo, criteria.pagination(), expenseSummary.totalCount()));
     return responseBuilder.build();
   }
 

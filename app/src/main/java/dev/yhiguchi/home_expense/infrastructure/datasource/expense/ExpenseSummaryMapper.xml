@@ -10,6 +10,9 @@
         <if test="criteria.year != null and criteria.month != null">
             WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
         </if>
+        <if test="criteria.expenseCategory != null">
+            AND category = #{criteria.expenseCategory}
+        </if>
     </select>
 
     <resultMap id="Expense" type="dev.yhiguchi.home_expense.domain.model.expense.Expense">
@@ -41,6 +44,9 @@
             OR attribute.id = variable_expense.attribute_id
         <if test="criteria.year != null and criteria.month != null">
             WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        </if>
+        <if test="criteria.expenseCategory != null">
+            AND category = #{criteria.expenseCategory}
         </if>
         ORDER BY attribute.category DESC, expense.payment_date DESC
         LIMIT #{criteria.perPage}
