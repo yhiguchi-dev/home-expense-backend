@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.Income;
+import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import java.util.List;
 import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
@@ -11,16 +11,12 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface IncomeMapper {
 
-  void insert(@Param("expense") Expense expense);
+  void insert(@Param("income") Income income);
 
-  void insertFixedExpense(@Param("expense") Expense expense);
+  Optional<Income> selectBy(@Param("incomeIdentifier") IncomeIdentifier incomeIdentifier);
 
-  void insertVariableExpense(@Param("expense") Expense expense);
+  Optional<List<Income>> selectByIncomeAttribute(
+      @Param("incomeAttribute") IncomeAttribute incomeAttribute);
 
-  Optional<Expense> selectBy(@Param("expenseIdentifier") ExpenseIdentifier expenseIdentifier);
-
-  Optional<List<Expense>> selectByExpenseAttribute(
-      @Param("expenseAttribute") ExpenseAttribute expenseAttribute);
-
-  void delete(@Param("expenseIdentifier") ExpenseIdentifier expenseIdentifier);
+  void delete(@Param("incomeIdentifier") IncomeIdentifier incomeIdentifier);
 }

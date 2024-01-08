@@ -13,6 +13,12 @@ public class IncomeAttribute {
     this.incomeAttributeName = incomeAttributeName;
   }
 
+  public IncomeAttribute() {}
+
+  public boolean exists() {
+    return incomeAttributeIdentifier().exists();
+  }
+
   public IncomeAttributeIdentifier incomeAttributeIdentifier() {
     return incomeAttributeIdentifier;
   }

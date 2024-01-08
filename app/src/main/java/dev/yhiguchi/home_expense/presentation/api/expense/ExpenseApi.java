@@ -1,9 +1,9 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
-import dev.yhiguchi.home_expense.application.service.ExpenseDeletionService;
-import dev.yhiguchi.home_expense.application.service.ExpenseGettingService;
-import dev.yhiguchi.home_expense.application.service.ExpenseRegistrationService;
-import dev.yhiguchi.home_expense.application.service.ExpenseUpdateService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseDeletionService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseGettingService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRegistrationService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
@@ -78,9 +78,10 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @QueryParam("year") Integer year,
       @QueryParam("month") Integer month,
       @QueryParam("category") @ExpenseCategory String category,
+      @QueryParam("attribute_name") String attributeName,
       @Context UriInfo uriInfo) {
     ExpenseSummaryCriteria criteria =
-        ExpenseCriteriaCreator.create(page, perPage, year, month, category);
+        ExpenseCriteriaCreator.create(page, perPage, year, month, category, attributeName);
     ExpenseSummary expenseSummary = expenseGettingService.findSummary(criteria);
     ExpenseGetListResponse response =
         page <= expenseSummary.totalCount()

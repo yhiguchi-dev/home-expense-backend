@@ -14,7 +14,7 @@ public class Expenses implements Iterable<Expense> {
   }
 
   public Expenses() {
-    this.values = new ArrayList<>();
+    this(new ArrayList<>());
   }
 
   public boolean has(ExpenseAttribute expenseAttribute) {

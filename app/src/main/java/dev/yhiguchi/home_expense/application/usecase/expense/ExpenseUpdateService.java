@@ -1,4 +1,4 @@
-package dev.yhiguchi.home_expense.application.service;
+package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import dev.yhiguchi.home_expense.application.service.expense.ExpenseService;
 import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
@@ -12,27 +12,28 @@ import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
-public class ExpenseRegistrationService {
+public class ExpenseUpdateService {
 
   ExpenseService expenseService;
   ExpenseAttributeService expenseAttributeService;
 
-  public ExpenseRegistrationService(
+  public ExpenseUpdateService(
       ExpenseService expenseService, ExpenseAttributeService expenseAttributeService) {
     this.expenseService = expenseService;
     this.expenseAttributeService = expenseAttributeService;
   }
 
-  public ExpenseIdentifier createAndRegister(
+  public void update(
+      ExpenseIdentifier expenseIdentifier,
       Description description,
       Price price,
       PaymentDate paymentDate,
       ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn =
+    Function<ExpenseIdentifier, Expense> getFn = identifier -> expenseService.get(identifier);
+    Function<ExpenseAttributeIdentifier, ExpenseAttribute> getAttributeFn =
         identifier -> expenseAttributeService.get(identifier);
-    Consumer<Expense> registerFn = expense -> expenseService.register(expense);
-    ExpenseCreator creator = new ExpenseCreator(getFn, registerFn);
-    Expense expense = creator.create(description, price, paymentDate, expenseAttributeIdentifier);
-    return expense.expenseIdentifier();
+    Consumer<Expense> updateFn = expense -> expenseService.update(expense);
+    ExpenseUpdater updater = new ExpenseUpdater(getFn, getAttributeFn, updateFn);
+    updater.update(expenseIdentifier, description, price, paymentDate, expenseAttributeIdentifier);
   }
 }

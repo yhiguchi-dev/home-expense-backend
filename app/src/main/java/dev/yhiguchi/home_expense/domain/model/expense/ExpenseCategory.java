@@ -15,10 +15,6 @@ public enum ExpenseCategory {
     return this == 変動費;
   }
 
-  public String value() {
-    return name().toLowerCase();
-  }
-
   public static boolean has(String name) {
     return Arrays.stream(values()).anyMatch(e -> e.name().equals(name));
   }

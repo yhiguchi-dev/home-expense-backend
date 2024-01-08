@@ -1,9 +1,9 @@
 package dev.yhiguchi.home_expense.presentation.api.expense.attribute;
 
-import dev.yhiguchi.home_expense.application.service.ExpenseAttributeDeletionService;
-import dev.yhiguchi.home_expense.application.service.ExpenseAttributeGettingService;
-import dev.yhiguchi.home_expense.application.service.ExpenseAttributeRegistrationService;
-import dev.yhiguchi.home_expense.application.service.ExpenseAttributeUpdateService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeDeletionService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeGettingService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeRegistrationService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;

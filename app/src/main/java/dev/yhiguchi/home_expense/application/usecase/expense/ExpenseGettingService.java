@@ -1,4 +1,4 @@
-package dev.yhiguchi.home_expense.application.service;
+package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import dev.yhiguchi.home_expense.application.service.expense.ExpenseAggregateService;
 import dev.yhiguchi.home_expense.application.service.expense.ExpenseService;

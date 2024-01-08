@@ -26,8 +26,8 @@ services:
       - FLYWAY_BASELINE_VERSION=0.0.0
       - FLYWAY_SCHEMAS=expense
       - FLYWAY_DEFAULT_SCHEMA=public
-#    command: clean migrate
-    command: migrate
+    command: clean migrate
+#    command: migrate
     depends_on:
       database:
         condition: service_healthy

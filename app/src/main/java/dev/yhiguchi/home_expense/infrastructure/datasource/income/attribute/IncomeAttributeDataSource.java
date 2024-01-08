@@ -1,10 +1,7 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Optional;
 
@@ -34,6 +31,13 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   public IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
     Optional<IncomeAttribute> incomeAttribute =
         incomeAttributeMapper.selectBy(incomeAttributeIdentifier);
-    return incomeAttribute.orElseThrow(() -> new IncomeAttributeNotFoundException(""));
+    return incomeAttribute.orElseThrow(IncomeAttributeNotFoundException::new);
+  }
+
+  @Override
+  public IncomeAttribute find(IncomeAttributeName incomeAttributeName) {
+    Optional<IncomeAttribute> incomeAttribute =
+        incomeAttributeMapper.selectByIncomeAttributeName(incomeAttributeName);
+    return incomeAttribute.orElse(new IncomeAttribute());
   }
 }

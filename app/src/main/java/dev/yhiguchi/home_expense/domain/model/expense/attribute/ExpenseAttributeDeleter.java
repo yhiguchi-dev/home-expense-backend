@@ -1,8 +1,6 @@
-package dev.yhiguchi.home_expense.domain.model.expense;
+package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.Expenses;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -12,20 +10,20 @@ public class ExpenseAttributeDeleter {
   Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn;
   Consumer<ExpenseAttributeIdentifier> deleteFn;
 
-  Function<ExpenseAttribute, Expenses> getExpensesFn;
+  Function<ExpenseAttribute, Expenses> findExpensesFn;
 
   public ExpenseAttributeDeleter(
       Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn,
       Consumer<ExpenseAttributeIdentifier> deleteFn,
-      Function<ExpenseAttribute, Expenses> getExpensesFn) {
+      Function<ExpenseAttribute, Expenses> findExpensesFn) {
     this.getFn = getFn;
     this.deleteFn = deleteFn;
-    this.getExpensesFn = getExpensesFn;
+    this.findExpensesFn = findExpensesFn;
   }
 
   public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
-    Expenses expenses = getExpensesFn.apply(expenseAttribute);
+    Expenses expenses = findExpensesFn.apply(expenseAttribute);
     if (expenses.has(expenseAttribute)) {
       throw new ExpenseAttributeConstraintException();
     }

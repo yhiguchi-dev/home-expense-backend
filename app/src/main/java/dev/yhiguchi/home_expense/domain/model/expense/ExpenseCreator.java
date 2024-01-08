@@ -24,15 +24,9 @@ public class ExpenseCreator {
       PaymentDate paymentDate,
       ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     ExpenseIdentifier expenseIdentifier = new ExpenseIdentifier(UUID.randomUUID().toString());
-    if (expenseAttributeIdentifier.exists()) {
-      ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
-      Expense expense =
-          new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute);
-      registerFn.accept(expense);
-      return expense;
-    }
+    ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
     Expense expense =
-        new Expense(expenseIdentifier, description, price, paymentDate, new ExpenseAttribute());
+        new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute);
     registerFn.accept(expense);
     return expense;
   }

@@ -1,9 +1,6 @@
-package dev.yhiguchi.home_expense.domain.model.expense;
+package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
-import java.util.Objects;
+import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,7 +24,7 @@ public class ExpenseAttributeUpdater {
     ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
     ExpenseAttribute updated =
         new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
-    if (Objects.equals(expenseAttribute, updated)) {
+    if (expenseAttribute.equals(updated)) {
       return;
     }
     updateFn.accept(updated);

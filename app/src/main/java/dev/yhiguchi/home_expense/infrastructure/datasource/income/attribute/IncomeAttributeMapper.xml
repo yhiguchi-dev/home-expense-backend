@@ -5,69 +5,35 @@
     <insert id="insert">
         INSERT INTO expense.income_attribute(
           id,
-          description,
-          price,
-          payment_date
+          name
         ) VALUES (
-          #{expense.expenseIdentifier.value},
-          #{expense.description.value},
-          #{expense.price.value},
-          #{expense.paymentDate.value}
+          #{incomeAttribute.incomeAttributeIdentifier.value},
+          #{incomeAttribute.incomeAttributeName.value}
         )
     </insert>
 
     <resultMap id="IncomeAttribute" type="dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute">
         <id property="incomeAttributeIdentifier.value" column="id" />
-        <result property="incomeAttributeName.value" column="description" />
-        <result property="price.value" column="price" />
-        <result property="paymentDate.value" column="payment_date" />
-        <result property="expenseAttribute.expenseAttributeIdentifier.value" column="attribute_id" />
-        <result property="expenseAttribute.expenseCategory" column="category" />
-        <result property="expenseAttribute.expenseAttributeName.value" column="attribute_name" />
+        <result property="incomeAttributeName.value" column="name" />
     </resultMap>
 
     <select id="selectBy" resultMap="IncomeAttribute">
         SELECT
-          expense.id,
-          expense.description,
-          expense.price,
-          expense.payment_date,
-          attribute.id AS attribute_id,
-          attribute.category,
-          attribute.name AS attribute_name
-        FROM expense.expense
-        LEFT JOIN fixed_expense
-          ON expense.id = fixed_expense.expense_id
-        LEFT JOIN variable_expense
-          ON expense.id = variable_expense.expense_id
-        LEFT JOIN attribute
-          ON attribute.id = fixed_expense.attribute_id
-            OR attribute.id = variable_expense.attribute_id
-        WHERE expense.id = #{expenseIdentifier.value}
+          id,
+          name
+        FROM expense.income_attribute
     </select>
 
-    <select id="selectByExpenseAttribute" resultMap="IncomeAttribute">
+    <select id="selectByIncomeAttributeName" resultMap="IncomeAttribute">
         SELECT
-        expense.id,
-        expense.description,
-        expense.price,
-        expense.payment_date,
-        attribute.id AS attribute_id,
-        attribute.category,
-        attribute.name AS attribute_name
-        FROM expense.expense
-        LEFT JOIN fixed_expense
-        ON expense.id = fixed_expense.expense_id
-        LEFT JOIN variable_expense
-        ON expense.id = variable_expense.expense_id
-        LEFT JOIN attribute
-        ON attribute.id = fixed_expense.attribute_id
-        OR attribute.id = variable_expense.attribute_id
-        WHERE attribute_id.id = #{expenseAttribute.expenseAttributeIdentifier.value}
+          id,
+          name
+        FROM expense.income_attribute
+        WHERE name = #{incomeAttributeName.value}
     </select>
 
     <delete id="delete">
-        DELETE FROM expense.expense
-        WHERE expense.id = #{expenseIdentifier.value}
+        DELETE FROM expense.income_attribute
+        WHERE id = #{incomeAttributeIdentifier.value}
     </delete>
 </mapper>

@@ -1,4 +1,4 @@
-package dev.yhiguchi.home_expense.application.service;
+package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import dev.yhiguchi.home_expense.application.service.expense.ExpenseService;
 import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
@@ -23,7 +23,7 @@ public class ExpenseDeletionService {
 
   public void delete(ExpenseIdentifier expenseIdentifier) {
     Function<ExpenseIdentifier, Expense> getFn = identifier -> expenseService.get(identifier);
-    Consumer<ExpenseIdentifier> deleteFn = expense -> expenseService.delete(expenseIdentifier);
+    Consumer<ExpenseIdentifier> deleteFn = identifier -> expenseService.delete(identifier);
     ExpenseDeleter deleter = new ExpenseDeleter(getFn, deleteFn);
     deleter.delete(expenseIdentifier);
   }

@@ -1,9 +1,8 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
-import java.util.List;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
 import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -16,8 +15,8 @@ public interface IncomeAttributeMapper {
   Optional<IncomeAttribute> selectBy(
       @Param("incomeAttributeIdentifier") IncomeAttributeIdentifier incomeAttributeIdentifier);
 
-  Optional<List<Expense>> selectByExpenseAttribute(
-      @Param("incomeAttribute") IncomeAttribute incomeAttribute);
+  Optional<IncomeAttribute> selectByIncomeAttributeName(
+      @Param("incomeAttributeName") IncomeAttributeName incomeAttributeName);
 
   void delete(
       @Param("incomeAttributeIdentifier") IncomeAttributeIdentifier incomeAttributeIdentifier);
