@@ -1,9 +1,5 @@
 package dev.yhiguchi.home_expense.domain.model.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Incomes;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.IncomeAttributeConstraintException;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.Incomes;
 import java.util.function.Consumer;
 import java.util.function.Function;
