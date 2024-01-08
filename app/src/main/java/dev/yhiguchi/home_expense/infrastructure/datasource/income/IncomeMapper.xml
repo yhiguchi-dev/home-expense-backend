@@ -11,6 +11,7 @@
           receive_date
         ) VALUES (
           #{income.incomeIdentifier.value},
+          #{income.incomeAttribute.incomeAttributeIdentifier.value},
           #{income.description.value},
           #{income.amount.value},
           #{income.receiveDate.value}

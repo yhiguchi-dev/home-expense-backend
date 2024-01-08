@@ -30,4 +30,8 @@ public class IncomeSummaryCriteria {
   int getOffset() {
     return offset();
   }
+
+  String getYear() {
+    return year.toString();
+  }
 }

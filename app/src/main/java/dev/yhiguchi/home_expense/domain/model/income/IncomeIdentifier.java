@@ -8,6 +8,8 @@ public class IncomeIdentifier {
     this.value = value;
   }
 
+  IncomeIdentifier() {}
+
   public String value() {
     return value;
   }

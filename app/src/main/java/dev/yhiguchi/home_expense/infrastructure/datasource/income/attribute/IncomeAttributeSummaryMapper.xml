@@ -20,7 +20,7 @@
           name
         FROM
           expense.income_attribute
-        ORDER BY attribute.created_at
+        ORDER BY income_attribute.created_at
         LIMIT #{criteria.perPage}
         OFFSET #{criteria.offset}
     </select>

@@ -22,6 +22,7 @@
           id,
           name
         FROM expense.income_attribute
+        WHERE id = #{incomeAttributeIdentifier.value}
     </select>
 
     <select id="selectByIncomeAttributeName" resultMap="IncomeAttribute">

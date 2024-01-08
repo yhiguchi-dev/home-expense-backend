@@ -15,14 +15,20 @@ import java.util.function.Function;
 @Transactional
 public class IncomeAttributeDeletionService {
 
-  IncomeAttributeService expenseAttributeService;
+  IncomeAttributeService incomeAttributeService;
   IncomeService incomeService;
+
+  public IncomeAttributeDeletionService(
+      IncomeAttributeService incomeAttributeService, IncomeService incomeService) {
+    this.incomeAttributeService = incomeAttributeService;
+    this.incomeService = incomeService;
+  }
 
   public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
     Function<IncomeAttributeIdentifier, IncomeAttribute> getFn =
-        identifier -> expenseAttributeService.get(identifier);
+        identifier -> incomeAttributeService.get(identifier);
     Consumer<IncomeAttributeIdentifier> deleteFn =
-        identifier -> expenseAttributeService.delete(identifier);
+        identifier -> incomeAttributeService.delete(identifier);
     Function<IncomeAttribute, Incomes> findExpensesFn = attribute -> incomeService.find(attribute);
     IncomeAttributeDeleter deleter = new IncomeAttributeDeleter(getFn, deleteFn, findExpensesFn);
     deleter.delete(incomeAttributeIdentifier);

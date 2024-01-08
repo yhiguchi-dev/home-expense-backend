@@ -8,6 +8,8 @@ public class Amount {
     this.value = value;
   }
 
+  Amount() {}
+
   public int value() {
     return value;
   }

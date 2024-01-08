@@ -11,6 +11,10 @@ import java.util.List;
 public class IncomeSummaryDataSource implements IncomeSummaryRepository {
   IncomeSummaryMapper incomeSummaryMapper;
 
+  public IncomeSummaryDataSource(IncomeSummaryMapper incomeSummaryMapper) {
+    this.incomeSummaryMapper = incomeSummaryMapper;
+  }
+
   @Override
   public IncomeSummary find(IncomeSummaryCriteria criteria) {
     int count = incomeSummaryMapper.selectCount(criteria);

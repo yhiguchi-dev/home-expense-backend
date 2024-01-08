@@ -21,8 +21,8 @@ public class IncomeAttributeDeleter {
     this.findIncomesFn = findIncomesFn;
   }
 
-  public void delete(IncomeAttributeIdentifier expenseAttributeIdentifier) {
-    IncomeAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
+  public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    IncomeAttribute expenseAttribute = getFn.apply(incomeAttributeIdentifier);
     Incomes expenses = findIncomesFn.apply(expenseAttribute);
     if (expenses.has(expenseAttribute)) {
       throw new IncomeAttributeConstraintException();

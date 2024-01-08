@@ -20,7 +20,10 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   }
 
   @Override
-  public void update(IncomeAttribute incomeAttribute) {}
+  public void update(IncomeAttribute incomeAttribute) {
+    delete(incomeAttribute.incomeAttributeIdentifier());
+    register(incomeAttribute);
+  }
 
   @Override
   public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {

@@ -24,7 +24,7 @@ public class Income {
     this.incomeAttribute = incomeAttribute;
   }
 
-  public Income() {}
+  Income() {}
 
   public IncomeIdentifier incomeIdentifier() {
     return incomeIdentifier;

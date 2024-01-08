@@ -10,6 +10,8 @@ public class ReceiveDate {
     this.value = value;
   }
 
+  ReceiveDate() {}
+
   public String value() {
     return value.toString();
   }

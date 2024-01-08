@@ -8,6 +8,8 @@ public class Description {
     this.value = value;
   }
 
+  Description() {}
+
   public String value() {
     return value;
   }
