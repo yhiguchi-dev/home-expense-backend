@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute.IncomeAttributeMapper">
+
+    <insert id="insert">
+        INSERT INTO expense.income_attribute(
+          id,
+          name
+        ) VALUES (
+          #{incomeAttribute.incomeAttributeIdentifier.value},
+          #{incomeAttribute.incomeAttributeName.value}
+        )
+    </insert>
+
+    <resultMap id="IncomeAttribute" type="dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute">
+        <id property="incomeAttributeIdentifier.value" column="id" />
+        <result property="incomeAttributeName.value" column="name" />
+    </resultMap>
+
+    <select id="selectBy" resultMap="IncomeAttribute">
+        SELECT
+          id,
+          name
+        FROM expense.income_attribute
+        WHERE id = #{incomeAttributeIdentifier.value}
+    </select>
+
+    <select id="selectByIncomeAttributeName" resultMap="IncomeAttribute">
+        SELECT
+          id,
+          name
+        FROM expense.income_attribute
+        WHERE name = #{incomeAttributeName.value}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM expense.income_attribute
+        WHERE id = #{incomeAttributeIdentifier.value}
+    </delete>
+</mapper>

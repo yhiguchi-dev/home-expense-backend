@@ -3,6 +3,7 @@ package dev.yhiguchi.home_expense.domain.model.expense;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/** 経費の削除者 */
 public class ExpenseDeleter {
 
   Function<ExpenseIdentifier, Expense> getFn;

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dev.yhiguchi.home_expense.infrastructure.datasource.income.IncomeMapper">
+
+    <insert id="insert">
+        INSERT INTO expense.income(
+          id,
+          attribute_id,
+          description,
+          amount,
+          receive_date
+        ) VALUES (
+          #{income.incomeIdentifier.value},
+          #{income.incomeAttribute.incomeAttributeIdentifier.value},
+          #{income.description.value},
+          #{income.amount.value},
+          #{income.receiveDate.value}
+        )
+    </insert>
+
+    <resultMap id="Income" type="dev.yhiguchi.home_expense.domain.model.income.Income">
+        <id property="incomeIdentifier.value" column="id" />
+        <result property="incomeAttribute.incomeAttributeIdentifier.value" column="attribute_id" />
+        <result property="incomeAttribute.incomeAttributeName.value" column="attribute_name" />
+        <result property="description.value" column="description" />
+        <result property="amount.value" column="amount" />
+        <result property="receiveDate.value" column="receive_date" />
+    </resultMap>
+
+    <select id="selectBy" resultMap="Income">
+        SELECT
+          income.id,
+          income.description,
+          income.amount,
+          income.receive_date,
+          income_attribute.id AS attribute_id,
+          income_attribute.name AS attribute_name
+        FROM expense.income
+        LEFT JOIN expense.income_attribute
+          ON income_attribute.id = income.attribute_id
+        WHERE income.id = #{incomeIdentifier.value}
+    </select>
+
+    <select id="selectByIncomeAttribute" resultMap="Income">
+        SELECT
+          income.id,
+          income.description,
+          income.amount,
+          income.receive_date,
+          income_attribute.id AS attribute_id,
+          income_attribute.name AS attribute_name
+        FROM expense.income
+        LEFT JOIN expense.income_attribute
+        ON income_attribute.id = income.attribute_id
+        WHERE income_attribute.id = #{incomeAttribute.incomeAttributeIdentifier.value}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM expense.income
+        WHERE income.id = #{incomeIdentifier.value}
+    </delete>
+</mapper>

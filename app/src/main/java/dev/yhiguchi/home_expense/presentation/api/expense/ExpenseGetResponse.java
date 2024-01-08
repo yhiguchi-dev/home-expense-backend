@@ -14,12 +14,7 @@ record ExpenseGetResponse(
 
   static ExpenseGetResponse from(Expense expense) {
     ExpenseAttributeResponse expenseAttributeResponse =
-        expense.hasAttribute()
-            ? new ExpenseAttributeResponse(
-                expense.expenseAttribute().expenseAttributeIdentifier().value(),
-                expense.expenseAttribute().expenseAttributeName().value(),
-                expense.expenseAttribute().expenseCategory().name())
-            : null;
+        ExpenseAttributeResponse.from(expense.expenseAttribute());
     return new ExpenseGetResponse(
         expense.expenseIdentifier().value(),
         expense.description().value(),

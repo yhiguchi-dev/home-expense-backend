@@ -17,7 +17,7 @@ public record ExpensePostRequest(
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}", message = "payment_dateの形式に誤りがあります")
         @JsonProperty("payment_date")
         String paymentDate,
-    @JsonProperty("attribute_id") String attributeId) {
+    @NotBlank(message = "attribute_idは必須入力です") @JsonProperty("attribute_id") String attributeId) {
   Description toDescription() {
     return new Description(description);
   }

@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
-import dev.yhiguchi.home_expense.application.service.ExpenseGettingService;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseGettingService;
 import dev.yhiguchi.home_expense.query.expense.*;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

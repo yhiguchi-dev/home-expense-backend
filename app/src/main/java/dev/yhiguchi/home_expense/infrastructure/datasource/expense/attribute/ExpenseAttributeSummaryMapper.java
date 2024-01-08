@@ -9,9 +9,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ExpenseAttributeSummaryMapper {
 
-  Integer selectCount(
-      @Param("criteria") ExpenseAttributeSummaryCriteria expenseAttributeSummaryCriteria);
+  Integer selectCount(@Param("criteria") ExpenseAttributeSummaryCriteria criteria);
 
-  List<ExpenseAttribute> selectBy(
-      @Param("criteria") ExpenseAttributeSummaryCriteria expenseAttributeSummaryCriteria);
+  List<ExpenseAttribute> selectBy(@Param("criteria") ExpenseAttributeSummaryCriteria criteria);
 }

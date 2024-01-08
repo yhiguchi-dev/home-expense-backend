@@ -6,10 +6,28 @@
         SELECT
           COUNT(*)
         FROM
-        expense.expense
-        <if test="criteria.year != null and criteria.month != null">
-            WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
-        </if>
+          expense.expense
+        LEFT JOIN fixed_expense
+          ON expense.id = fixed_expense.expense_id
+        LEFT JOIN variable_expense
+          ON expense.id = variable_expense.expense_id
+        LEFT JOIN attribute
+          ON attribute.id = fixed_expense.attribute_id
+            OR attribute.id = variable_expense.attribute_id
+        <where>
+            <if test="criteria.year != null and criteria.month != null">
+                date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+            </if>
+            <if test="criteria.year != null and criteria.month == null">
+                AND date_trunc('year', expense.payment_date) = to_timestamp(#{criteria.year}, 'YYYY')
+            </if>
+            <if test="criteria.expenseCategory != null">
+                AND category = #{criteria.expenseCategory}
+            </if>
+            <if test="criteria.expenseAttributeName != null">
+                AND category = #{criteria.expenseAttributeName.value}
+            </if>
+        </where>
     </select>
 
     <resultMap id="Expense" type="dev.yhiguchi.home_expense.domain.model.expense.Expense">
@@ -39,9 +57,20 @@
         LEFT JOIN attribute
           ON attribute.id = fixed_expense.attribute_id
             OR attribute.id = variable_expense.attribute_id
-        <if test="criteria.year != null and criteria.month != null">
-            WHERE date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
-        </if>
+        <where>
+            <if test="criteria.year != null and criteria.month != null">
+                date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+            </if>
+            <if test="criteria.year != null and criteria.month == null">
+                AND date_trunc('year', expense.payment_date) = to_timestamp(#{criteria.year}, 'YYYY')
+            </if>
+            <if test="criteria.expenseCategory != null">
+                AND category = #{criteria.expenseCategory}
+            </if>
+            <if test="criteria.expenseAttributeName != null">
+                AND category = #{criteria.expenseAttributeName.value}
+            </if>
+        </where>
         ORDER BY attribute.category DESC, expense.payment_date DESC
         LIMIT #{criteria.perPage}
         OFFSET #{criteria.offset}

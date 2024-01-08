@@ -1,10 +1,10 @@
 package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/** 経費属性の更新者 */
 public class ExpenseAttributeUpdater {
 
   Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn;
@@ -24,7 +24,7 @@ public class ExpenseAttributeUpdater {
     ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
     ExpenseAttribute updated =
         new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
-    if (Objects.equals(expenseAttribute, updated)) {
+    if (expenseAttribute.equals(updated)) {
       return;
     }
     updateFn.accept(updated);

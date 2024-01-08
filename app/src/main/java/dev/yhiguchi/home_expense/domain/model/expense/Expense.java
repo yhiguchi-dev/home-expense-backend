@@ -38,10 +38,6 @@ public class Expense {
     return expenseAttribute.isVariable();
   }
 
-  public boolean hasAttribute() {
-    return expenseAttribute().exists();
-  }
-
   public ExpenseIdentifier expenseIdentifier() {
     return expenseIdentifier;
   }

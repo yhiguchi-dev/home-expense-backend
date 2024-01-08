@@ -1,0 +1,43 @@
+name: Continuous Delivery
+run-name: Continuous Delivery
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pre-build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+      - name: Set Version
+        id: set-version
+        run: |
+          echo "version=$(./gradlew --console=plain --no-daemon -q printVersion)" >> "${GITHUB_OUTPUT}"
+        working-directory: app
+  build-and-push:
+    uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image-push-to-ghcr.yaml@main
+    with:
+      build-context: ${{ matrix.build-context }}
+      version: ${{ needs.pre-build-and-push.outputs.version }}
+      platform: ${{ matrix.platform }}
+    needs:
+      - pre-build-and-push
+    strategy:
+      fail-fast: false
+      matrix:
+        build-context:
+          - app
+          - flyway
+        platform:
+          - linux/amd64
