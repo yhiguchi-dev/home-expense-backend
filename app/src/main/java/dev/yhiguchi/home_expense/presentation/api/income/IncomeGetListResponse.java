@@ -7,7 +7,7 @@ import java.util.List;
 
 @RegisterForReflection
 class IncomeGetListResponse {
-  @JsonProperty("expenses")
+  @JsonProperty("incomes")
   List<IncomeGetResponse> list;
 
   IncomeGetListResponse(IncomeSummary summary) {
