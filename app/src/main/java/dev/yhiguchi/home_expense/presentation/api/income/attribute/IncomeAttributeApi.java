@@ -9,7 +9,6 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeAl
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
-import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
@@ -72,7 +71,6 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
 
   @GET
   public Response get(
-      @QueryParam("category") @ExpenseCategory String category,
       @QueryParam("page") @DefaultValue("1") Integer page,
       @QueryParam("per_page") @DefaultValue("20") Integer perPage,
       @Context UriInfo uriInfo) {

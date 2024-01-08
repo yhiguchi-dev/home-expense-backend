@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
 
-@Path("/v1/income")
+@Path("/v1/incomes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class IncomeApi implements LinkHeaderCreatable {
