@@ -63,4 +63,16 @@ public class ExpenseSummaryCriteria {
   String getYearMonth() {
     return yearMonth();
   }
+
+  String getYear() {
+    return year.toString();
+  }
+
+  public ExpenseCategory getExpenseCategory() {
+    return expenseCategory;
+  }
+
+  public ExpenseAttributeName getExpenseAttributeName() {
+    return expenseAttributeName;
+  }
 }

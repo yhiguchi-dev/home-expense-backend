@@ -24,7 +24,7 @@
             <if test="criteria.expenseCategory != null">
                 AND category = #{criteria.expenseCategory}
             </if>
-            <if test="criteria.expenseAttributeName != null">
+            <if test="criteria.expenseAttributeName.value != null">
                 AND category = #{criteria.expenseAttributeName.value}
             </if>
         </where>
@@ -67,7 +67,7 @@
             <if test="criteria.expenseCategory != null">
                 AND category = #{criteria.expenseCategory}
             </if>
-            <if test="criteria.expenseAttributeName != null">
+            <if test="criteria.expenseAttributeName.value != null">
                 AND category = #{criteria.expenseAttributeName.value}
             </if>
         </where>
