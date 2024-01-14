@@ -26,11 +26,12 @@ jobs:
           echo "version=$(./gradlew --console=plain --no-daemon -q printVersion)" >> "${GITHUB_OUTPUT}"
         working-directory: app
   build-and-push:
-    uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image-push-to-ghcr.yaml@main
+    uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image.yaml@main
     with:
       build-context: ${{ matrix.build-context }}
       version: ${{ needs.pre-build-and-push.outputs.version }}
       platform: ${{ matrix.platform }}
+      push: true
     needs:
       - pre-build-and-push
     strategy:

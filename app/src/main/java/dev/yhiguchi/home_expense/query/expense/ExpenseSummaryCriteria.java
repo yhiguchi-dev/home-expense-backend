@@ -4,13 +4,14 @@ import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
 import dev.yhiguchi.home_expense.query.Pagination;
 import java.time.YearMonth;
+import java.util.Objects;
 
 public class ExpenseSummaryCriteria {
   Pagination pagination;
   Integer year;
   Integer month;
   ExpenseCategory expenseCategory;
-  ExpenseAttributeName expenseAttributeName;
+  ExpenseAttributeName expenseAttributeName = new ExpenseAttributeName();
 
   public ExpenseSummaryCriteria(
       Pagination pagination,
@@ -65,14 +66,14 @@ public class ExpenseSummaryCriteria {
   }
 
   String getYear() {
-    return year.toString();
+    return Objects.nonNull(year) ? year.toString() : null;
   }
 
   public ExpenseCategory getExpenseCategory() {
     return expenseCategory;
   }
 
-  public ExpenseAttributeName getExpenseAttributeName() {
-    return expenseAttributeName;
+  public String getExpenseAttributeName() {
+    return expenseAttributeName.value();
   }
 }

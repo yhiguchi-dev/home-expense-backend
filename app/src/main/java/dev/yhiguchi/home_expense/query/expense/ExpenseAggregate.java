@@ -2,18 +2,31 @@ package dev.yhiguchi.home_expense.query.expense;
 
 public class ExpenseAggregate {
 
+  Integer incomeTotalAmount;
+
   ExpenseAggregateDetail fixedDetail;
 
   ExpenseAggregateDetail variableDetail;
 
   public ExpenseAggregate(
-      ExpenseAggregateDetail fixedDetail, ExpenseAggregateDetail variableDetail) {
+      Integer incomeTotalAmount,
+      ExpenseAggregateDetail fixedDetail,
+      ExpenseAggregateDetail variableDetail) {
+    this.incomeTotalAmount = incomeTotalAmount;
     this.fixedDetail = fixedDetail;
     this.variableDetail = variableDetail;
   }
 
   ExpenseAggregate() {
-    this(new ExpenseAggregateDetail(), new ExpenseAggregateDetail());
+    this(0, new ExpenseAggregateDetail(), new ExpenseAggregateDetail());
+  }
+
+  public Integer incomeTotalAmount() {
+    return incomeTotalAmount;
+  }
+
+  public Integer disposableIncome() {
+    return incomeTotalAmount - totalAmount();
   }
 
   public Integer totalAmount() {

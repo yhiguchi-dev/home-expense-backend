@@ -10,7 +10,7 @@ public class ExpenseAttributeName {
     this.value = value;
   }
 
-  ExpenseAttributeName() {}
+  public ExpenseAttributeName() {}
 
   public String value() {
     return value;
