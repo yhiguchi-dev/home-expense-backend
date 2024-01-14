@@ -21,3 +21,19 @@ jobs:
       - name: Gradle lint
         run: ./gradlew --console=plain --no-daemon -q check
         working-directory: app
+  build-and-lint:
+    uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image.yaml@main
+    with:
+      build-context: ${{ matrix.build-context }}
+      version: ${{ needs.pre-build-and-push.outputs.version }}
+      platform: ${{ matrix.platform }}
+    needs:
+      - pre-build-and-push
+    strategy:
+      fail-fast: false
+      matrix:
+        build-context:
+          - app
+          - flyway
+        platform:
+          - linux/amd64
