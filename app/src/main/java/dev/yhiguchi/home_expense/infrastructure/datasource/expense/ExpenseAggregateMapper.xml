@@ -8,6 +8,13 @@
         <result property="totalAmount" column="total_amount" />
     </resultMap>
 
+    <select id="selectIncomeTotalAmount" resultType="int">
+        SELECT
+        sum(income.amount)
+        FROM expense.income
+        WHERE date_trunc('month', income.receive_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+    </select>
+
     <select id="selectTotalAmountByFixedCategory" resultType="int">
         SELECT
         sum(expense.price)

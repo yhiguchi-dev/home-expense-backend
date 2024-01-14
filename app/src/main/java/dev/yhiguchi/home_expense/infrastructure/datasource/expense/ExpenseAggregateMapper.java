@@ -10,6 +10,8 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ExpenseAggregateMapper {
 
+  Optional<Integer> selectIncomeTotalAmount(@Param("criteria") ExpenseAggregateCriteria criteria);
+
   Optional<Integer> selectTotalAmountByFixedCategory(
       @Param("criteria") ExpenseAggregateCriteria criteria);
 

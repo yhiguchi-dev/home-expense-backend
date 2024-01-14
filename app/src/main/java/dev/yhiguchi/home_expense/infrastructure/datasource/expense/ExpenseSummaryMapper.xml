@@ -24,8 +24,8 @@
             <if test="criteria.expenseCategory != null">
                 AND category = #{criteria.expenseCategory}
             </if>
-            <if test="criteria.expenseAttributeName.value != null">
-                AND category = #{criteria.expenseAttributeName.value}
+            <if test="criteria.expenseAttributeName != null">
+                AND attribute.name = #{criteria.expenseAttributeName.value}
             </if>
         </where>
     </select>
@@ -67,8 +67,8 @@
             <if test="criteria.expenseCategory != null">
                 AND category = #{criteria.expenseCategory}
             </if>
-            <if test="criteria.expenseAttributeName.value != null">
-                AND category = #{criteria.expenseAttributeName.value}
+            <if test="criteria.expenseAttributeName != null">
+                AND attribute.name = #{criteria.expenseAttributeName.value}
             </if>
         </where>
         ORDER BY attribute.category DESC, expense.payment_date DESC
