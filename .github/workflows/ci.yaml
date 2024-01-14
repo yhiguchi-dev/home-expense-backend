@@ -25,7 +25,7 @@ jobs:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image.yaml@main
     with:
       build-context: ${{ matrix.build-context }}
-      version: ${{ needs.pre-build-and-push.outputs.version }}
+      version: lint
       platform: ${{ matrix.platform }}
     needs:
       - lint
