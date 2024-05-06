@@ -25,7 +25,7 @@
                 AND category = #{criteria.expenseCategory}
             </if>
             <if test="criteria.hasExpenseAttributeIdentifier == true">
-                AND attribute.id = #{criteria.expenseAttributeIdentifier.value}
+                AND attribute.id = #{criteria.expenseAttributeIdentifier}
             </if>
         </where>
     </select>
@@ -68,7 +68,7 @@
                 AND category = #{criteria.expenseCategory}
             </if>
             <if test="criteria.hasExpenseAttributeIdentifier == true">
-                AND attribute.id = #{criteria.expenseAttributeIdentifier.value}
+                AND attribute.id = #{criteria.expenseAttributeIdentifier}
             </if>
         </where>
         ORDER BY attribute.category DESC, expense.payment_date DESC
