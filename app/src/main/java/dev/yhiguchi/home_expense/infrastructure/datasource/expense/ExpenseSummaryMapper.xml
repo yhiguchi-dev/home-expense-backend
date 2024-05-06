@@ -15,17 +15,17 @@
           ON attribute.id = fixed_expense.attribute_id
             OR attribute.id = variable_expense.attribute_id
         <where>
-            <if test="criteria.year != null and criteria.month != null">
+            <if test="criteria.hasYear == true and criteria.hasMonth == true">
                 date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
             </if>
-            <if test="criteria.year != null and criteria.month == null">
+            <if test="criteria.hasYear == true and criteria.hasMonth == false">
                 AND date_trunc('year', expense.payment_date) = to_timestamp(#{criteria.year}, 'YYYY')
             </if>
-            <if test="criteria.expenseCategory != null">
+            <if test="criteria.hasExpenseCategory == true">
                 AND category = #{criteria.expenseCategory}
             </if>
-            <if test="criteria.expenseAttributeName != null">
-                AND attribute.name = #{criteria.expenseAttributeName.value}
+            <if test="criteria.hasExpenseAttributeIdentifier == true">
+                AND attribute.id = #{criteria.expenseAttributeIdentifier.value}
             </if>
         </where>
     </select>
@@ -58,17 +58,17 @@
           ON attribute.id = fixed_expense.attribute_id
             OR attribute.id = variable_expense.attribute_id
         <where>
-            <if test="criteria.year != null and criteria.month != null">
+            <if test="criteria.hasYear = true and criteria.hasMonth == true">
                 date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
             </if>
-            <if test="criteria.year != null and criteria.month == null">
+            <if test="criteria.hasYear == true and criteria.hasMonth == false">
                 AND date_trunc('year', expense.payment_date) = to_timestamp(#{criteria.year}, 'YYYY')
             </if>
-            <if test="criteria.expenseCategory != null">
+            <if test="criteria.hasExpenseCategory == true">
                 AND category = #{criteria.expenseCategory}
             </if>
-            <if test="criteria.expenseAttributeName != null">
-                AND attribute.name = #{criteria.expenseAttributeName.value}
+            <if test="criteria.hasExpenseAttributeIdentifier == true">
+                AND attribute.id = #{criteria.expenseAttributeIdentifier.value}
             </if>
         </where>
         ORDER BY attribute.category DESC, expense.payment_date DESC

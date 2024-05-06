@@ -1,7 +1,7 @@
 package dev.yhiguchi.home_expense.query.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.query.Pagination;
 import java.time.YearMonth;
 import java.util.Objects;
@@ -11,38 +11,30 @@ public class ExpenseSummaryCriteria {
   Integer year;
   Integer month;
   ExpenseCategory expenseCategory;
-  ExpenseAttributeName expenseAttributeName = new ExpenseAttributeName();
+  ExpenseAttributeIdentifier expenseAttributeIdentifier;
 
   public ExpenseSummaryCriteria(
       Pagination pagination,
       Integer year,
       Integer month,
       ExpenseCategory expenseCategory,
-      ExpenseAttributeName expenseAttributeName) {
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     this.pagination = pagination;
     this.year = year;
     this.month = month;
     this.expenseCategory = expenseCategory;
-    this.expenseAttributeName = expenseAttributeName;
+    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
   }
 
   public ExpenseSummaryCriteria(
       Pagination pagination,
       Integer year,
       Integer month,
-      ExpenseAttributeName expenseAttributeName) {
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     this.pagination = pagination;
     this.year = year;
     this.month = month;
-    this.expenseAttributeName = expenseAttributeName;
-  }
-
-  public int offset() {
-    return pagination.offset();
-  }
-
-  public int perPage() {
-    return pagination.perPage();
+    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
   }
 
   public Pagination pagination() {
@@ -54,26 +46,42 @@ public class ExpenseSummaryCriteria {
   }
 
   int getPerPage() {
-    return perPage();
+    return pagination.perPage();
   }
 
   int getOffset() {
-    return offset();
+    return pagination.offset();
   }
 
   String getYearMonth() {
     return yearMonth();
   }
 
-  String getYear() {
-    return Objects.nonNull(year) ? year.toString() : null;
+  public boolean hasYear() {
+    return Objects.nonNull(year);
   }
 
-  public ExpenseCategory getExpenseCategory() {
+  String getYear() {
+    return year.toString();
+  }
+
+  public boolean hasMonth() {
+    return Objects.nonNull(month);
+  }
+
+  public boolean hasExpenseCategory() {
+    return Objects.nonNull(expenseCategory);
+  }
+
+  ExpenseCategory getExpenseCategory() {
     return expenseCategory;
   }
 
-  public String getExpenseAttributeName() {
-    return expenseAttributeName.value();
+  public boolean hasExpenseAttributeIdentifier() {
+    return expenseAttributeIdentifier.exists();
+  }
+
+  String getExpenseAttributeIdentifier() {
+    return expenseAttributeIdentifier.value();
   }
 }
