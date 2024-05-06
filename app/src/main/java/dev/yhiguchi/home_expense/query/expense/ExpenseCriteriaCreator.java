@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.query.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
@@ -14,15 +14,16 @@ public class ExpenseCriteriaCreator {
       Integer year,
       Integer month,
       String category,
-      String attributeName) {
+      String attributeId) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    ExpenseAttributeName expenseAttributeName = new ExpenseAttributeName(attributeName);
+    ExpenseAttributeIdentifier expenseAttributeIdentifier =
+        new ExpenseAttributeIdentifier(attributeId);
     if (Objects.nonNull(category)) {
       dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory expenseCategory =
           dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category);
       return new ExpenseSummaryCriteria(
-          pagination, year, month, expenseCategory, expenseAttributeName);
+          pagination, year, month, expenseCategory, expenseAttributeIdentifier);
     }
-    return new ExpenseSummaryCriteria(pagination, year, month, expenseAttributeName);
+    return new ExpenseSummaryCriteria(pagination, year, month, expenseAttributeIdentifier);
   }
 }

@@ -27,7 +27,6 @@ services:
       - FLYWAY_SCHEMAS=expense
       - FLYWAY_DEFAULT_SCHEMA=public
     command: clean migrate
-#    command: migrate
     depends_on:
       database:
         condition: service_healthy

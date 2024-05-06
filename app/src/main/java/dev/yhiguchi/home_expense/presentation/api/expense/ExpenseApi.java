@@ -78,10 +78,10 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @QueryParam("year") Integer year,
       @QueryParam("month") Integer month,
       @QueryParam("category") @ExpenseCategory String category,
-      @QueryParam("attribute_name") String attributeName,
+      @QueryParam("attribute_id") String attributeId,
       @Context UriInfo uriInfo) {
     ExpenseSummaryCriteria criteria =
-        ExpenseCriteriaCreator.create(page, perPage, year, month, category, attributeName);
+        ExpenseCriteriaCreator.create(page, perPage, year, month, category, attributeId);
     ExpenseSummary expenseSummary = expenseGettingService.findSummary(criteria);
     ExpenseGetListResponse response =
         page <= expenseSummary.totalCount()
