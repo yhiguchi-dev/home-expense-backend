@@ -1,5 +1,5 @@
 [versions]
-io-quarkus = "3.6.4"
+io-quarkus = "3.10.0"
 quarkus-mybatis = "2.2.2"
 com-diffplug-spotless = "6.25.0"
 
