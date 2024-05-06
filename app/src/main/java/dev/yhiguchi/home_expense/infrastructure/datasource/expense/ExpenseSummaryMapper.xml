@@ -58,7 +58,7 @@
           ON attribute.id = fixed_expense.attribute_id
             OR attribute.id = variable_expense.attribute_id
         <where>
-            <if test="criteria.hasYear = true and criteria.hasMonth == true">
+            <if test="criteria.hasYear == true and criteria.hasMonth == true">
                 date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
             </if>
             <if test="criteria.hasYear == true and criteria.hasMonth == false">
