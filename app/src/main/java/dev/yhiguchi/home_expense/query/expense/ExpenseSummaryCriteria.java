@@ -61,12 +61,16 @@ public class ExpenseSummaryCriteria {
     return Objects.nonNull(year);
   }
 
-  String getYear() {
-    return year.toString();
+  int getYear() {
+    return year;
   }
 
   public boolean hasMonth() {
     return Objects.nonNull(month);
+  }
+
+  public int getMonth() {
+    return month;
   }
 
   public boolean hasExpenseCategory() {

@@ -16,10 +16,11 @@
             OR attribute.id = variable_expense.attribute_id
         <where>
             <if test="criteria.hasYear == true and criteria.hasMonth == true">
-                date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+                extract('year' from expense.payment_date) = #{criteria.year}
+                AND extract('month' from expense.payment_date) = #{criteria.month}
             </if>
             <if test="criteria.hasYear == true and criteria.hasMonth == false">
-                AND date_trunc('year', expense.payment_date) = to_timestamp(#{criteria.year}, 'YYYY')
+                AND extract('year' from expense.payment_date) = #{criteria.year}
             </if>
             <if test="criteria.hasExpenseCategory == true">
                 AND category = #{criteria.expenseCategory}
@@ -59,10 +60,11 @@
             OR attribute.id = variable_expense.attribute_id
         <where>
             <if test="criteria.hasYear == true and criteria.hasMonth == true">
-                date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+                extract('year' from expense.payment_date) = #{criteria.year}
+                AND extract('month' from expense.payment_date) = #{criteria.month}
             </if>
             <if test="criteria.hasYear == true and criteria.hasMonth == false">
-                AND date_trunc('year', expense.payment_date) = to_timestamp(#{criteria.year}, 'YYYY')
+                AND extract('year' from expense.payment_date) = #{criteria.year}
             </if>
             <if test="criteria.hasExpenseCategory == true">
                 AND category = #{criteria.expenseCategory}

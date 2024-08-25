@@ -11,7 +11,7 @@
           ON income_attribute.id = income.attribute_id
         <where>
             <if test="criteria.year != null">
-                date_trunc('year', income.receive_date) = to_timestamp(#{criteria.year}, 'YYYY')
+                extract('year' from income.receive_date) = #{criteria.year}
             </if>
         </where>
     </select>
@@ -39,7 +39,7 @@
           ON income_attribute.id = income.attribute_id
         <where>
             <if test="criteria.year != null">
-                date_trunc('year', income.receive_date) = to_timestamp(#{criteria.year}, 'YYYY')
+                extract('year' from income.receive_date) = #{criteria.year}
             </if>
         </where>
         ORDER BY income.receive_date DESC

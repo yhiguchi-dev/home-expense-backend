@@ -12,7 +12,8 @@
         SELECT
         sum(income.amount)
         FROM expense.income
-        WHERE date_trunc('month', income.receive_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        WHERE extract('year' from income.receive_date) = #{criteria.year}
+        AND extract('month' from income.receive_date) = #{criteria.month}
     </select>
 
     <select id="selectTotalAmountByFixedCategory" resultType="int">
@@ -24,7 +25,8 @@
         LEFT JOIN attribute
         ON attribute.id = fixed_expense.attribute_id
         WHERE attribute.id IS NOT NULL
-        AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        AND extract('year' from expense.payment_date) = #{criteria.year}
+        AND extract('month' from expense.payment_date) = #{criteria.month}
     </select>
 
     <select id="selectByFixedCategory" resultMap="ExpenseAttributeAggregate">
@@ -38,7 +40,8 @@
         LEFT JOIN attribute
         ON attribute.id = fixed_expense.attribute_id
         WHERE attribute.id IS NOT NULL
-        AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        AND extract('year' from expense.payment_date) = #{criteria.year}
+        AND extract('month' from expense.payment_date) = #{criteria.month}
         group by attribute.id
         order by attribute.created_at
     </select>
@@ -52,7 +55,8 @@
         LEFT JOIN attribute
         ON attribute.id = variable_expense.attribute_id
         WHERE attribute.id IS NOT NULL
-        AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        AND extract('year' from expense.payment_date) = #{criteria.year}
+        AND extract('month' from expense.payment_date) = #{criteria.month}
     </select>
 
     <select id="selectByVariableCategory" resultMap="ExpenseAttributeAggregate">
@@ -66,7 +70,8 @@
         LEFT JOIN attribute
         ON attribute.id = variable_expense.attribute_id
         WHERE attribute.id IS NOT NULL
-        AND date_trunc('month', expense.payment_date) = to_timestamp(#{criteria.yearMonth}, 'YYYY-MM')
+        AND extract('year' from expense.payment_date) = #{criteria.year}
+        AND extract('month' from expense.payment_date) = #{criteria.month}
         group by attribute.id
         order by attribute.created_at
     </select>
