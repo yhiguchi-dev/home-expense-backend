@@ -20,4 +20,12 @@ public class ExpenseAggregateCriteria {
   String getYearMonth() {
     return yearMonth();
   }
+
+  public int getYear() {
+    return year;
+  }
+
+  public int getMonth() {
+    return month;
+  }
 }
