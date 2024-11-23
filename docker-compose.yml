@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgres:16.3
+    image: postgres:16.6
     container_name: expense-db
     environment:
       - POSTGRES_USER=expense
