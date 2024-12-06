@@ -1,4 +1,4 @@
-FROM alpine:3.19.1 as lib
+FROM alpine:3.21.0 as lib
 
 FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.3 AS gradle-cache
 
