@@ -10,7 +10,6 @@ import dev.higuchi.homeexpense.command.model.income.IncomeIdentifier;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttribute;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeIdentifier;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeName;
-import dev.higuchi.homeexpense.postgresql.mybatisadapter.datasource.expense.*;
 import dev.higuchi.homeexpense.query.model.expense.*;
 import dev.higuchi.homeexpense.query.model.expense.attribute.ExpenseAttributeSummaryCriteria;
 import dev.higuchi.homeexpense.query.model.income.IncomeSummaryCriteria;
