@@ -1,0 +1,23 @@
+package dev.higuchi.homeexpense.springboot.presentation.api.expense;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.higuchi.homeexpense.command.model.expense.Expense;
+
+record ExpenseGetResponse(
+    @JsonProperty("id") String id,
+    @JsonProperty("description") String description,
+    @JsonProperty("price") Integer price,
+    @JsonProperty("payment_date") String paymentDate,
+    @JsonProperty("expense_attribute") ExpenseAttributeResponse expenseAttributeResponse) {
+
+  static ExpenseGetResponse from(Expense expense) {
+    ExpenseAttributeResponse expenseAttributeResponse =
+        ExpenseAttributeResponse.from(expense.expenseAttribute());
+    return new ExpenseGetResponse(
+        expense.expenseIdentifier().value(),
+        expense.description().value(),
+        expense.price().value(),
+        expense.paymentDate().value(),
+        expenseAttributeResponse);
+  }
+}

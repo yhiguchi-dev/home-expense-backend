@@ -1,0 +1,34 @@
+package dev.higuchi.homeexpense.command.service.expense;
+
+import dev.higuchi.homeexpense.command.model.expense.*;
+import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttribute;
+import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeIdentifier;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+/** 経費作成者 */
+public class ExpenseCreator {
+
+  Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn;
+  Consumer<Expense> registerFn;
+
+  public ExpenseCreator(
+      Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn, Consumer<Expense> registerFn) {
+    this.getFn = getFn;
+    this.registerFn = registerFn;
+  }
+
+  public Expense create(
+      Description description,
+      Price price,
+      PaymentDate paymentDate,
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    ExpenseIdentifier expenseIdentifier = new ExpenseIdentifier(UUID.randomUUID().toString());
+    ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
+    Expense expense =
+        new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute);
+    registerFn.accept(expense);
+    return expense;
+  }
+}

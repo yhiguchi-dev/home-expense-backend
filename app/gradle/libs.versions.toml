@@ -1,7 +1,14 @@
 [versions]
-io-quarkus = "3.10.0"
-quarkus-mybatis = "2.2.2"
+io-quarkus = "3.15.3.1"
+quarkus-mybatis = "2.2.4"
 com-diffplug-spotless = "6.25.0"
+mybatis = "3.5.19"
+postgresql = "42.7.5"
+junit-bom = "5.10.0"
+boot = "3.4.3"
+dependency-management = "1.1.7"
+aws-advanced-jdbc-wrapper = "2.5.4"
+mybatis-spring-boot-starter = "3.0.4"
 
 [libraries]
 quarkus-bom = { group = "io.quarkus.platform", name = "quarkus-bom", version.ref = "io-quarkus" }
@@ -13,9 +20,23 @@ quarkus-resteasy-reactive = { group = "io.quarkus", name = "quarkus-resteasy-rea
 quarkus-mybatis = { group = "io.quarkiverse.mybatis", name = "quarkus-mybatis", version.ref = "quarkus-mybatis" }
 quarkus-logging-json = { group = "io.quarkus", name = "quarkus-resteasy-reactive" }
 quarkus-junit5 = { group = "io.quarkus", name = "quarkus-resteasy-reactive" }
+mybatis = { group = "org.mybatis", name = "mybatis", version.ref = "mybatis" }
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junit-bom" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+spring-boot-starter-actuator = { group = "org.springframework.boot", name = "spring-boot-starter-actuator" }
+spring-boot-starter-validation = { group = "org.springframework.boot", name = "spring-boot-starter-validation" }
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+mybatis-spring-boot-starter = { group = "org.mybatis.spring.boot", name = "mybatis-spring-boot-starter", version.ref = "mybatis-spring-boot-starter" }
+aws-advanced-jdbc-wrapper = { group = "software.amazon.jdbc", name = "aws-advanced-jdbc-wrapper", version.ref = "aws-advanced-jdbc-wrapper" }
+spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+mybatis-spring-boot-starter-test = { group = "org.mybatis.spring.boot", name = "mybatis-spring-boot-starter-test", version.ref = "mybatis-spring-boot-starter" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
 [plugins]
 io-quarkus = { id = "io.quarkus", version.ref = "io-quarkus" }
 com-diffplug-spotless = { id = "com.diffplug.spotless", version.ref = "com-diffplug-spotless" }
+boot = { id = "org.springframework.boot", version.ref = "boot" }
+dependency-management = { id = "io.spring.dependency-management", version.ref = "dependency-management" }
 
 [bundles]

@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:aws-wrapper:postgresql://database-1.cluster-cjemees0cpb0.ap-northeast-1.rds.amazonaws.com
+    username: postgres
+    password: QtU5LnZ5zJfwLWdCJLiq
+    driver-class-name: software.amazon.jdbc.Driver
+    type: org.springframework.jdbc.datasource.SimpleDriverDataSource
+#    hikari:
+#      data-source-properties:
+#        wrapperPlugins: failover,readWriteSplitting
+#        wrapperDialect: aurora-pg
+#      max-lifetime: 840000
+#      minimum-idle: 20
+#      maximum-pool-size: 20
+#      idle-timeout: 900000
+#      read-only: true

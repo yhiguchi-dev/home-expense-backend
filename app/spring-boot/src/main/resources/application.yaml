@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: spring-boot
+  profiles:
+    active: "aws"
+  mvc:
+    problemdetails:
+      enabled: true
