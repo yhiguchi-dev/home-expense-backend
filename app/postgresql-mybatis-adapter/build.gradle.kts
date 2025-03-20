@@ -1,5 +1,5 @@
 plugins {
-  id("java")
+  java
 }
 
 group = "dev.higuchi.homeexpense"

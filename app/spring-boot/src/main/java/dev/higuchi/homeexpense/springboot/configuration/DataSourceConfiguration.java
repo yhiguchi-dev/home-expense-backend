@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @MapperScan("dev.higuchi.homeexpense.postgresql.mybatisadapter.datasource")
-public class DataSourceDIConfig {
+public class DataSourceConfiguration {
 
   @Bean
   ExpenseAttributeRepository expenseAttributeRepository(

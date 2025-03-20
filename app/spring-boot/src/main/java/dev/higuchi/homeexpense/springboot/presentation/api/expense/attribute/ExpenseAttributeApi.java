@@ -16,7 +16,6 @@ import dev.higuchi.homeexpense.springboot.application.usecase.expense.ExpenseAtt
 import dev.higuchi.homeexpense.springboot.application.usecase.expense.ExpenseAttributeUpdateService;
 import dev.higuchi.homeexpense.springboot.presentation.validation.ExpenseCategory;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import java.net.URI;
 import java.util.Objects;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -63,7 +62,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   @PutMapping("{id}")
   public ResponseEntity<?> put(
-      @PathParam("id") String id, @Valid ExpenseAttributePutRequest request) {
+      @PathVariable("id") String id, @Valid ExpenseAttributePutRequest request) {
     expenseAttributeUpdateService.update(
         new ExpenseAttributeIdentifier(id),
         request.toExpenseAttributeName(),
@@ -72,7 +71,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   }
 
   @DeleteMapping("{id}")
-  public ResponseEntity<?> delete(@PathParam("id") String id) {
+  public ResponseEntity<?> delete(@PathVariable("id") String id) {
     expenseAttributeDeletionService.delete(new ExpenseAttributeIdentifier(id));
     return ResponseEntity.noContent().build();
   }
@@ -101,7 +100,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   }
 
   @GetMapping("{id}")
-  public ResponseEntity<?> get(@PathParam("id") String id) {
+  public ResponseEntity<?> get(@PathVariable("id") String id) {
     ExpenseAttribute expenseAttribute =
         expenseAttributeGettingService.get(new ExpenseAttributeIdentifier(id));
     ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(expenseAttribute);

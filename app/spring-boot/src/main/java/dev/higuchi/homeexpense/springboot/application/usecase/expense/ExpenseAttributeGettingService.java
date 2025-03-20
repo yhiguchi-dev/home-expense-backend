@@ -7,6 +7,7 @@ import dev.higuchi.homeexpense.query.model.expense.attribute.ExpenseAttributeSum
 import dev.higuchi.homeexpense.springboot.application.service.expense.attribute.ExpenseAttributeService;
 import dev.higuchi.homeexpense.springboot.application.service.expense.attribute.ExpenseAttributeSummaryService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ExpenseAttributeGettingService {
@@ -25,6 +26,7 @@ public class ExpenseAttributeGettingService {
     return expenseAttributeSummaryService.find(criteria);
   }
 
+  @Transactional(readOnly = true)
   public ExpenseAttribute get(ExpenseAttributeIdentifier expenseIdentifier) {
     return expenseAttributeService.get(expenseIdentifier);
   }

@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "dev.higuchi.homeexpense"
-version = "1.1.0"
+version = "unspecified"
 
 repositories {
   mavenCentral()
