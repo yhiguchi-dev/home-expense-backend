@@ -3,43 +3,79 @@ package dev.higuchi.jtd.json;
 import dev.higuchi.jtd.json.path.JSONPath;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public interface JSONRepresentation {
+public interface JSONRepresentation extends JSONTraverser {
 
-  boolean isRoot();
+  static JSONRepresentation none() {
+    return new JSONRepresentation() {
+        @Override
+        public boolean exists() {
+            return true;
+        }
+    };
+  }
 
-  boolean isNull();
+  default boolean exists() {
+    return false;
+  }
 
-  boolean isBoolean();
+  default boolean isNull() {
+    return false;
+  }
 
-  boolean isNumber();
+  default boolean isBoolean() {
+    return false;
+  }
 
-  boolean isString();
+  default boolean isNumber() {
+    return false;
+  }
 
-  boolean isArray();
+  default boolean isString() {
+    return false;
+  }
 
-  boolean isObject();
+  default boolean isArray() {
+    return false;
+  }
 
-  boolean asBoolean();
+  default boolean isObject() {
+    return false;
+  }
 
-  double asNumber();
+  default boolean asBoolean() {
+    throw new UnsupportedOperationException();
+  }
 
-  String asString();
+  default double asNumber() {
+    throw new UnsupportedOperationException();
+  }
 
-  List<JSONRepresentation> asArray();
+  default String asString() {
+    throw new UnsupportedOperationException();
+  }
 
-  Map<String, JSONRepresentation> asObject();
+  default List<JSONRepresentation> asArray() {
+    throw new UnsupportedOperationException();
+  }
 
-  String stringify(JSONSerializer serializer);
+  default Map<String, JSONRepresentation> asObject() {
+    throw new UnsupportedOperationException();
+  }
 
-  <TYPE> TYPE convert(JSONParser parser, Class<TYPE> clazz);
+  default String stringify(JSONSerializer serializer) {
+    throw new UnsupportedOperationException();
+  }
 
-  String jsonPath();
+  default <TYPE> TYPE convert(JSONParser parser, Class<TYPE> clazz) {
+    throw new UnsupportedOperationException();
+  }
 
-  default Optional<JSONRepresentation> findBy(String jsonPath) {
-    JSONTraverser traverser = new JSONTraverser(this);
-    JSONPath path = JSONPath.parse(jsonPath);
-    return traverser.traverse(path);
+  default JSONPath jsonPath() {
+    throw new UnsupportedOperationException();
+  }
+
+  default JSONRepresentation findBy(JSONPath path) {
+    return JSONTraverser.traverse(this, path);
   }
 }

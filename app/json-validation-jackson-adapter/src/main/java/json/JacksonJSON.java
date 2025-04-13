@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import dev.higuchi.jtd.json.JSONParser;
 import dev.higuchi.jtd.json.JSONRepresentation;
 import dev.higuchi.jtd.json.JSONSerializer;
+import dev.higuchi.jtd.json.path.IndexSelector;
 import dev.higuchi.jtd.json.path.JSONPath;
+import dev.higuchi.jtd.json.path.NameSelector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +30,6 @@ public class JacksonJSON implements JSONRepresentation {
 
   static JacksonJSON createChild(JsonNode jsonNode, JSONPath jsonPath) {
     return new JacksonJSON(jsonNode, jsonPath);
-  }
-
-  @Override
-  public boolean isRoot() {
-    return jsonPath.isRoot();
   }
 
   @Override
@@ -84,7 +81,7 @@ public class JacksonJSON implements JSONRepresentation {
   public List<JSONRepresentation> asArray() {
     List<JSONRepresentation> list = new ArrayList<>();
     for (int i = 0; i < jsonNode.size(); i++) {
-      JSONPath updatedPath = jsonPath.addArraySelector(i);
+      JSONPath updatedPath = jsonPath.update(new IndexSelector(i));
       list.add(createChild(jsonNode.get(i), updatedPath));
     }
     return list;
@@ -98,7 +95,8 @@ public class JacksonJSON implements JSONRepresentation {
             Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                  JSONPath updatedPath = jsonPath.addSelector(e.getKey());
+                  NameSelector nameSelector = new NameSelector(e.getKey());
+                  JSONPath updatedPath = jsonPath.update(nameSelector);
                   return createChild(e.getValue(), updatedPath);
                 }));
   }
@@ -114,7 +112,7 @@ public class JacksonJSON implements JSONRepresentation {
   }
 
   @Override
-  public String jsonPath() {
-    return jsonPath.stringify();
+  public JSONPath jsonPath() {
+    return jsonPath;
   }
 }

@@ -1,66 +1,48 @@
 package dev.higuchi.jtd.json.path;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class JSONPath {
 
-  Segments segments;
+  Selectors selectors;
 
-  JSONPath(Segments segments) {
-    this.segments = segments;
+  JSONPath(Selectors selectors) {
+    this.selectors = selectors;
   }
 
   JSONPath() {
-    this(new Segments());
+    this(new Selectors());
   }
 
   public static JSONPath createRoot() {
-    return new JSONPath(Segments.root());
+    return new JSONPath(new Selectors());
   }
 
   public static JSONPath parse(String path) {
-    JSONPath root = new JSONPath();
-    String[] splitted = path.split("\\.");
-    return root.addSelector(splitted);
+    if (!path.startsWith("$")) {
+      throw new IllegalArgumentException("JSON path must start with $");
+    }
+    String[] splitted = path.substring(1).split(Pattern.quote("."));
+    List<Selector> selectors = new ArrayList<>();
+    for (String value : splitted) {
+      List<Selector> parsed = SelectorParser.parse(value);
+      selectors.addAll(parsed);
+    }
+    return new JSONPath(new Selectors(selectors));
   }
 
-  public JSONPath addSelector(String... selector) {
-    Segment[] array = Arrays.stream(selector).map(Segment::create).toArray(Segment[]::new);
-    Segments updated = this.segments.addChild(array);
+  public JSONPath update(Selector... selectors) {
+    Selectors updated = this.selectors.merge(selectors);
     return new JSONPath(updated);
-  }
-
-  public JSONPath addArraySelector(int index) {
-    Segment segment = segments.findLast();
-    Segment child = Segment.createArrayWith(segment, index);
-    Segments updated = segments.updateLast(child);
-    return new JSONPath(updated);
-  }
-
-  public JSONPath addArrayWildcardSelector() {
-    Segment segment = segments.findLast();
-    Segment child = Segment.createArrayWithWildcard(segment);
-    Segments updated = segments.updateLast(child);
-    return new JSONPath(updated);
-  }
-
-  public boolean isRoot() {
-    return segments.isRoot();
   }
 
   public int depth() {
-    return segments.depth();
+    return selectors.depth();
   }
 
-  public String selector(int index) {
-    return segments.get(index).value();
-  }
-
-  public String stringify() {
-    return StreamSupport.stream(segments.spliterator(), false)
-        .map(Segment::value)
-        .collect(Collectors.joining("."));
+  public Selector get(int index) {
+    return selectors.get(index);
   }
 }

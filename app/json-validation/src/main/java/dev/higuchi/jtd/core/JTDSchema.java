@@ -1,10 +1,14 @@
 package dev.higuchi.jtd.core;
 
+import dev.higuchi.jtd.core.form.FormCreator;
 import dev.higuchi.jtd.json.JSONRepresentation;
+
+import javax.xml.validation.Schema;
 import java.util.Map;
 import java.util.Set;
 
 public interface JTDSchema {
+
   Map<String, ? extends JTDSchema> definitions();
 
   Boolean nullable();

@@ -1,3 +1,3 @@
 package dev.higuchi.jtd.core.form;
 
-public record Enum() {}
+public record Enum() implements Form {}

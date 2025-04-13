@@ -1,3 +1,5 @@
 package dev.higuchi.jtd.core.form;
 
-public record Elements() {}
+public record Elements() implements Form {
+
+}

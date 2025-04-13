@@ -1,3 +1,5 @@
 package dev.higuchi.jtd.core.form;
 
-public record Discriminator() {}
+import dev.higuchi.jtd.json.JSONRepresentation;
+
+public record Discriminator() implements Form {}

@@ -1,3 +1,3 @@
 package dev.higuchi.jtd.core.form;
 
-public record Values() {}
+public record Values() implements Form {}

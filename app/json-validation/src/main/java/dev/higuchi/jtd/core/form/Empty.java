@@ -1,3 +1,7 @@
 package dev.higuchi.jtd.core.form;
 
-public record Empty() {}
+import dev.higuchi.jtd.json.JSONRepresentation;
+
+public record Empty() implements Form {
+
+}
