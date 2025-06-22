@@ -1,58 +1,59 @@
 package dev.higuchi.jtd.json;
 
 import dev.higuchi.jtd.json.path.*;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface JSONTraverser {
 
-  static JSONRepresentation traverse(JSONRepresentation jsonRepresentation, JSONPath path) {
-    return traverse(path, jsonRepresentation, 0);
+  default List<JSONRepresentation> traverse(JSONRepresentation jsonRepresentation, JSONPath path) {
+    return traverse(path, List.of(jsonRepresentation), 0);
   }
 
-  static JSONRepresentation traverse(JSONPath path, JSONRepresentation jsonRepresentation, int index) {
+  default List<JSONRepresentation> traverse(
+      JSONPath path, List<JSONRepresentation> jsonRepresentations, int index) {
     if (index == path.depth()) {
-      return jsonRepresentation;
+      return jsonRepresentations;
     }
     Selector current = path.get(index);
-    Optional<JSONRepresentation> found = findBy(current, jsonRepresentation);
-    if (found.isEmpty()) {
-      return JSONRepresentation.none();
+    List<JSONRepresentation> list = new ArrayList<>();
+    for (JSONRepresentation json : jsonRepresentations) {
+      List<JSONRepresentation> found = findBy(current, json);
+      list.addAll(found);
     }
-    return traverse(path, found.get(), index + 1);
+    return traverse(path, list, index + 1);
   }
 
-  static Optional<JSONRepresentation> findBy(Selector selector, JSONRepresentation jsonRepresentation) {
+  default List<JSONRepresentation> findBy(
+      Selector selector, JSONRepresentation jsonRepresentation) {
     switch (selector) {
       case IndexSelector indexSelector -> {
         if (!jsonRepresentation.isArray()) {
-          return Optional.empty();
+          return List.of();
         }
         List<JSONRepresentation> array = jsonRepresentation.asArray();
         if (array.size() <= indexSelector.value()) {
-          return Optional.empty();
+          return List.of();
         }
-        return Optional.ofNullable(array.get(indexSelector.value()));
+        return List.of(array.get(indexSelector.value()));
       }
       case NameSelector nameSelector -> {
         if (!jsonRepresentation.isObject()) {
-          return Optional.empty();
+          return List.of();
         }
         Map<String, JSONRepresentation> object = jsonRepresentation.asObject();
-        return Optional.ofNullable(object.get(nameSelector.value()));
+        return List.of(object.getOrDefault(nameSelector.value(), JSONRepresentation.none()));
       }
-        case WildcardSelector wildcardSelector -> {
-//            if (jsonRepresentation.isArray()) {
-//            return Optional.of(jsonRepresentation);
-//            } else if (jsonRepresentation.isObject()) {
-//            return Optional.of(jsonRepresentation);
-//            } else {
-//            return Optional.empty();
-//            }
-          return Optional.empty();
+      case WildcardSelector ignored -> {
+        if (jsonRepresentation.isArray()) {
+          return jsonRepresentation.asArray();
         }
+        if (jsonRepresentation.isObject()) {
+          return jsonRepresentation.asObject().values().stream().toList();
+        }
+        return List.of();
+      }
     }
   }
 }

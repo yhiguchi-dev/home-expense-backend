@@ -7,10 +7,7 @@ import dev.higuchi.jtd.json.JSONSerializer;
 import dev.higuchi.jtd.json.path.IndexSelector;
 import dev.higuchi.jtd.json.path.JSONPath;
 import dev.higuchi.jtd.json.path.NameSelector;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -30,6 +27,11 @@ public class JacksonJSON implements JSONRepresentation {
 
   static JacksonJSON createChild(JsonNode jsonNode, JSONPath jsonPath) {
     return new JacksonJSON(jsonNode, jsonPath);
+  }
+
+  @Override
+  public boolean exists() {
+    return Objects.nonNull(jsonNode);
   }
 
   @Override
@@ -79,7 +81,7 @@ public class JacksonJSON implements JSONRepresentation {
 
   @Override
   public List<JSONRepresentation> asArray() {
-    List<JSONRepresentation> list = new ArrayList<>();
+    List<JSONRepresentation> list = new ArrayList<>(jsonNode.size());
     for (int i = 0; i < jsonNode.size(); i++) {
       JSONPath updatedPath = jsonPath.update(new IndexSelector(i));
       list.add(createChild(jsonNode.get(i), updatedPath));

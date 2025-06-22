@@ -17,7 +17,7 @@ public class JSONPath {
   }
 
   public static JSONPath createRoot() {
-    return new JSONPath(new Selectors());
+    return new JSONPath();
   }
 
   public static JSONPath parse(String path) {

@@ -1,13 +1,12 @@
 package dev.higuchi.jtd.core;
 
+import dev.higuchi.jtd.core.form.Form;
 import dev.higuchi.jtd.core.form.FormCreator;
 import dev.higuchi.jtd.json.JSONRepresentation;
-
-import javax.xml.validation.Schema;
 import java.util.Map;
 import java.util.Set;
 
-public interface JTDSchema {
+public interface JTDSchema extends FormCreator {
 
   Map<String, ? extends JTDSchema> definitions();
 
@@ -60,4 +59,8 @@ public interface JTDSchema {
   boolean hasDiscriminator();
 
   boolean hasMapping();
+
+  default Form create() {
+    return create(this);
+  }
 }

@@ -12,12 +12,12 @@ import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 
 interface MybatisConfigurer {
 
-  default Configuration configuration() {
+  default Configuration configuration(String address, Integer port) {
     TransactionFactory transactionFactory = new JdbcTransactionFactory();
     DataSource pooledDataSource =
         new PooledDataSource(
             "org.postgresql.Driver",
-            "jdbc:postgresql://localhost:5432/expense",
+            "jdbc:postgresql://%s:%d/expense".formatted(address, port),
             "expense",
             "password");
     Environment environment = new Environment("test", transactionFactory, pooledDataSource);

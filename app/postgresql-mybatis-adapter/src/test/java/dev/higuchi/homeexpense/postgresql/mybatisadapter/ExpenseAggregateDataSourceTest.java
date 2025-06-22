@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 public class ExpenseAggregateDataSourceTest implements MybatisConfigurer {
   @Test
   public void test() {
-    Configuration configuration = configuration();
+    Configuration configuration = configuration("localhost", 5432);
     configuration.addMapper(ExpenseAttributeMapper.class);
     try (SqlSession sqlSession = openSession(configuration)) {
       ExpenseAttributeMapper mapper = sqlSession.getMapper(ExpenseAttributeMapper.class);

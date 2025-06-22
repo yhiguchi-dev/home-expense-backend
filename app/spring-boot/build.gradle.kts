@@ -28,6 +28,7 @@ dependencies {
   implementation(libs.mybatis.spring.boot.starter)
   implementation(libs.mybatis)
   implementation(libs.aws.advanced.jdbc.wrapper)
+  implementation("org.crac:crac")
   runtimeOnly(libs.postgresql)
   implementation(project(":core"))
   implementation(project(":network"))

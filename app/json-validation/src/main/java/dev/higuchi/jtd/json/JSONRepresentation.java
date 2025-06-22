@@ -8,10 +8,10 @@ public interface JSONRepresentation extends JSONTraverser {
 
   static JSONRepresentation none() {
     return new JSONRepresentation() {
-        @Override
-        public boolean exists() {
-            return true;
-        }
+      @Override
+      public boolean exists() {
+        return true;
+      }
     };
   }
 
@@ -75,7 +75,15 @@ public interface JSONRepresentation extends JSONTraverser {
     throw new UnsupportedOperationException();
   }
 
-  default JSONRepresentation findBy(JSONPath path) {
-    return JSONTraverser.traverse(this, path);
+  default List<JSONRepresentation> findBy(JSONPath path) {
+    return traverse(this, path);
+  }
+
+  default JSONRepresentation findFirstBy(JSONPath path) {
+    List<JSONRepresentation> found = findBy(path);
+    if (found.isEmpty()) {
+      return none();
+    }
+    return found.getFirst();
   }
 }

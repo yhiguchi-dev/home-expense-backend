@@ -15,17 +15,7 @@ services:
     volumes:
       - database_volume:/var/lib/postgresql/data
   flyway:
-    build: flyway
-    environment:
-      - FLYWAY_URL=jdbc:postgresql://database/expense
-      - FLYWAY_USER=expense
-      - FLYWAY_PASSWORD=password
-      - FLYWAY_CONNECT_RETRIES=60
-      - FLYWAY_CLEAN_DISABLED=false
-      - FLYWAY_BASELINE_VERSION=0.0.0
-      - FLYWAY_SCHEMAS=expense
-      - FLYWAY_DEFAULT_SCHEMA=public
-    command: clean migrate
+    build: db-migration
     depends_on:
       database:
         condition: service_healthy
