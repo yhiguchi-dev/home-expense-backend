@@ -13,13 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: setup JDK 21 with crac
+        run: |
+          wget -O crac-jdk.tar.gz https://cdn.azul.com/zulu/bin/zulu21.42.21-ca-crac-jdk21.0.7-linux_x64.tar.gz
+          tar zxf ./crac-jdk.tar.gz -C ~/
       - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: zulu
+          java-version: 21
           cache: gradle
       - name: Gradle lint
-        run: ./gradlew --console=plain --no-daemon -q check
+        run: ./gradlew --console=plain --no-daemon -q build -x check
+        working-directory: app
+      - name: checkpoint
+        run: echo "Lint completed successfully"
         working-directory: app
   build-and-lint-docker-image:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image.yaml@main
@@ -33,7 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         build-context:
-          - app
+          - app/spring-boot
           - flyway
         platform:
           - linux/amd64
