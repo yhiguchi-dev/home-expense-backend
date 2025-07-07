@@ -18,7 +18,7 @@ jobs:
         with:
           candidate: java
           version: 21.0.7.crac-zulu
-      - run:|
+      - run: |
           source "/home/runner/.sdkman/bin/sdkman-init.sh"
           ls -la $JAVA_HOME/lib/criu
           java -version
