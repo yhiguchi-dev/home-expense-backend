@@ -13,15 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: setup JDK 21 with crac
-        run: |
-          wget -O crac-jdk.tar.gz https://cdn.azul.com/zulu/bin/zulu21.42.21-ca-crac-jdk21.0.7-linux_x64.tar.gz
-          tar zxf ./crac-jdk.tar.gz -C ~/
-      - uses: actions/setup-java@v4
+      - uses: sdkman/sdkman-action@v1
+        id: sdkman
         with:
-          distribution: zulu
-          java-version: 21
-          cache: gradle
+          candidate: java
+          version: 21.0.7.crac.zulu
+      - run: java -version
       - name: Gradle lint
         run: ./gradlew --console=plain --no-daemon -q build -x check
         working-directory: app
