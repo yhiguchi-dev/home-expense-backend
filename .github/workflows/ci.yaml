@@ -17,7 +17,7 @@ jobs:
         id: sdkman
         with:
           candidate: java
-          version: 21.0.7.crac.zulu
+          version: 21.0.7.crac-zulu
       - run: java -version
       - name: Gradle lint
         run: ./gradlew --console=plain --no-daemon -q build -x check
