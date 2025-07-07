@@ -33,7 +33,7 @@ dependencies {
   implementation(project(":core"))
   implementation(project(":network"))
   implementation(project(":postgresql-mybatis-adapter"))
-  implementation(project(":retry"))
+//  implementation(project(":retry"))
 //  implementation(project(":json-validation"))
   testImplementation(libs.spring.boot.starter.test)
   testImplementation(libs.mybatis.spring.boot.starter.test)
