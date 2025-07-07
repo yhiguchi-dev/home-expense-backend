@@ -34,7 +34,7 @@ dependencies {
   implementation(project(":network"))
   implementation(project(":postgresql-mybatis-adapter"))
   implementation(project(":retry"))
-  implementation(project(":json-validation"))
+//  implementation(project(":json-validation"))
   testImplementation(libs.spring.boot.starter.test)
   testImplementation(libs.mybatis.spring.boot.starter.test)
   testRuntimeOnly(libs.junit.platform.launcher)
