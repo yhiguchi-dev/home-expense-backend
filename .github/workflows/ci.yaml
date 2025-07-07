@@ -26,7 +26,9 @@ jobs:
         run: ./gradlew --console=plain --no-daemon -q build -x check
         working-directory: app
       - name: checkpoint
-        run: echo "Lint completed successfully"
+        run: |
+          ls -ltar
+          java -Dspring.context.checkpoint=onRefresh -XX:CRaCCheckpointTo=./my_checkpoint -jar spring-boot/build/libs/spring-boot-0.0.1-SNAPSHOT.jar
         working-directory: app
   build-and-lint-docker-image:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image.yaml@main
