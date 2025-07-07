@@ -20,7 +20,7 @@ jobs:
           version: 21.0.7.crac-zulu
       - run: java -version
       - name: Gradle lint
-        run: ./gradlew --console=plain --no-daemon -q build -x check
+        run: ./gradlew --console=plain --no-daemon --enable-preview -q build -x check
         working-directory: app
       - name: checkpoint
         run: |
