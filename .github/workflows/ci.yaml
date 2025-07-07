@@ -22,16 +22,13 @@ jobs:
           source "/home/runner/.sdkman/bin/sdkman-init.sh"
           ls -la $JAVA_HOME/lib/criu
           java -version
-      - name: Gradle lint
-        run: ./gradlew --console=plain --no-daemon -q spring-boot:build -x check
-        working-directory: app
-      - name: checkpoint
-        run: |
+          ./gradlew --console=plain --no-daemon -q spring-boot:build -x check
           ls -la $JAVA_HOME/lib/criu
           sudo chown root:root $JAVA_HOME/lib/criu
           sudo chmod u+s $JAVA_HOME/lib/criu
           ls -ltar
           java -Dspring.context.checkpoint=onRefresh -XX:CRaCCheckpointTo=./my_checkpoint -jar spring-boot/build/libs/spring-boot-0.0.1-SNAPSHOT.jar
+          ls -ltar ./my_checkpoint
         working-directory: app
   build-and-lint-docker-image:
     uses: yhiguchi-dev/reusable-workflow/.github/workflows/docker-image.yaml@main
