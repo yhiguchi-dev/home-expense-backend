@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: sdkman/sdkman-action@v1
+      - uses: sdkman/sdkman-action@main
         id: sdkman
         with:
           candidate: java
