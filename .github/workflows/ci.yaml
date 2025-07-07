@@ -18,7 +18,10 @@ jobs:
         with:
           candidate: java
           version: 21.0.7.crac-zulu
-      - run: java -version
+      - run:|
+          source "/home/runner/.sdkman/bin/sdkman-init.sh"
+          ls -la $JAVA_HOME/lib/criu
+          java -version
       - name: Gradle lint
         run: ./gradlew --console=plain --no-daemon -q spring-boot:build -x check
         working-directory: app
