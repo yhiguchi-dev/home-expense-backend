@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         build-context:
-          - app/spring-boot
+          - app
           - flyway
         platform:
           - linux/amd64
