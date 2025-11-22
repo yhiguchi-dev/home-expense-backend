@@ -1,4 +1,4 @@
-package dev.higuchi.jtd.json;
+package dev.higuchi.homeexpense.json;
 
 public interface JSONSerializer {
 

@@ -1,4 +1,4 @@
-package dev.higuchi.jtd.json.path;
+package dev.higuchi.homeexpense.json.path;
 
 import java.util.regex.Pattern;
 

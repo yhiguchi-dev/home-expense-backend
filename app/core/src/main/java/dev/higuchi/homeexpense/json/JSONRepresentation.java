@@ -1,6 +1,6 @@
-package dev.higuchi.jtd.json;
+package dev.higuchi.homeexpense.json;
 
-import dev.higuchi.jtd.json.path.JSONPath;
+import dev.higuchi.homeexpense.json.path.JSONPath;
 import java.util.List;
 import java.util.Map;
 

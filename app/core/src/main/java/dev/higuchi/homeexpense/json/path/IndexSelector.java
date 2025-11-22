@@ -1,3 +1,3 @@
-package dev.higuchi.jtd.json.path;
+package dev.higuchi.homeexpense.json.path;
 
 public record IndexSelector(int value) implements Selector {}
