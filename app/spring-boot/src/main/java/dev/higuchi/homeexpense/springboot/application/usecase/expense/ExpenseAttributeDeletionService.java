@@ -1,9 +1,9 @@
 package dev.higuchi.homeexpense.springboot.application.usecase.expense;
 
+import dev.higuchi.homeexpense.command.expense.ExpenseAttributeDeleter;
 import dev.higuchi.homeexpense.command.model.expense.Expenses;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttribute;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.higuchi.homeexpense.command.service.expense.ExpenseAttributeDeleter;
 import dev.higuchi.homeexpense.springboot.application.service.expense.ExpenseService;
 import dev.higuchi.homeexpense.springboot.application.service.expense.attribute.ExpenseAttributeService;
 import java.util.function.Consumer;

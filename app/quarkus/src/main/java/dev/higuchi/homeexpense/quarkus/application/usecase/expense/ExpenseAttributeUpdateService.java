@@ -1,10 +1,10 @@
 package dev.higuchi.homeexpense.quarkus.application.usecase.expense;
 
+import dev.higuchi.homeexpense.command.expense.ExpenseAttributeUpdater;
 import dev.higuchi.homeexpense.command.model.expense.ExpenseCategory;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttribute;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeName;
-import dev.higuchi.homeexpense.command.service.expense.ExpenseAttributeUpdater;
 import dev.higuchi.homeexpense.quarkus.application.service.expense.attribute.ExpenseAttributeService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;

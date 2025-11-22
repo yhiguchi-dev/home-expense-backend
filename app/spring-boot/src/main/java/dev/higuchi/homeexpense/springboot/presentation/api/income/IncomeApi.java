@@ -2,7 +2,7 @@ package dev.higuchi.homeexpense.springboot.presentation.api.income;
 
 import dev.higuchi.homeexpense.command.model.income.Income;
 import dev.higuchi.homeexpense.command.model.income.IncomeIdentifier;
-import dev.higuchi.homeexpense.network.http.LinkHeaderCreatable;
+import dev.higuchi.homeexpense.network.LinkHeaderCreatable;
 import dev.higuchi.homeexpense.query.model.income.IncomeSummary;
 import dev.higuchi.homeexpense.query.model.income.IncomeSummaryCriteria;
 import dev.higuchi.homeexpense.query.model.pagination.Page;

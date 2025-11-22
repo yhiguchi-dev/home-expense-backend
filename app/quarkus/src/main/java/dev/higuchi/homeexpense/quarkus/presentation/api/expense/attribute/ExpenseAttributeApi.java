@@ -4,7 +4,7 @@ import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttribute;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeConstraintException;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.higuchi.homeexpense.network.http.LinkHeaderCreatable;
+import dev.higuchi.homeexpense.network.LinkHeaderCreatable;
 import dev.higuchi.homeexpense.quarkus.application.usecase.expense.ExpenseAttributeDeletionService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.expense.ExpenseAttributeGettingService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.expense.ExpenseAttributeRegistrationService;

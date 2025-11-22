@@ -1,4 +1,4 @@
-package dev.higuchi.homeexpense.command.service.expense;
+package dev.higuchi.homeexpense.command.expense;
 
 import dev.higuchi.homeexpense.command.model.expense.Expenses;
 import dev.higuchi.homeexpense.command.model.expense.attribute.ExpenseAttribute;

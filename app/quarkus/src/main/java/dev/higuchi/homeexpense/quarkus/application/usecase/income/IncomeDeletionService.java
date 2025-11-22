@@ -1,8 +1,8 @@
 package dev.higuchi.homeexpense.quarkus.application.usecase.income;
 
+import dev.higuchi.homeexpense.command.income.IncomeDeleter;
 import dev.higuchi.homeexpense.command.model.income.Income;
 import dev.higuchi.homeexpense.command.model.income.IncomeIdentifier;
-import dev.higuchi.homeexpense.command.service.income.IncomeDeleter;
 import dev.higuchi.homeexpense.quarkus.application.service.income.IncomeService;
 import dev.higuchi.homeexpense.quarkus.application.service.income.attribute.IncomeAttributeService;
 import jakarta.enterprise.context.ApplicationScoped;

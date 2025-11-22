@@ -2,7 +2,7 @@ package dev.higuchi.homeexpense.springboot.presentation.api.expense;
 
 import dev.higuchi.homeexpense.command.model.expense.Expense;
 import dev.higuchi.homeexpense.command.model.expense.ExpenseIdentifier;
-import dev.higuchi.homeexpense.network.http.LinkHeaderCreatable;
+import dev.higuchi.homeexpense.network.LinkHeaderCreatable;
 import dev.higuchi.homeexpense.query.model.expense.ExpenseCriteriaCreator;
 import dev.higuchi.homeexpense.query.model.expense.ExpenseSummary;
 import dev.higuchi.homeexpense.query.model.expense.ExpenseSummaryCriteria;

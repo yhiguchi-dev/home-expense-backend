@@ -1,4 +1,4 @@
-package dev.higuchi.homeexpense.network.http;
+package dev.higuchi.homeexpense.network;
 
 import dev.higuchi.homeexpense.query.model.pagination.Pagination;
 import java.net.URI;

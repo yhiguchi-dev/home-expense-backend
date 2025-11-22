@@ -1,9 +1,9 @@
 package dev.higuchi.homeexpense.springboot.application.usecase.income;
 
+import dev.higuchi.homeexpense.command.income.IncomeAttributeUpdater;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttribute;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeIdentifier;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeName;
-import dev.higuchi.homeexpense.command.service.income.IncomeAttributeUpdater;
 import dev.higuchi.homeexpense.springboot.application.service.income.attribute.IncomeAttributeService;
 import java.util.function.Consumer;
 import java.util.function.Function;

@@ -2,7 +2,7 @@ package dev.higuchi.homeexpense.quarkus.presentation.api.expense;
 
 import dev.higuchi.homeexpense.command.model.expense.Expense;
 import dev.higuchi.homeexpense.command.model.expense.ExpenseIdentifier;
-import dev.higuchi.homeexpense.network.http.LinkHeaderCreatable;
+import dev.higuchi.homeexpense.network.LinkHeaderCreatable;
 import dev.higuchi.homeexpense.quarkus.application.usecase.expense.ExpenseDeletionService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.expense.ExpenseGettingService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.expense.ExpenseRegistrationService;

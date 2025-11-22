@@ -2,7 +2,7 @@ package dev.higuchi.homeexpense.quarkus.presentation.api.income;
 
 import dev.higuchi.homeexpense.command.model.income.Income;
 import dev.higuchi.homeexpense.command.model.income.IncomeIdentifier;
-import dev.higuchi.homeexpense.network.http.LinkHeaderCreatable;
+import dev.higuchi.homeexpense.network.LinkHeaderCreatable;
 import dev.higuchi.homeexpense.quarkus.application.usecase.income.IncomeDeletionService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.income.IncomeGettingService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.income.IncomeRegistrationService;

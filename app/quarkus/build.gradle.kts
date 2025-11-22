@@ -19,7 +19,6 @@ dependencies {
   implementation(libs.quarkus.mybatis)
   implementation(libs.mybatis)
   implementation(project(":core"))
-  implementation(project(":network"))
   implementation(project(":postgresql-mybatis-adapter"))
   implementation(libs.quarkus.logging.json)
   testImplementation(libs.quarkus.junit5)

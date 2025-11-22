@@ -4,7 +4,7 @@ import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttribute;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeAlreadyExistsException;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeConstraintException;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeIdentifier;
-import dev.higuchi.homeexpense.network.http.LinkHeaderCreatable;
+import dev.higuchi.homeexpense.network.LinkHeaderCreatable;
 import dev.higuchi.homeexpense.quarkus.application.usecase.income.IncomeAttributeDeletionService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.income.IncomeAttributeGettingService;
 import dev.higuchi.homeexpense.quarkus.application.usecase.income.IncomeAttributeRegistrationService;

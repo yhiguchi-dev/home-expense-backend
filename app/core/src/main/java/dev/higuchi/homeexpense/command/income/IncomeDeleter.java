@@ -1,4 +1,4 @@
-package dev.higuchi.homeexpense.command.service.income;
+package dev.higuchi.homeexpense.command.income;
 
 import dev.higuchi.homeexpense.command.model.income.Income;
 import dev.higuchi.homeexpense.command.model.income.IncomeIdentifier;

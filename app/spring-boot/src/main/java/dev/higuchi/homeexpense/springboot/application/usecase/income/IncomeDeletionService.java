@@ -1,8 +1,8 @@
 package dev.higuchi.homeexpense.springboot.application.usecase.income;
 
+import dev.higuchi.homeexpense.command.income.IncomeDeleter;
 import dev.higuchi.homeexpense.command.model.income.Income;
 import dev.higuchi.homeexpense.command.model.income.IncomeIdentifier;
-import dev.higuchi.homeexpense.command.service.income.IncomeDeleter;
 import dev.higuchi.homeexpense.springboot.application.service.income.IncomeService;
 import dev.higuchi.homeexpense.springboot.application.service.income.attribute.IncomeAttributeService;
 import java.util.function.Consumer;

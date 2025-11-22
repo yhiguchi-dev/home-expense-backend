@@ -1,9 +1,9 @@
 package dev.higuchi.homeexpense.quarkus.application.usecase.income;
 
+import dev.higuchi.homeexpense.command.income.IncomeCreator;
 import dev.higuchi.homeexpense.command.model.income.*;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttribute;
 import dev.higuchi.homeexpense.command.model.income.attribute.IncomeAttributeIdentifier;
-import dev.higuchi.homeexpense.command.service.income.IncomeCreator;
 import dev.higuchi.homeexpense.quarkus.application.service.income.IncomeService;
 import dev.higuchi.homeexpense.quarkus.application.service.income.attribute.IncomeAttributeService;
 import jakarta.enterprise.context.ApplicationScoped;
