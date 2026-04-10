@@ -1,11 +1,7 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeUpdater;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.function.Consumer;
@@ -15,10 +11,10 @@ import java.util.function.Function;
 @Transactional
 public class ExpenseAttributeUpdateService {
 
-  ExpenseAttributeService expenseAttributeService;
+  ExpenseAttributeRepository expenseAttributeRepository;
 
-  public ExpenseAttributeUpdateService(ExpenseAttributeService expenseAttributeService) {
-    this.expenseAttributeService = expenseAttributeService;
+  public ExpenseAttributeUpdateService(ExpenseAttributeRepository expenseAttributeRepository) {
+    this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
   public void update(
@@ -26,8 +22,8 @@ public class ExpenseAttributeUpdateService {
       ExpenseAttributeName expenseAttributeName,
       ExpenseCategory expenseCategory) {
     Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn =
-        identifier -> expenseAttributeService.get(identifier);
-    Consumer<ExpenseAttribute> updateFn = attribute -> expenseAttributeService.update(attribute);
+        identifier -> expenseAttributeRepository.get(identifier);
+    Consumer<ExpenseAttribute> updateFn = attribute -> expenseAttributeRepository.update(attribute);
     ExpenseAttributeUpdater updater = new ExpenseAttributeUpdater(getFn, updateFn);
     updater.update(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
   }

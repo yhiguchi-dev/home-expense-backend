@@ -10,8 +10,6 @@ public class IncomeAttributeName {
     this.value = value;
   }
 
-  IncomeAttributeName() {}
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

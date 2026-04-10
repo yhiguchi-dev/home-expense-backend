@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import java.util.Objects;
 
 /** 収入 */
 public class Income {
@@ -24,8 +25,6 @@ public class Income {
     this.incomeAttribute = incomeAttribute;
   }
 
-  Income() {}
-
   public IncomeIdentifier incomeIdentifier() {
     return incomeIdentifier;
   }
@@ -44,5 +43,22 @@ public class Income {
 
   public IncomeAttribute incomeAttribute() {
     return incomeAttribute;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Income income = (Income) o;
+    return Objects.equals(incomeIdentifier, income.incomeIdentifier)
+        && Objects.equals(description, income.description)
+        && Objects.equals(amount, income.amount)
+        && Objects.equals(receiveDate, income.receiveDate)
+        && Objects.equals(incomeAttribute, income.incomeAttribute);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(incomeIdentifier, description, amount, receiveDate, incomeAttribute);
   }
 }

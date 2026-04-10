@@ -13,6 +13,7 @@ import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.*;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -47,6 +48,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   }
 
   @POST
+  @RunOnVirtualThread
   public Response post(@Valid ExpenseAttributePostRequest request, @Context UriInfo uriInfo) {
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
         expenseAttributeRegistrationService.createAndRegister(
@@ -57,6 +59,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   @PUT
   @Path("{id}")
+  @RunOnVirtualThread
   public Response put(@PathParam("id") String id, @Valid ExpenseAttributePutRequest request) {
     expenseAttributeUpdateService.update(
         new ExpenseAttributeIdentifier(id),
@@ -67,12 +70,14 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   @DELETE
   @Path("{id}")
+  @RunOnVirtualThread
   public Response delete(@PathParam("id") String id) {
     expenseAttributeDeletionService.delete(new ExpenseAttributeIdentifier(id));
     return Response.noContent().build();
   }
 
   @GET
+  @RunOnVirtualThread
   public Response get(
       @QueryParam("category") @ExpenseCategory String category,
       @QueryParam("page") @DefaultValue("1") Integer page,
@@ -99,6 +104,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   @GET
   @Path("{id}")
+  @RunOnVirtualThread
   public Response get(@PathParam("id") String id) {
     ExpenseAttribute expenseAttribute =
         expenseAttributeGettingService.get(new ExpenseAttributeIdentifier(id));

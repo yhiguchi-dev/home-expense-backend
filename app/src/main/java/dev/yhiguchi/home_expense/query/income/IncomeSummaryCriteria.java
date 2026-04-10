@@ -1,6 +1,8 @@
 package dev.yhiguchi.home_expense.query.income;
 
 import dev.yhiguchi.home_expense.query.Pagination;
+import java.time.LocalDate;
+import java.time.Year;
 
 public class IncomeSummaryCriteria {
   Pagination pagination;
@@ -23,15 +25,15 @@ public class IncomeSummaryCriteria {
     return pagination;
   }
 
-  int getPerPage() {
-    return perPage();
+  public boolean hasDateRange() {
+    return year != null;
   }
 
-  int getOffset() {
-    return offset();
+  public LocalDate dateFrom() {
+    return Year.of(year).atDay(1);
   }
 
-  int getYear() {
-    return year;
+  public LocalDate dateTo() {
+    return Year.of(year).plusYears(1).atDay(1);
   }
 }

@@ -24,15 +24,7 @@ public class ExpenseAttributeSummaryCriteria {
     return pagination.perPage();
   }
 
-  public int page() {
-    return pagination.currentPage();
-  }
-
-  int getPerPage() {
-    return perPage();
-  }
-
-  int getOffset() {
-    return offset();
+  public ExpenseCategory getExpenseCategory() {
+    return expenseCategory;
   }
 }

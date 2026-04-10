@@ -12,6 +12,11 @@ public class ExpenseAggregateDetail {
     this.list = list;
   }
 
+  public ExpenseAggregateDetail(List<ExpenseAttributeAggregate> list) {
+    this.totalAmount = list.stream().mapToInt(ExpenseAttributeAggregate::totalAmount).sum();
+    this.list = list;
+  }
+
   ExpenseAggregateDetail() {
     this(0, new ArrayList<>());
   }

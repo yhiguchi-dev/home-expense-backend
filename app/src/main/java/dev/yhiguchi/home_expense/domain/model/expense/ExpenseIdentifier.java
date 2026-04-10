@@ -10,8 +10,6 @@ public class ExpenseIdentifier {
     this.value = value;
   }
 
-  ExpenseIdentifier() {}
-
   public String value() {
     return value;
   }

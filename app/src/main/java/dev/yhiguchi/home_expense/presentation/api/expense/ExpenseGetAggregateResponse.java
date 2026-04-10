@@ -2,9 +2,7 @@ package dev.yhiguchi.home_expense.presentation.api.expense;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.query.expense.ExpenseAggregate;
-import io.quarkus.runtime.annotations.RegisterForReflection;
 
-@RegisterForReflection
 class ExpenseGetAggregateResponse {
 
   @JsonProperty("income_total_amount")

@@ -1,10 +1,10 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -12,18 +12,19 @@ import java.util.function.Function;
 @Transactional
 public class ExpenseAttributeRegistrationService {
 
-  ExpenseAttributeService expenseAttributeService;
+  ExpenseAttributeRepository expenseAttributeRepository;
 
-  public ExpenseAttributeRegistrationService(ExpenseAttributeService expenseAttributeService) {
-    this.expenseAttributeService = expenseAttributeService;
+  public ExpenseAttributeRegistrationService(
+      ExpenseAttributeRepository expenseAttributeRepository) {
+    this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
   public ExpenseAttributeIdentifier createAndRegister(
       ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
-    Function<ExpenseAttributeName, ExpenseAttribute> findFn =
-        name -> expenseAttributeService.find(name);
+    Function<ExpenseAttributeName, Optional<ExpenseAttribute>> findFn =
+        name -> expenseAttributeRepository.find(name);
     Consumer<ExpenseAttribute> registerFn =
-        attribute -> expenseAttributeService.register(attribute);
+        attribute -> expenseAttributeRepository.register(attribute);
     ExpenseAttributeCreator creator = new ExpenseAttributeCreator(findFn, registerFn);
     ExpenseAttribute expenseAttribute =
         creator.createAndRegister(expenseAttributeName, expenseCategory);

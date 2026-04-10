@@ -1,6 +1,6 @@
-FROM alpine:3.19.1 as lib
+FROM alpine:3.23 as lib
 
-FROM ghcr.io/graalvm/native-image:ol9-java17-22.3.3 AS gradle-cache
+FROM ghcr.io/graalvm/native-image-community:25.0.2-ol9-20260120 AS gradle-cache
 
 WORKDIR /work
 
@@ -15,7 +15,7 @@ COPY src/ ./src/
 
 RUN ./gradlew --console=plain --no-daemon -q clean build -Dquarkus.package.type=native -x check
 
-FROM gcr.io/distroless/base-nossl-debian12:nonroot
+FROM gcr.io/distroless/base-nossl-debian13:nonroot
 
 WORKDIR /app
 

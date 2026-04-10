@@ -11,6 +11,7 @@ import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteriaCreator;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSummaryCriteria;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -41,6 +42,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
   }
 
   @POST
+  @RunOnVirtualThread
   public Response post(@Valid ExpensePostRequest request, @Context UriInfo uriInfo) {
     ExpenseIdentifier expenseIdentifier =
         expenseRegistrationService.createAndRegister(
@@ -54,6 +56,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
 
   @PUT
   @Path("{id}")
+  @RunOnVirtualThread
   public Response put(@PathParam("id") String id, @Valid ExpensePutRequest request) {
     expenseUpdateService.update(
         new ExpenseIdentifier(id),
@@ -66,12 +69,14 @@ public class ExpenseApi implements LinkHeaderCreatable {
 
   @DELETE
   @Path("{id}")
+  @RunOnVirtualThread
   public Response delete(@PathParam("id") String id) {
     expenseDeletionService.delete(new ExpenseIdentifier(id));
     return Response.noContent().build();
   }
 
   @GET
+  @RunOnVirtualThread
   public Response get(
       @QueryParam("page") @DefaultValue("1") Integer page,
       @QueryParam("per_page") @DefaultValue("20") Integer perPage,
@@ -95,6 +100,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
 
   @GET
   @Path("{id}")
+  @RunOnVirtualThread
   public Response get(@PathParam("id") String id) {
     Expense expense = expenseGettingService.get(new ExpenseIdentifier(id));
     ExpenseGetResponse response = ExpenseGetResponse.from(expense);

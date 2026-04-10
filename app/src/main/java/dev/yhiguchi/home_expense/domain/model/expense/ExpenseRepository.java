@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.domain.model.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import java.util.Optional;
 
 /** 経費リポジトリ */
 public interface ExpenseRepository {
@@ -9,7 +10,7 @@ public interface ExpenseRepository {
 
   Expense get(ExpenseIdentifier expenseIdentifier);
 
-  Expense find(ExpenseIdentifier expenseIdentifier);
+  Optional<Expense> find(ExpenseIdentifier expenseIdentifier);
 
   Expenses find(ExpenseAttribute expenseAttribute);
 

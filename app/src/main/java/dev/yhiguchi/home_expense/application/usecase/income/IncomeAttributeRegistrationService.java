@@ -1,12 +1,9 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
-import dev.yhiguchi.home_expense.application.service.income.attribute.IncomeAttributeService;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeCreator;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -14,16 +11,17 @@ import java.util.function.Function;
 @Transactional
 public class IncomeAttributeRegistrationService {
 
-  IncomeAttributeService incomeAttributeService;
+  IncomeAttributeRepository incomeAttributeRepository;
 
-  public IncomeAttributeRegistrationService(IncomeAttributeService incomeAttributeService) {
-    this.incomeAttributeService = incomeAttributeService;
+  public IncomeAttributeRegistrationService(IncomeAttributeRepository incomeAttributeRepository) {
+    this.incomeAttributeRepository = incomeAttributeRepository;
   }
 
   public IncomeAttributeIdentifier createAndRegister(IncomeAttributeName incomeAttributeName) {
-    Function<IncomeAttributeName, IncomeAttribute> findFn =
-        name -> incomeAttributeService.find(name);
-    Consumer<IncomeAttribute> registerFn = attribute -> incomeAttributeService.register(attribute);
+    Function<IncomeAttributeName, Optional<IncomeAttribute>> findFn =
+        name -> incomeAttributeRepository.find(name);
+    Consumer<IncomeAttribute> registerFn =
+        attribute -> incomeAttributeRepository.register(attribute);
     IncomeAttributeCreator creator = new IncomeAttributeCreator(findFn, registerFn);
     IncomeAttribute incomeAttribute = creator.createAndRegister(incomeAttributeName);
     return incomeAttribute.incomeAttributeIdentifier();

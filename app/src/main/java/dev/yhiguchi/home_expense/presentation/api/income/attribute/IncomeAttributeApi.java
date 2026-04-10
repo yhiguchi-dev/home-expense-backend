@@ -14,6 +14,7 @@ import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummary;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummaryCriteria;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -47,6 +48,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   }
 
   @POST
+  @RunOnVirtualThread
   public Response post(@Valid IncomeAttributePostRequest request, @Context UriInfo uriInfo) {
     IncomeAttributeIdentifier incomeAttributeIdentifier =
         incomeAttributeRegistrationService.createAndRegister(request.toIncomeAttributeName());
@@ -56,6 +58,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
 
   @PUT
   @Path("{id}")
+  @RunOnVirtualThread
   public Response put(@PathParam("id") String id, @Valid IncomeAttributePutRequest request) {
     incomeAttributeUpdateService.update(
         new IncomeAttributeIdentifier(id), request.toIncomeAttributeName());
@@ -64,12 +67,14 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
 
   @DELETE
   @Path("{id}")
+  @RunOnVirtualThread
   public Response delete(@PathParam("id") String id) {
     incomeAttributeDeletionService.delete(new IncomeAttributeIdentifier(id));
     return Response.noContent().build();
   }
 
   @GET
+  @RunOnVirtualThread
   public Response get(
       @QueryParam("page") @DefaultValue("1") Integer page,
       @QueryParam("per_page") @DefaultValue("20") Integer perPage,
@@ -90,6 +95,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
 
   @GET
   @Path("{id}")
+  @RunOnVirtualThread
   public Response get(@PathParam("id") String id) {
     IncomeAttribute incomeAttribute =
         incomeAttributeGettingService.get(new IncomeAttributeIdentifier(id));

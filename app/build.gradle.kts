@@ -11,14 +11,13 @@ repositories {
 
 dependencies {
   implementation(enforcedPlatform(libs.quarkus.bom))
-  implementation(libs.quarkus.resteasy.reactive.jackson)
+  implementation(libs.quarkus.rest.jackson)
   implementation(libs.quarkus.hibernate.validator)
   implementation(libs.quarkus.jdbc.postgresql)
   implementation(libs.quarkus.arc)
-  implementation(libs.quarkus.resteasy.reactive)
-  implementation(libs.quarkus.mybatis)
   implementation(libs.quarkus.logging.json)
   testImplementation(libs.quarkus.junit5)
+  testImplementation(libs.rest.assured)
 }
 
 group = "dev.yhiguchi.home_expense"
@@ -30,8 +29,8 @@ System.getenv("DEPLOY_ENV")?.let { deployEnv ->
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_25
+  targetCompatibility = JavaVersion.VERSION_25
 }
 
 sourceSets {
@@ -43,6 +42,14 @@ sourceSets {
   }
 }
 
+val integrationTest by sourceSets.getting {
+  compileClasspath += sourceSets.test.get().output
+  runtimeClasspath += sourceSets.test.get().output
+}
+
+configurations["integrationTestImplementation"].extendsFrom(configurations.testImplementation.get())
+configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
+
 tasks.withType<Test> {
   systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
 }
@@ -51,7 +58,7 @@ tasks.withType<JavaCompile> {
   options.compilerArgs.add("-parameters")
 }
 
-task("printVersion") {
+tasks.register("printVersion") {
   doFirst {
     println(version)
   }

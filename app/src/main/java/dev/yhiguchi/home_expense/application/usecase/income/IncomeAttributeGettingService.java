@@ -1,11 +1,11 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
-import dev.yhiguchi.home_expense.application.service.income.attribute.IncomeAttributeService;
-import dev.yhiguchi.home_expense.application.service.income.attribute.IncomeAttributeSummaryService;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummary;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummaryCriteria;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummaryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -13,21 +13,21 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class IncomeAttributeGettingService {
 
-  IncomeAttributeService incomeAttributeService;
-  IncomeAttributeSummaryService incomeAttributeSummaryService;
+  IncomeAttributeRepository incomeAttributeRepository;
+  IncomeAttributeSummaryRepository incomeAttributeSummaryRepository;
 
   public IncomeAttributeGettingService(
-      IncomeAttributeService incomeAttributeService,
-      IncomeAttributeSummaryService incomeAttributeSummaryService) {
-    this.incomeAttributeService = incomeAttributeService;
-    this.incomeAttributeSummaryService = incomeAttributeSummaryService;
+      IncomeAttributeRepository incomeAttributeRepository,
+      IncomeAttributeSummaryRepository incomeAttributeSummaryRepository) {
+    this.incomeAttributeRepository = incomeAttributeRepository;
+    this.incomeAttributeSummaryRepository = incomeAttributeSummaryRepository;
   }
 
   public IncomeAttributeSummary findSummary(IncomeAttributeSummaryCriteria criteria) {
-    return incomeAttributeSummaryService.find(criteria);
+    return incomeAttributeSummaryRepository.find(criteria);
   }
 
   public IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    return incomeAttributeService.get(incomeAttributeIdentifier);
+    return incomeAttributeRepository.get(incomeAttributeIdentifier);
   }
 }

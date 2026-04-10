@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.query.expense;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 
 public class ExpenseAggregateCriteria {
@@ -13,19 +14,11 @@ public class ExpenseAggregateCriteria {
     this.month = month;
   }
 
-  String yearMonth() {
-    return YearMonth.of(year, month).toString();
+  public LocalDate dateFrom() {
+    return YearMonth.of(year, month).atDay(1);
   }
 
-  String getYearMonth() {
-    return yearMonth();
-  }
-
-  public int getYear() {
-    return year;
-  }
-
-  public int getMonth() {
-    return month;
+  public LocalDate dateTo() {
+    return YearMonth.of(year, month).plusMonths(1).atDay(1);
   }
 }

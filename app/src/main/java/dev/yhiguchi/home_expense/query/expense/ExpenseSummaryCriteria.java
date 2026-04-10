@@ -3,6 +3,8 @@ package dev.yhiguchi.home_expense.query.expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.query.Pagination;
+import java.time.LocalDate;
+import java.time.Year;
 import java.time.YearMonth;
 import java.util.Objects;
 
@@ -41,43 +43,29 @@ public class ExpenseSummaryCriteria {
     return pagination;
   }
 
-  String yearMonth() {
-    return YearMonth.of(year, month).toString();
-  }
-
-  int getPerPage() {
-    return pagination.perPage();
-  }
-
-  int getOffset() {
-    return pagination.offset();
-  }
-
-  String getYearMonth() {
-    return yearMonth();
-  }
-
-  public boolean hasYear() {
+  public boolean hasDateRange() {
     return Objects.nonNull(year);
   }
 
-  int getYear() {
-    return year;
+  public LocalDate dateFrom() {
+    if (Objects.nonNull(month)) {
+      return YearMonth.of(year, month).atDay(1);
+    }
+    return Year.of(year).atDay(1);
   }
 
-  public boolean hasMonth() {
-    return Objects.nonNull(month);
-  }
-
-  public int getMonth() {
-    return month;
+  public LocalDate dateTo() {
+    if (Objects.nonNull(month)) {
+      return YearMonth.of(year, month).plusMonths(1).atDay(1);
+    }
+    return Year.of(year).plusYears(1).atDay(1);
   }
 
   public boolean hasExpenseCategory() {
     return Objects.nonNull(expenseCategory);
   }
 
-  ExpenseCategory getExpenseCategory() {
+  public ExpenseCategory getExpenseCategory() {
     return expenseCategory;
   }
 
@@ -85,7 +73,7 @@ public class ExpenseSummaryCriteria {
     return expenseAttributeIdentifier.exists();
   }
 
-  String getExpenseAttributeIdentifier() {
+  public String getExpenseAttributeIdentifier() {
     return expenseAttributeIdentifier.value();
   }
 }

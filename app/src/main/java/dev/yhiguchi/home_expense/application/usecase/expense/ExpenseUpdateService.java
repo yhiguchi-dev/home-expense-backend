@@ -1,10 +1,9 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.application.service.expense.ExpenseService;
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.function.Consumer;
@@ -14,13 +13,13 @@ import java.util.function.Function;
 @Transactional
 public class ExpenseUpdateService {
 
-  ExpenseService expenseService;
-  ExpenseAttributeService expenseAttributeService;
+  ExpenseRepository expenseRepository;
+  ExpenseAttributeRepository expenseAttributeRepository;
 
   public ExpenseUpdateService(
-      ExpenseService expenseService, ExpenseAttributeService expenseAttributeService) {
-    this.expenseService = expenseService;
-    this.expenseAttributeService = expenseAttributeService;
+      ExpenseRepository expenseRepository, ExpenseAttributeRepository expenseAttributeRepository) {
+    this.expenseRepository = expenseRepository;
+    this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
   public void update(
@@ -29,10 +28,10 @@ public class ExpenseUpdateService {
       Price price,
       PaymentDate paymentDate,
       ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    Function<ExpenseIdentifier, Expense> getFn = identifier -> expenseService.get(identifier);
+    Function<ExpenseIdentifier, Expense> getFn = identifier -> expenseRepository.get(identifier);
     Function<ExpenseAttributeIdentifier, ExpenseAttribute> getAttributeFn =
-        identifier -> expenseAttributeService.get(identifier);
-    Consumer<Expense> updateFn = expense -> expenseService.update(expense);
+        identifier -> expenseAttributeRepository.get(identifier);
+    Consumer<Expense> updateFn = expense -> expenseRepository.update(expense);
     ExpenseUpdater updater = new ExpenseUpdater(getFn, getAttributeFn, updateFn);
     updater.update(expenseIdentifier, description, price, paymentDate, expenseAttributeIdentifier);
   }

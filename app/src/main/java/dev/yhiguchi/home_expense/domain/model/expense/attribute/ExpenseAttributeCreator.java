@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -8,11 +9,11 @@ import java.util.function.Function;
 /** 経費属性作成者 */
 public class ExpenseAttributeCreator {
 
-  Function<ExpenseAttributeName, ExpenseAttribute> findFn;
+  Function<ExpenseAttributeName, Optional<ExpenseAttribute>> findFn;
   Consumer<ExpenseAttribute> registerFn;
 
   public ExpenseAttributeCreator(
-      Function<ExpenseAttributeName, ExpenseAttribute> findFn,
+      Function<ExpenseAttributeName, Optional<ExpenseAttribute>> findFn,
       Consumer<ExpenseAttribute> registerFn) {
     this.findFn = findFn;
     this.registerFn = registerFn;
@@ -30,8 +31,8 @@ public class ExpenseAttributeCreator {
   }
 
   void throwIfExpenseAttributeAlreadyExists(ExpenseAttributeName expenseAttributeName) {
-    ExpenseAttribute expenseAttribute = findFn.apply(expenseAttributeName);
-    if (expenseAttribute.exists()) {
+    Optional<ExpenseAttribute> expenseAttribute = findFn.apply(expenseAttributeName);
+    if (expenseAttribute.isPresent()) {
       throw new ExpenseAttributeAlreadyExistsException();
     }
   }

@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.presentation.api.expense;
 
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseGettingService;
 import dev.yhiguchi.home_expense.query.expense.*;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,6 +19,7 @@ public class ExpenseAggregateApi {
   }
 
   @GET
+  @RunOnVirtualThread
   public Response get(@QueryParam("year") int year, @QueryParam("month") int month) {
     ExpenseAggregateCriteria criteria = new ExpenseAggregateCriteria(year, month);
     ExpenseAggregate aggregate = expenseGettingService.findAggregate(criteria);

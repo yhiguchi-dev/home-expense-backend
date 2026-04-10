@@ -11,8 +11,6 @@ public class PaymentDate {
     this.value = value;
   }
 
-  PaymentDate() {}
-
   public String value() {
     return value.toString();
   }

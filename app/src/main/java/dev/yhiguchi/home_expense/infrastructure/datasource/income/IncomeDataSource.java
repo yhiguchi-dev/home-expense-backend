@@ -1,25 +1,40 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
-import dev.yhiguchi.home_expense.domain.model.income.Income;
-import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
-import dev.yhiguchi.home_expense.domain.model.income.Incomes;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.*;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.sql.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 @ApplicationScoped
 public class IncomeDataSource implements IncomeRepository {
-  IncomeMapper incomeMapper;
 
-  public IncomeDataSource(IncomeMapper incomeMapper) {
-    this.incomeMapper = incomeMapper;
+  DataSource dataSource;
+
+  public IncomeDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   @Override
   public void register(Income income) {
-    incomeMapper.insert(income);
+    String sql =
+        "INSERT INTO expense.income(id, attribute_id, description, amount, receive_date) VALUES (?, ?, ?, ?, ?)";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, income.incomeIdentifier().value());
+      ps.setString(2, income.incomeAttribute().incomeAttributeIdentifier().value());
+      ps.setString(3, income.description().value());
+      ps.setInt(4, income.amount().value());
+      ps.setDate(5, Date.valueOf(income.receiveDate().value()));
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
@@ -30,17 +45,100 @@ public class IncomeDataSource implements IncomeRepository {
 
   @Override
   public void delete(IncomeIdentifier incomeIdentifier) {
-    incomeMapper.delete(incomeIdentifier);
+    String sql = "DELETE FROM expense.income WHERE income.id = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeIdentifier.value());
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
   public Income get(IncomeIdentifier incomeIdentifier) {
-    return incomeMapper.selectBy(incomeIdentifier).orElseThrow();
+    return selectBy(incomeIdentifier).orElseThrow();
   }
 
   @Override
   public Incomes find(IncomeAttribute incomeAttribute) {
-    Optional<List<Income>> incomes = incomeMapper.selectByIncomeAttribute(incomeAttribute);
-    return incomes.map(Incomes::new).orElseGet(Incomes::new);
+    String sql =
+        """
+        SELECT
+          income.id,
+          income.description,
+          income.amount,
+          income.receive_date,
+          income_attribute.id AS attribute_id,
+          income_attribute.name AS attribute_name
+        FROM expense.income
+        LEFT JOIN expense.income_attribute
+          ON income_attribute.id = income.attribute_id
+        WHERE income_attribute.id = ?
+        """;
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value());
+      try (ResultSet rs = ps.executeQuery()) {
+        List<Income> list = new ArrayList<>();
+        while (rs.next()) {
+          list.add(mapIncome(rs));
+        }
+        if (list.isEmpty()) {
+          return new Incomes();
+        }
+        return new Incomes(list);
+      }
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
+  }
+
+  private Optional<Income> selectBy(IncomeIdentifier incomeIdentifier) {
+    String sql =
+        """
+        SELECT
+          income.id,
+          income.description,
+          income.amount,
+          income.receive_date,
+          income_attribute.id AS attribute_id,
+          income_attribute.name AS attribute_name
+        FROM expense.income
+        LEFT JOIN expense.income_attribute
+          ON income_attribute.id = income.attribute_id
+        WHERE income.id = ?
+        """;
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeIdentifier.value());
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapIncome(rs));
+        }
+        return Optional.empty();
+      }
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
+  }
+
+  static Income mapIncome(ResultSet rs) throws SQLException {
+    String attributeId = rs.getString("attribute_id");
+    IncomeAttribute incomeAttribute;
+    if (attributeId != null) {
+      incomeAttribute =
+          new IncomeAttribute(
+              new IncomeAttributeIdentifier(attributeId),
+              new IncomeAttributeName(rs.getString("attribute_name")));
+    } else {
+      incomeAttribute = new IncomeAttribute();
+    }
+    return new Income(
+        new IncomeIdentifier(rs.getString("id")),
+        new Description(rs.getString("description")),
+        new Amount(rs.getInt("amount")),
+        new ReceiveDate(rs.getObject("receive_date", LocalDate.class)),
+        incomeAttribute);
   }
 }

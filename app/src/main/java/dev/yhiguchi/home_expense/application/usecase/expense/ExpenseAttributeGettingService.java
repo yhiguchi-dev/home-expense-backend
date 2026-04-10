@@ -1,11 +1,11 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeSummaryService;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -13,21 +13,21 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class ExpenseAttributeGettingService {
 
-  ExpenseAttributeService expenseAttributeService;
-  ExpenseAttributeSummaryService expenseAttributeSummaryService;
+  ExpenseAttributeRepository expenseAttributeRepository;
+  ExpenseAttributeSummaryRepository expenseAttributeSummaryRepository;
 
   public ExpenseAttributeGettingService(
-      ExpenseAttributeService expenseAttributeService,
-      ExpenseAttributeSummaryService expenseAttributeSummaryService) {
-    this.expenseAttributeService = expenseAttributeService;
-    this.expenseAttributeSummaryService = expenseAttributeSummaryService;
+      ExpenseAttributeRepository expenseAttributeRepository,
+      ExpenseAttributeSummaryRepository expenseAttributeSummaryRepository) {
+    this.expenseAttributeRepository = expenseAttributeRepository;
+    this.expenseAttributeSummaryRepository = expenseAttributeSummaryRepository;
   }
 
   public ExpenseAttributeSummary findSummary(ExpenseAttributeSummaryCriteria criteria) {
-    return expenseAttributeSummaryService.find(criteria);
+    return expenseAttributeSummaryRepository.find(criteria);
   }
 
   public ExpenseAttribute get(ExpenseAttributeIdentifier expenseIdentifier) {
-    return expenseAttributeService.get(expenseIdentifier);
+    return expenseAttributeRepository.get(expenseIdentifier);
   }
 }

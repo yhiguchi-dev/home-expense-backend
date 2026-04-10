@@ -16,16 +16,4 @@ public class IncomeAttributeSummaryCriteria {
   public int perPage() {
     return pagination.perPage();
   }
-
-  public int page() {
-    return pagination.currentPage();
-  }
-
-  int getPerPage() {
-    return perPage();
-  }
-
-  int getOffset() {
-    return offset();
-  }
 }

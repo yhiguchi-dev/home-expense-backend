@@ -2,9 +2,7 @@ package dev.yhiguchi.home_expense.presentation.api.income;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
-import io.quarkus.runtime.annotations.RegisterForReflection;
 
-@RegisterForReflection
 record IncomeGetResponse(
     @JsonProperty("id") String id,
     @JsonProperty("description") String description,

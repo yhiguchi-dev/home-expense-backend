@@ -1,35 +1,57 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
+import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.sql.*;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 @ApplicationScoped
 public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
-  ExpenseAttributeMapper expenseAttributeMapper;
+  DataSource dataSource;
 
-  public ExpenseAttributeDataSource(ExpenseAttributeMapper expenseAttributeMapper) {
-    this.expenseAttributeMapper = expenseAttributeMapper;
+  public ExpenseAttributeDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   @Override
   public void register(ExpenseAttribute expenseAttribute) {
-    expenseAttributeMapper.insert(expenseAttribute);
+    String sql = "INSERT INTO expense.attribute(id, category, name) VALUES (?, ?, ?)";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, expenseAttribute.expenseAttributeIdentifier().value());
+      ps.setString(2, expenseAttribute.expenseCategory().name());
+      ps.setString(3, expenseAttribute.expenseAttributeName().value());
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
   public ExpenseAttribute get(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    Optional<ExpenseAttribute> expenseAttribute =
-        expenseAttributeMapper.selectBy(expenseAttributeIdentifier);
+    Optional<ExpenseAttribute> expenseAttribute = selectBy(expenseAttributeIdentifier);
     return expenseAttribute.orElseThrow(ExpenseAttributeNotFoundException::new);
   }
 
   @Override
-  public ExpenseAttribute find(ExpenseAttributeName expenseAttributeName) {
-    Optional<ExpenseAttribute> expenseAttribute =
-        expenseAttributeMapper.selectByExpenseAttributeName(expenseAttributeName);
-    return expenseAttribute.orElse(new ExpenseAttribute());
+  public Optional<ExpenseAttribute> find(ExpenseAttributeName expenseAttributeName) {
+    String sql = "SELECT id, category, name FROM expense.attribute WHERE name = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, expenseAttributeName.value());
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapExpenseAttribute(rs));
+        }
+        return Optional.empty();
+      }
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
@@ -40,6 +62,37 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
   @Override
   public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    expenseAttributeMapper.delete(expenseAttributeIdentifier);
+    String sql = "DELETE FROM expense.attribute WHERE id = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, expenseAttributeIdentifier.value());
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
+  }
+
+  private Optional<ExpenseAttribute> selectBy(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    String sql = "SELECT id, category, name FROM expense.attribute WHERE id = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, expenseAttributeIdentifier.value());
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapExpenseAttribute(rs));
+        }
+        return Optional.empty();
+      }
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
+  }
+
+  static ExpenseAttribute mapExpenseAttribute(ResultSet rs) throws SQLException {
+    return new ExpenseAttribute(
+        new ExpenseAttributeIdentifier(rs.getString("id")),
+        new ExpenseAttributeName(rs.getString("name")),
+        ExpenseCategory.valueOf(rs.getString("category")));
   }
 }

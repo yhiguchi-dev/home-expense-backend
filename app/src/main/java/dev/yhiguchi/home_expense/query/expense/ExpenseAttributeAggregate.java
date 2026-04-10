@@ -9,7 +9,14 @@ public class ExpenseAttributeAggregate {
 
   int totalAmount;
 
-  ExpenseAttributeAggregate() {}
+  public ExpenseAttributeAggregate(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier,
+      ExpenseAttributeName expenseAttributeName,
+      int totalAmount) {
+    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
+    this.expenseAttributeName = expenseAttributeName;
+    this.totalAmount = totalAmount;
+  }
 
   public ExpenseAttributeIdentifier expenseAttributeIdentifier() {
     return expenseAttributeIdentifier;

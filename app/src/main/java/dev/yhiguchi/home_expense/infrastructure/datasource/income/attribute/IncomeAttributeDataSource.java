@@ -1,22 +1,32 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.sql.*;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 @ApplicationScoped
 public class IncomeAttributeDataSource implements IncomeAttributeRepository {
 
-  IncomeAttributeMapper incomeAttributeMapper;
+  DataSource dataSource;
 
-  public IncomeAttributeDataSource(IncomeAttributeMapper incomeAttributeMapper) {
-    this.incomeAttributeMapper = incomeAttributeMapper;
+  public IncomeAttributeDataSource(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   @Override
   public void register(IncomeAttribute incomeAttribute) {
-    incomeAttributeMapper.insert(incomeAttribute);
+    String sql = "INSERT INTO expense.income_attribute(id, name) VALUES (?, ?)";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value());
+      ps.setString(2, incomeAttribute.incomeAttributeName().value());
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
@@ -27,20 +37,58 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
 
   @Override
   public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    incomeAttributeMapper.delete(incomeAttributeIdentifier);
+    String sql = "DELETE FROM expense.income_attribute WHERE id = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeAttributeIdentifier.value());
+      ps.executeUpdate();
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
   public IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    Optional<IncomeAttribute> incomeAttribute =
-        incomeAttributeMapper.selectBy(incomeAttributeIdentifier);
+    Optional<IncomeAttribute> incomeAttribute = selectBy(incomeAttributeIdentifier);
     return incomeAttribute.orElseThrow(IncomeAttributeNotFoundException::new);
   }
 
   @Override
-  public IncomeAttribute find(IncomeAttributeName incomeAttributeName) {
-    Optional<IncomeAttribute> incomeAttribute =
-        incomeAttributeMapper.selectByIncomeAttributeName(incomeAttributeName);
-    return incomeAttribute.orElse(new IncomeAttribute());
+  public Optional<IncomeAttribute> find(IncomeAttributeName incomeAttributeName) {
+    String sql = "SELECT id, name FROM expense.income_attribute WHERE name = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeAttributeName.value());
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapIncomeAttribute(rs));
+        }
+        return Optional.empty();
+      }
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
+  }
+
+  private Optional<IncomeAttribute> selectBy(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    String sql = "SELECT id, name FROM expense.income_attribute WHERE id = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, incomeAttributeIdentifier.value());
+      try (ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) {
+          return Optional.of(mapIncomeAttribute(rs));
+        }
+        return Optional.empty();
+      }
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
+  }
+
+  static IncomeAttribute mapIncomeAttribute(ResultSet rs) throws SQLException {
+    return new IncomeAttribute(
+        new IncomeAttributeIdentifier(rs.getString("id")),
+        new IncomeAttributeName(rs.getString("name")));
   }
 }
