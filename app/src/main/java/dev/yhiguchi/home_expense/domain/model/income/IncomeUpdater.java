@@ -31,7 +31,8 @@ public class IncomeUpdater {
     Income income = getFn.apply(incomeIdentifier);
     IncomeAttribute incomeAttribute = getAttributeFn.apply(incomeAttributeIdentifier);
     Income updated =
-        new Income(incomeIdentifier, description, amount, receiveDate, incomeAttribute);
+        new Income(
+            incomeIdentifier, description, amount, receiveDate, incomeAttribute, income.version());
     if (income.equals(updated)) {
       return;
     }

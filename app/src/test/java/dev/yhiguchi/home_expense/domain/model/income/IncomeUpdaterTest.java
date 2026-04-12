@@ -21,7 +21,8 @@ class IncomeUpdaterTest {
           new Description("4月給与"),
           new Amount(300000),
           new ReceiveDate(LocalDate.of(2026, 4, 25)),
-          attribute);
+          attribute,
+          1L);
 
   @Test
   void 収入を更新する() {

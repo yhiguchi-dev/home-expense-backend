@@ -15,17 +15,21 @@ public class Expense {
 
   ExpenseAttribute expenseAttribute = new ExpenseAttribute();
 
+  long version;
+
   public Expense(
       ExpenseIdentifier expenseIdentifier,
       Description description,
       Price price,
       PaymentDate paymentDate,
-      ExpenseAttribute expenseAttribute) {
+      ExpenseAttribute expenseAttribute,
+      long version) {
     this.expenseIdentifier = expenseIdentifier;
     this.description = description;
     this.price = price;
     this.paymentDate = paymentDate;
     this.expenseAttribute = expenseAttribute;
+    this.version = version;
   }
 
   public Expense() {}
@@ -56,6 +60,10 @@ public class Expense {
 
   public ExpenseAttribute expenseAttribute() {
     return expenseAttribute;
+  }
+
+  public long version() {
+    return version;
   }
 
   @Override

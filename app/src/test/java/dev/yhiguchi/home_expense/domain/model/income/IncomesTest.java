@@ -22,7 +22,8 @@ class IncomesTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute);
+            attribute,
+            1L);
     Incomes incomes = new Incomes(List.of(income));
 
     assertTrue(incomes.has(attribute));

@@ -25,7 +25,8 @@ class ExpensesTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute);
+            attribute,
+            1L);
     Expenses expenses = new Expenses(List.of(expense));
 
     assertTrue(expenses.has(attribute));
@@ -44,7 +45,8 @@ class ExpensesTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            otherAttribute);
+            otherAttribute,
+            1L);
     Expenses expenses = new Expenses(List.of(expense));
 
     assertFalse(expenses.has(attribute));

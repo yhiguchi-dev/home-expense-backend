@@ -23,7 +23,8 @@ class ExpenseDeleterTest {
             new ExpenseAttribute(
                 new ExpenseAttributeIdentifier("attr-1"),
                 new ExpenseAttributeName("食費"),
-                ExpenseCategory.変動費));
+                ExpenseCategory.変動費),
+            1L);
 
     List<ExpenseIdentifier> deleted = new ArrayList<>();
 

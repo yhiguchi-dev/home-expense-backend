@@ -35,7 +35,8 @@ class IncomeAttributeDeleterTest {
             new Description("給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute);
+            attribute,
+            1L);
     Incomes incomesWithAttribute = new Incomes(List.of(income));
 
     IncomeAttributeDeleter deleter =

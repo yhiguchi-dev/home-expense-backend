@@ -24,7 +24,8 @@ class ExpenseUpdaterTest {
           new Description("ランチ"),
           new Price(1000),
           new PaymentDate(LocalDate.of(2026, 4, 1)),
-          attribute);
+          attribute,
+          1L);
 
   @Test
   void 経費を更新する() {

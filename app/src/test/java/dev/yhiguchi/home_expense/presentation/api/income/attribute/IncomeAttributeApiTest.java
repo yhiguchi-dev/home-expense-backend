@@ -81,7 +81,7 @@ class IncomeAttributeApiTest {
 
   @Test
   @Order(5)
-  void POST_同名の収入属性を登録すると400エラー() {
+  void POST_同名の収入属性を登録すると409エラー() {
     given()
         .contentType(ContentType.JSON)
         .body(
@@ -91,7 +91,13 @@ class IncomeAttributeApiTest {
         .when()
         .post("/v1/income-attributes")
         .then()
-        .statusCode(400);
+        .statusCode(409)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Conflict"))
+        .body("status", equalTo(409))
+        .body("detail", equalTo("既に登録されています"))
+        .body("instance", containsString("/v1/income-attributes"));
   }
 
   @Test
@@ -99,6 +105,60 @@ class IncomeAttributeApiTest {
   void DELETE_収入属性を削除できる() {
     given().when().delete("/v1/income-attributes/{id}", createdId).then().statusCode(204);
     createdId = null;
+  }
+
+  @Test
+  void GET_per_pageが上限を超える場合バリデーションエラー() {
+    given()
+        .queryParam("per_page", 101)
+        .when()
+        .get("/v1/income-attributes")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Bad Request"))
+        .body("status", equalTo(400))
+        .body("detail", containsString("per_pageは100以下を指定してください"))
+        .body("instance", containsString("/v1/income-attributes"));
+  }
+
+  @Test
+  void POST_nameが512文字を超える場合バリデーションエラー() {
+    String longName = "あ".repeat(513);
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"name": "%s"}
+            """
+                .formatted(longName))
+        .when()
+        .post("/v1/income-attributes")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("nameは512文字以内で入力してください"));
+  }
+
+  @Test
+  void PUT_nameが512文字を超える場合バリデーションエラー() {
+    String longName = "あ".repeat(513);
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"name": "%s"}
+            """
+                .formatted(longName))
+        .when()
+        .put("/v1/income-attributes/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("nameは512文字以内で入力してください"));
   }
 
   @Test
@@ -112,6 +172,12 @@ class IncomeAttributeApiTest {
         .when()
         .post("/v1/income-attributes")
         .then()
-        .statusCode(400);
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Bad Request"))
+        .body("status", equalTo(400))
+        .body("detail", notNullValue())
+        .body("instance", containsString("/v1/income-attributes"));
   }
 }

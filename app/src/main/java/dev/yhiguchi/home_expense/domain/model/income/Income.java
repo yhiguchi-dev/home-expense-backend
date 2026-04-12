@@ -12,17 +12,21 @@ public class Income {
 
   IncomeAttribute incomeAttribute;
 
+  long version;
+
   public Income(
       IncomeIdentifier incomeIdentifier,
       Description description,
       Amount amount,
       ReceiveDate receiveDate,
-      IncomeAttribute incomeAttribute) {
+      IncomeAttribute incomeAttribute,
+      long version) {
     this.incomeIdentifier = incomeIdentifier;
     this.description = description;
     this.amount = amount;
     this.receiveDate = receiveDate;
     this.incomeAttribute = incomeAttribute;
+    this.version = version;
   }
 
   public IncomeIdentifier incomeIdentifier() {
@@ -43,6 +47,10 @@ public class Income {
 
   public IncomeAttribute incomeAttribute() {
     return incomeAttribute;
+  }
+
+  public long version() {
+    return version;
   }
 
   @Override

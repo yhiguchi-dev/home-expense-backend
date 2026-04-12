@@ -23,7 +23,7 @@ public class IncomeAttributeCreator {
     IncomeAttributeIdentifier incomeAttributeIdentifier =
         new IncomeAttributeIdentifier(UUID.randomUUID().toString());
     IncomeAttribute incomeAttribute =
-        new IncomeAttribute(incomeAttributeIdentifier, incomeAttributeName);
+        new IncomeAttribute(incomeAttributeIdentifier, incomeAttributeName, 1L);
     registerFn.accept(incomeAttribute);
     return incomeAttribute;
   }

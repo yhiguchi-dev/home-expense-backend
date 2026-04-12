@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
+import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -25,11 +26,12 @@ public class ExpenseDataSource implements ExpenseRepository {
     try (Connection conn = dataSource.getConnection()) {
       try (PreparedStatement ps =
           conn.prepareStatement(
-              "INSERT INTO expense.expense(id, description, price, payment_date) VALUES (?, ?, ?, ?)")) {
+              "INSERT INTO expense.expense(id, description, price, payment_date, version) VALUES (?, ?, ?, ?, ?)")) {
         ps.setString(1, expense.expenseIdentifier().value());
         ps.setString(2, expense.description().value());
         ps.setInt(3, expense.price().value());
         ps.setDate(4, Date.valueOf(expense.paymentDate().value()));
+        ps.setLong(5, expense.version());
         ps.executeUpdate();
       }
       if (expense.isFixed()) {
@@ -75,6 +77,7 @@ public class ExpenseDataSource implements ExpenseRepository {
           expense.description,
           expense.price,
           expense.payment_date,
+          expense.version,
           attribute.id AS attribute_id,
           attribute.category,
           attribute.name AS attribute_name
@@ -108,8 +111,57 @@ public class ExpenseDataSource implements ExpenseRepository {
 
   @Override
   public void update(Expense expense) {
-    delete(expense.expenseIdentifier());
-    register(expense);
+    try (Connection conn = dataSource.getConnection()) {
+      String sql =
+          """
+          UPDATE expense.expense
+          SET description = ?, price = ?, payment_date = ?, version = version + 1
+          WHERE id = ? AND version = ?
+          """;
+      try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, expense.description().value());
+        ps.setInt(2, expense.price().value());
+        ps.setDate(3, Date.valueOf(expense.paymentDate().value()));
+        ps.setString(4, expense.expenseIdentifier().value());
+        ps.setLong(5, expense.version());
+        int rowCount = ps.executeUpdate();
+        if (rowCount == 0) {
+          throw new OptimisticLockException();
+        }
+      }
+      try (PreparedStatement ps =
+          conn.prepareStatement("DELETE FROM expense.fixed_expense WHERE expense_id = ?")) {
+        ps.setString(1, expense.expenseIdentifier().value());
+        ps.executeUpdate();
+      }
+      try (PreparedStatement ps =
+          conn.prepareStatement("DELETE FROM expense.variable_expense WHERE expense_id = ?")) {
+        ps.setString(1, expense.expenseIdentifier().value());
+        ps.executeUpdate();
+      }
+      if (expense.isFixed()) {
+        try (PreparedStatement ps =
+            conn.prepareStatement(
+                "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)")) {
+          ps.setString(1, expense.expenseIdentifier().value());
+          ps.setString(2, expense.expenseAttribute().expenseAttributeIdentifier().value());
+          ps.executeUpdate();
+        }
+      }
+      if (expense.isVariable()) {
+        try (PreparedStatement ps =
+            conn.prepareStatement(
+                "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)")) {
+          ps.setString(1, expense.expenseIdentifier().value());
+          ps.setString(2, expense.expenseAttribute().expenseAttributeIdentifier().value());
+          ps.executeUpdate();
+        }
+      }
+    } catch (OptimisticLockException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
@@ -132,6 +184,7 @@ public class ExpenseDataSource implements ExpenseRepository {
           expense.description,
           expense.price,
           expense.payment_date,
+          expense.version,
           attribute.id AS attribute_id,
           attribute.category,
           attribute.name AS attribute_name
@@ -176,6 +229,7 @@ public class ExpenseDataSource implements ExpenseRepository {
         new Description(rs.getString("description")),
         new Price(rs.getInt("price")),
         new PaymentDate(rs.getObject("payment_date", LocalDate.class)),
-        expenseAttribute);
+        expenseAttribute,
+        rs.getLong("version"));
   }
 }

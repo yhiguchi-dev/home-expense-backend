@@ -6,7 +6,6 @@ plugins {
 
 repositories {
   mavenCentral()
-  mavenLocal()
 }
 
 dependencies {
@@ -14,7 +13,6 @@ dependencies {
   implementation(libs.quarkus.rest.jackson)
   implementation(libs.quarkus.hibernate.validator)
   implementation(libs.quarkus.jdbc.postgresql)
-  implementation(libs.quarkus.arc)
   implementation(libs.quarkus.logging.json)
   testImplementation(libs.quarkus.junit5)
   testImplementation(libs.rest.assured)
@@ -31,15 +29,6 @@ System.getenv("DEPLOY_ENV")?.let { deployEnv ->
 java {
   sourceCompatibility = JavaVersion.VERSION_25
   targetCompatibility = JavaVersion.VERSION_25
-}
-
-sourceSets {
-  main {
-    resources.setSrcDirs(setOf("src/main/java", "src/main/resources"))
-  }
-  test {
-    resources.setSrcDirs(setOf("src/test/java", "src/test/resources"))
-  }
 }
 
 val integrationTest by sourceSets.getting {
@@ -59,6 +48,7 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.register("printVersion") {
+  description = "Prints the project version."
   doFirst {
     println(version)
   }

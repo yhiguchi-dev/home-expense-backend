@@ -23,7 +23,11 @@ public class ExpenseAttributeUpdater {
       ExpenseCategory expenseCategory) {
     ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
     ExpenseAttribute updated =
-        new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+        new ExpenseAttribute(
+            expenseAttributeIdentifier,
+            expenseAttributeName,
+            expenseCategory,
+            expenseAttribute.version());
     if (expenseAttribute.equals(updated)) {
       return;
     }

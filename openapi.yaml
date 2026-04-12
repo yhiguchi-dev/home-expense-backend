@@ -1,0 +1,872 @@
+openapi: 3.1.0
+info:
+  title: Home Expense API
+  description: API for managing home expenses and income
+  version: 1.1.0
+  contact:
+    name: API Support
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Expenses
+    description: Operations related to expenses
+  - name: Expense Attributes
+    description: Operations related to expense categories and attributes
+  - name: Expense Statistics
+    description: Operations for expense statistics
+  - name: Incomes
+    description: Operations related to incomes
+  - name: Income Attributes
+    description: Operations related to income attributes
+
+paths:
+  /v1/expenses:
+    get:
+      tags:
+        - Expenses
+      summary: Get list of expenses
+      description: Retrieve a paginated list of expenses with optional filters
+      operationId: getExpenses
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+        - name: year
+          in: query
+          description: Filter by year
+          schema:
+            type: integer
+            minimum: 1
+        - name: month
+          in: query
+          description: Filter by month
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: category
+          in: query
+          description: Filter by expense category
+          schema:
+            type: string
+            enum: ["固定費", "変動費"]
+        - name: attribute_id
+          in: query
+          description: Filter by expense attribute ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Link:
+              description: Pagination links (RFC 5988)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    post:
+      tags:
+        - Expenses
+      summary: Create a new expense
+      operationId: createExpense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpensePostRequest"
+      responses:
+        "201":
+          description: Expense created successfully
+          headers:
+            Location:
+              description: URI of the created resource
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /v1/expenses/{id}:
+    get:
+      tags:
+        - Expenses
+      summary: Get expense by ID
+      operationId: getExpenseById
+      parameters:
+        - $ref: "#/components/parameters/ExpenseId"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseGetResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Expenses
+      summary: Update an expense
+      operationId: updateExpense
+      parameters:
+        - $ref: "#/components/parameters/ExpenseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpensePutRequest"
+      responses:
+        "204":
+          description: Expense updated successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags:
+        - Expenses
+      summary: Delete an expense
+      operationId: deleteExpense
+      parameters:
+        - $ref: "#/components/parameters/ExpenseId"
+      responses:
+        "204":
+          description: Expense deleted successfully
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/expenses/statistics:
+    get:
+      tags:
+        - Expense Statistics
+      summary: Get expense statistics
+      description: Retrieve expense statistics for a specific month
+      operationId: getExpenseStatistics
+      parameters:
+        - name: year
+          in: query
+          required: true
+          description: Year for statistics
+          schema:
+            type: integer
+            minimum: 1
+        - name: month
+          in: query
+          required: true
+          description: Month for statistics
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseStatisticsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /v1/expense-attributes:
+    get:
+      tags:
+        - Expense Attributes
+      summary: Get list of expense attributes
+      operationId: getExpenseAttributes
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+            enum: ["固定費", "変動費"]
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Link:
+              description: Pagination links (RFC 5988)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseAttributeListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    post:
+      tags:
+        - Expense Attributes
+      summary: Create a new expense attribute
+      operationId: createExpenseAttribute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseAttributePostRequest"
+      responses:
+        "201":
+          description: Expense attribute created successfully
+          headers:
+            Location:
+              description: URI of the created resource
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /v1/expense-attributes/{id}:
+    get:
+      tags:
+        - Expense Attributes
+      summary: Get expense attribute by ID
+      operationId: getExpenseAttributeById
+      parameters:
+        - $ref: "#/components/parameters/ExpenseAttributeId"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpenseAttributeGetResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Expense Attributes
+      summary: Update an expense attribute
+      operationId: updateExpenseAttribute
+      parameters:
+        - $ref: "#/components/parameters/ExpenseAttributeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExpenseAttributePutRequest"
+      responses:
+        "204":
+          description: Expense attribute updated successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Expense Attributes
+      summary: Delete an expense attribute
+      operationId: deleteExpenseAttribute
+      parameters:
+        - $ref: "#/components/parameters/ExpenseAttributeId"
+      responses:
+        "204":
+          description: Expense attribute deleted successfully
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /v1/incomes:
+    get:
+      tags:
+        - Incomes
+      summary: Get list of incomes
+      operationId: getIncomes
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+        - name: year
+          in: query
+          description: Filter by year
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Link:
+              description: Pagination links (RFC 5988)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    post:
+      tags:
+        - Incomes
+      summary: Create a new income
+      operationId: createIncome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncomePostRequest"
+      responses:
+        "201":
+          description: Income created successfully
+          headers:
+            Location:
+              description: URI of the created resource
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /v1/incomes/{id}:
+    get:
+      tags:
+        - Incomes
+      summary: Get income by ID
+      operationId: getIncomeById
+      parameters:
+        - $ref: "#/components/parameters/IncomeId"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeGetResponse"
+    put:
+      tags:
+        - Incomes
+      summary: Update an income
+      operationId: updateIncome
+      parameters:
+        - $ref: "#/components/parameters/IncomeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncomePutRequest"
+      responses:
+        "204":
+          description: Income updated successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags:
+        - Incomes
+      summary: Delete an income
+      operationId: deleteIncome
+      parameters:
+        - $ref: "#/components/parameters/IncomeId"
+      responses:
+        "204":
+          description: Income deleted successfully
+
+  /v1/income-attributes:
+    get:
+      tags:
+        - Income Attributes
+      summary: Get list of income attributes
+      operationId: getIncomeAttributes
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PerPage"
+      responses:
+        "200":
+          description: Successful response
+          headers:
+            Link:
+              description: Pagination links (RFC 5988)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeAttributeListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    post:
+      tags:
+        - Income Attributes
+      summary: Create a new income attribute
+      operationId: createIncomeAttribute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncomeAttributePostRequest"
+      responses:
+        "201":
+          description: Income attribute created successfully
+          headers:
+            Location:
+              description: URI of the created resource
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /v1/income-attributes/{id}:
+    get:
+      tags:
+        - Income Attributes
+      summary: Get income attribute by ID
+      operationId: getIncomeAttributeById
+      parameters:
+        - $ref: "#/components/parameters/IncomeAttributeId"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeAttributeGetResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags:
+        - Income Attributes
+      summary: Update an income attribute
+      operationId: updateIncomeAttribute
+      parameters:
+        - $ref: "#/components/parameters/IncomeAttributeId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncomeAttributePutRequest"
+      responses:
+        "204":
+          description: Income attribute updated successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags:
+        - Income Attributes
+      summary: Delete an income attribute
+      operationId: deleteIncomeAttribute
+      parameters:
+        - $ref: "#/components/parameters/IncomeAttributeId"
+      responses:
+        "204":
+          description: Income attribute deleted successfully
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+components:
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+          example:
+            type: "about:blank"
+            title: "Bad Request"
+            status: 400
+            detail: "descriptionは必須入力です"
+            instance: "/v1/expenses"
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+          example:
+            type: "about:blank"
+            title: "Not Found"
+            status: 404
+            detail: "経費が見つかりません"
+            instance: "/v1/expenses/123"
+    Conflict:
+      description: Resource conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+          example:
+            type: "about:blank"
+            title: "Conflict"
+            status: 409
+            detail: "既に登録されています"
+            instance: "/v1/expense-attributes"
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: Page number
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+    PerPage:
+      name: per_page
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    ExpenseId:
+      name: id
+      in: path
+      required: true
+      description: Expense ID
+      schema:
+        type: string
+        format: uuid
+    ExpenseAttributeId:
+      name: id
+      in: path
+      required: true
+      description: Expense attribute ID
+      schema:
+        type: string
+        format: uuid
+    IncomeId:
+      name: id
+      in: path
+      required: true
+      description: Income ID
+      schema:
+        type: string
+        format: uuid
+    IncomeAttributeId:
+      name: id
+      in: path
+      required: true
+      description: Income attribute ID
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ExpensePostRequest:
+      type: object
+      required:
+        - description
+        - price
+        - payment_date
+        - attribute_id
+      properties:
+        description:
+          type: string
+          maxLength: 512
+        price:
+          type: integer
+          minimum: 1
+        payment_date:
+          type: string
+          format: date
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          example: "2026-04-10"
+        attribute_id:
+          type: string
+          format: uuid
+
+    ExpensePutRequest:
+      type: object
+      required:
+        - description
+        - price
+        - payment_date
+        - attribute_id
+      properties:
+        description:
+          type: string
+          maxLength: 512
+        price:
+          type: integer
+          minimum: 1
+        payment_date:
+          type: string
+          format: date
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          example: "2026-04-10"
+        attribute_id:
+          type: string
+          format: uuid
+
+    ExpenseGetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        price:
+          type: integer
+        payment_date:
+          type: string
+          format: date
+        expense_attribute:
+          $ref: "#/components/schemas/ExpenseAttributeResponse"
+
+    ExpenseListResponse:
+      type: object
+      properties:
+        expenses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExpenseGetResponse"
+
+    ExpenseStatisticsResponse:
+      type: object
+      properties:
+        income_total_amount:
+          type: integer
+          description: Total income amount for the month
+        disposal_income_amount:
+          type: integer
+          description: Disposable income (income - total expenses)
+        total_amount:
+          type: integer
+          description: Total expense amount
+        fixed_expense_detail:
+          $ref: "#/components/schemas/ExpenseStatisticsDetailResponse"
+        variable_expense_detail:
+          $ref: "#/components/schemas/ExpenseStatisticsDetailResponse"
+
+    ExpenseStatisticsDetailResponse:
+      type: object
+      properties:
+        total_amount:
+          type: integer
+          description: Total amount for the category
+        attribute_statistics:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExpenseAttributeStatisticsResponse"
+
+    ExpenseAttributeStatisticsResponse:
+      type: object
+      properties:
+        attribute_id:
+          type: string
+          format: uuid
+        attribute_name:
+          type: string
+        total_amount:
+          type: integer
+
+    ExpenseAttributePostRequest:
+      type: object
+      required:
+        - name
+        - category
+      properties:
+        name:
+          type: string
+          maxLength: 512
+        category:
+          type: string
+          enum: ["固定費", "変動費"]
+
+    ExpenseAttributePutRequest:
+      type: object
+      required:
+        - name
+        - category
+      properties:
+        name:
+          type: string
+          maxLength: 512
+        category:
+          type: string
+          enum: ["固定費", "変動費"]
+
+    ExpenseAttributeGetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+
+    ExpenseAttributeListResponse:
+      type: object
+      properties:
+        expense_attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExpenseAttributeGetResponse"
+
+    ExpenseAttributeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+
+    IncomePostRequest:
+      type: object
+      required:
+        - description
+        - amount
+        - receive_date
+        - attribute_id
+      properties:
+        description:
+          type: string
+          maxLength: 512
+        amount:
+          type: integer
+          minimum: 1
+        receive_date:
+          type: string
+          format: date
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          example: "2026-04-25"
+        attribute_id:
+          type: string
+          format: uuid
+
+    IncomePutRequest:
+      type: object
+      required:
+        - description
+        - amount
+        - receive_date
+        - attribute_id
+      properties:
+        description:
+          type: string
+          maxLength: 512
+        amount:
+          type: integer
+          minimum: 1
+        receive_date:
+          type: string
+          format: date
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          example: "2026-04-25"
+        attribute_id:
+          type: string
+          format: uuid
+
+    IncomeGetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        amount:
+          type: integer
+        receive_date:
+          type: string
+          format: date
+        income_attribute:
+          $ref: "#/components/schemas/IncomeAttributeResponse"
+
+    IncomeListResponse:
+      type: object
+      properties:
+        incomes:
+          type: array
+          items:
+            $ref: "#/components/schemas/IncomeGetResponse"
+
+    IncomeAttributePostRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 512
+
+    IncomeAttributePutRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 512
+
+    IncomeAttributeGetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    IncomeAttributeListResponse:
+      type: object
+      properties:
+        income_attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/IncomeAttributeGetResponse"
+
+    IncomeAttributeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    ProblemDetail:
+      type: object
+      description: RFC 9457 Problem Details for HTTP APIs
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type
+          example: "about:blank"
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type
+          example: "Bad Request"
+        status:
+          type: integer
+          description: The HTTP status code
+          example: 400
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem
+          example: "descriptionは必須入力です"
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence of the problem
+          example: "/v1/expenses"

@@ -1,15 +1,15 @@
 package dev.yhiguchi.home_expense.presentation.api.income;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.yhiguchi.home_expense.query.income.IncomeSummary;
+import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import java.util.List;
 
 class IncomeGetListResponse {
   @JsonProperty("incomes")
   List<IncomeGetResponse> list;
 
-  IncomeGetListResponse(IncomeSummary summary) {
-    this.list = summary.list().stream().map(IncomeGetResponse::from).toList();
+  IncomeGetListResponse(IncomeSearchResult searchResult) {
+    this.list = searchResult.list().stream().map(IncomeGetResponse::from).toList();
   }
 
   IncomeGetListResponse() {

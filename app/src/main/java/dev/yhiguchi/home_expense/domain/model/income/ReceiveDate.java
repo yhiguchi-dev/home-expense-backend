@@ -8,6 +8,7 @@ public class ReceiveDate {
   LocalDate value;
 
   public ReceiveDate(LocalDate value) {
+    Objects.requireNonNull(value, "受取日は必須です");
     this.value = value;
   }
 

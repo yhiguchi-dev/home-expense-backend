@@ -21,7 +21,8 @@ class IncomeDeleterTest {
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
             new IncomeAttribute(
-                new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与")));
+                new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与")),
+            1L);
 
     List<IncomeIdentifier> deleted = new ArrayList<>();
 

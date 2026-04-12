@@ -21,7 +21,8 @@ class ExpenseTest {
             new ExpenseAttribute(
                 new ExpenseAttributeIdentifier("attr-1"),
                 new ExpenseAttributeName("家賃"),
-                ExpenseCategory.固定費));
+                ExpenseCategory.固定費),
+            1L);
 
     assertTrue(expense.isFixed());
     assertFalse(expense.isVariable());
@@ -38,7 +39,8 @@ class ExpenseTest {
             new ExpenseAttribute(
                 new ExpenseAttributeIdentifier("attr-1"),
                 new ExpenseAttributeName("食費"),
-                ExpenseCategory.変動費));
+                ExpenseCategory.変動費),
+            1L);
 
     assertFalse(expense.isFixed());
     assertTrue(expense.isVariable());
@@ -65,14 +67,16 @@ class ExpenseTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute);
+            attribute,
+            1L);
     Expense expense2 =
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute);
+            attribute,
+            1L);
 
     assertEquals(expense1, expense2);
     assertEquals(expense1.hashCode(), expense2.hashCode());

@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
+import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -23,7 +24,7 @@ public class IncomeDataSource implements IncomeRepository {
   @Override
   public void register(Income income) {
     String sql =
-        "INSERT INTO expense.income(id, attribute_id, description, amount, receive_date) VALUES (?, ?, ?, ?, ?)";
+        "INSERT INTO expense.income(id, attribute_id, description, amount, receive_date, version) VALUES (?, ?, ?, ?, ?, ?)";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, income.incomeIdentifier().value());
@@ -31,6 +32,7 @@ public class IncomeDataSource implements IncomeRepository {
       ps.setString(3, income.description().value());
       ps.setInt(4, income.amount().value());
       ps.setDate(5, Date.valueOf(income.receiveDate().value()));
+      ps.setLong(6, income.version());
       ps.executeUpdate();
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -39,8 +41,29 @@ public class IncomeDataSource implements IncomeRepository {
 
   @Override
   public void update(Income income) {
-    delete(income.incomeIdentifier());
-    register(income);
+    String sql =
+        """
+        UPDATE expense.income
+        SET attribute_id = ?, description = ?, amount = ?, receive_date = ?, version = version + 1
+        WHERE id = ? AND version = ?
+        """;
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, income.incomeAttribute().incomeAttributeIdentifier().value());
+      ps.setString(2, income.description().value());
+      ps.setInt(3, income.amount().value());
+      ps.setDate(4, Date.valueOf(income.receiveDate().value()));
+      ps.setString(5, income.incomeIdentifier().value());
+      ps.setLong(6, income.version());
+      int rowCount = ps.executeUpdate();
+      if (rowCount == 0) {
+        throw new OptimisticLockException();
+      }
+    } catch (OptimisticLockException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
@@ -69,6 +92,7 @@ public class IncomeDataSource implements IncomeRepository {
           income.description,
           income.amount,
           income.receive_date,
+          income.version,
           income_attribute.id AS attribute_id,
           income_attribute.name AS attribute_name
         FROM expense.income
@@ -102,6 +126,7 @@ public class IncomeDataSource implements IncomeRepository {
           income.description,
           income.amount,
           income.receive_date,
+          income.version,
           income_attribute.id AS attribute_id,
           income_attribute.name AS attribute_name
         FROM expense.income
@@ -139,6 +164,7 @@ public class IncomeDataSource implements IncomeRepository {
         new Description(rs.getString("description")),
         new Amount(rs.getInt("amount")),
         new ReceiveDate(rs.getObject("receive_date", LocalDate.class)),
-        incomeAttribute);
+        incomeAttribute,
+        rs.getLong("version"));
   }
 }

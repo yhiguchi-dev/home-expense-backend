@@ -1,29 +1,27 @@
 package dev.yhiguchi.home_expense.presentation.api.income.attribute;
 
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeDeletionService;
-import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeGettingService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeRegistrationService;
+import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeUpdateService;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeAlreadyExistsException;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
-import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummary;
-import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummaryCriteria;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchCriteria;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResult;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
-import org.jboss.resteasy.reactive.RestResponse;
-import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 @Path("/v1/income-attributes")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -34,17 +32,17 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   IncomeAttributeUpdateService incomeAttributeUpdateService;
   IncomeAttributeDeletionService incomeAttributeDeletionService;
 
-  IncomeAttributeGettingService incomeAttributeGettingService;
+  IncomeAttributeRetrievalService incomeAttributeRetrievalService;
 
   public IncomeAttributeApi(
       IncomeAttributeRegistrationService incomeAttributeRegistrationService,
       IncomeAttributeUpdateService incomeAttributeUpdateService,
       IncomeAttributeDeletionService incomeAttributeDeletionService,
-      IncomeAttributeGettingService incomeAttributeGettingService) {
+      IncomeAttributeRetrievalService incomeAttributeRetrievalService) {
     this.incomeAttributeRegistrationService = incomeAttributeRegistrationService;
     this.incomeAttributeUpdateService = incomeAttributeUpdateService;
     this.incomeAttributeDeletionService = incomeAttributeDeletionService;
-    this.incomeAttributeGettingService = incomeAttributeGettingService;
+    this.incomeAttributeRetrievalService = incomeAttributeRetrievalService;
   }
 
   @POST
@@ -59,7 +57,9 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @PUT
   @Path("{id}")
   @RunOnVirtualThread
-  public Response put(@PathParam("id") String id, @Valid IncomeAttributePutRequest request) {
+  public Response put(
+      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
+      @Valid IncomeAttributePutRequest request) {
     incomeAttributeUpdateService.update(
         new IncomeAttributeIdentifier(id), request.toIncomeAttributeName());
     return Response.noContent().build();
@@ -68,7 +68,8 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @DELETE
   @Path("{id}")
   @RunOnVirtualThread
-  public Response delete(@PathParam("id") String id) {
+  public Response delete(
+      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
     incomeAttributeDeletionService.delete(new IncomeAttributeIdentifier(id));
     return Response.noContent().build();
   }
@@ -76,40 +77,36 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @GET
   @RunOnVirtualThread
   public Response get(
-      @QueryParam("page") @DefaultValue("1") Integer page,
-      @QueryParam("per_page") @DefaultValue("20") Integer perPage,
+      @QueryParam("page") @DefaultValue("1") @Min(value = 1, message = "pageは1以上を指定してください")
+          Integer page,
+      @QueryParam("per_page")
+          @DefaultValue("20")
+          @Min(value = 1, message = "per_pageは1以上を指定してください")
+          @jakarta.validation.constraints.Max(value = 100, message = "per_pageは100以下を指定してください")
+          Integer perPage,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    IncomeAttributeSummaryCriteria criteria = new IncomeAttributeSummaryCriteria(pagination);
-    IncomeAttributeSummary incomeAttributeSummary =
-        incomeAttributeGettingService.findSummary(criteria);
-    IncomeAttributeGetSummaryResponse response =
-        page <= incomeAttributeSummary.totalCount()
-            ? new IncomeAttributeGetSummaryResponse(incomeAttributeSummary)
-            : new IncomeAttributeGetSummaryResponse();
+    IncomeAttributeSearchCriteria criteria = new IncomeAttributeSearchCriteria(pagination);
+    IncomeAttributeSearchResult incomeAttributeSearchResult =
+        incomeAttributeRetrievalService.search(criteria);
+    IncomeAttributeGetListResponse response =
+        page <= incomeAttributeSearchResult.totalCount()
+            ? new IncomeAttributeGetListResponse(incomeAttributeSearchResult)
+            : new IncomeAttributeGetListResponse();
     Response.ResponseBuilder responseBuilder = Response.ok(response);
     responseBuilder.header(
-        "Link", create(uriInfo, pagination, incomeAttributeSummary.totalCount()));
+        "Link", create(uriInfo, pagination, incomeAttributeSearchResult.totalCount()));
     return responseBuilder.build();
   }
 
   @GET
   @Path("{id}")
   @RunOnVirtualThread
-  public Response get(@PathParam("id") String id) {
+  public Response get(
+      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
     IncomeAttribute incomeAttribute =
-        incomeAttributeGettingService.get(new IncomeAttributeIdentifier(id));
+        incomeAttributeRetrievalService.get(new IncomeAttributeIdentifier(id));
     IncomeAttributeGetResponse response = IncomeAttributeGetResponse.from(incomeAttribute);
     return Response.ok(response).build();
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<String> mapException(IncomeAttributeAlreadyExistsException e) {
-    return RestResponse.status(Response.Status.BAD_REQUEST, "既に登録されています");
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<String> mapException(IncomeAttributeConstraintException e) {
-    return RestResponse.status(Response.Status.BAD_REQUEST, "制約があるため削除できません");
   }
 }

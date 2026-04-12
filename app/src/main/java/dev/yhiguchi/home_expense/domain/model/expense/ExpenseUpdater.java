@@ -31,7 +31,13 @@ public class ExpenseUpdater {
     Expense expense = getFn.apply(expenseIdentifier);
     ExpenseAttribute expenseAttribute = getAttributeFn.apply(expenseAttributeIdentifier);
     Expense updated =
-        new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute);
+        new Expense(
+            expenseIdentifier,
+            description,
+            price,
+            paymentDate,
+            expenseAttribute,
+            expense.version());
     if (expense.equals(updated)) {
       return;
     }

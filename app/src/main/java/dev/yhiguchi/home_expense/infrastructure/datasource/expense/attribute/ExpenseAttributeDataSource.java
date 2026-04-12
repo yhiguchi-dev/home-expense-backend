@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
+import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -19,12 +20,13 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
   @Override
   public void register(ExpenseAttribute expenseAttribute) {
-    String sql = "INSERT INTO expense.attribute(id, category, name) VALUES (?, ?, ?)";
+    String sql = "INSERT INTO expense.attribute(id, category, name, version) VALUES (?, ?, ?, ?)";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, expenseAttribute.expenseAttributeIdentifier().value());
       ps.setString(2, expenseAttribute.expenseCategory().name());
       ps.setString(3, expenseAttribute.expenseAttributeName().value());
+      ps.setLong(4, expenseAttribute.version());
       ps.executeUpdate();
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -39,7 +41,7 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
   @Override
   public Optional<ExpenseAttribute> find(ExpenseAttributeName expenseAttributeName) {
-    String sql = "SELECT id, category, name FROM expense.attribute WHERE name = ?";
+    String sql = "SELECT id, category, name, version FROM expense.attribute WHERE name = ?";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, expenseAttributeName.value());
@@ -56,8 +58,23 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
   @Override
   public void update(ExpenseAttribute expenseAttribute) {
-    delete(expenseAttribute.expenseAttributeIdentifier());
-    register(expenseAttribute);
+    String sql =
+        "UPDATE expense.attribute SET category = ?, name = ?, version = version + 1 WHERE id = ? AND version = ?";
+    try (Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+      ps.setString(1, expenseAttribute.expenseCategory().name());
+      ps.setString(2, expenseAttribute.expenseAttributeName().value());
+      ps.setString(3, expenseAttribute.expenseAttributeIdentifier().value());
+      ps.setLong(4, expenseAttribute.version());
+      int rowCount = ps.executeUpdate();
+      if (rowCount == 0) {
+        throw new OptimisticLockException();
+      }
+    } catch (OptimisticLockException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw new DataAccessException(e);
+    }
   }
 
   @Override
@@ -74,7 +91,7 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
   private Optional<ExpenseAttribute> selectBy(
       ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    String sql = "SELECT id, category, name FROM expense.attribute WHERE id = ?";
+    String sql = "SELECT id, category, name, version FROM expense.attribute WHERE id = ?";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, expenseAttributeIdentifier.value());
@@ -93,6 +110,7 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
     return new ExpenseAttribute(
         new ExpenseAttributeIdentifier(rs.getString("id")),
         new ExpenseAttributeName(rs.getString("name")),
-        ExpenseCategory.valueOf(rs.getString("category")));
+        ExpenseCategory.valueOf(rs.getString("category")),
+        rs.getLong("version"));
   }
 }

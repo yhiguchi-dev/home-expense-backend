@@ -25,7 +25,7 @@ public class ExpenseAttributeCreator {
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
         new ExpenseAttributeIdentifier(UUID.randomUUID().toString());
     ExpenseAttribute expenseAttribute =
-        new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+        new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory, 1L);
     registerFn.accept(expenseAttribute);
     return expenseAttribute;
   }

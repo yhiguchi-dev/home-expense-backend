@@ -8,6 +8,7 @@ public class ExpenseAttribute {
   ExpenseAttributeIdentifier expenseAttributeIdentifier = new ExpenseAttributeIdentifier();
   ExpenseAttributeName expenseAttributeName;
   ExpenseCategory expenseCategory;
+  long version;
 
   public ExpenseAttribute(
       ExpenseAttributeIdentifier expenseAttributeIdentifier,
@@ -16,6 +17,15 @@ public class ExpenseAttribute {
     this.expenseAttributeIdentifier = expenseAttributeIdentifier;
     this.expenseAttributeName = expenseAttributeName;
     this.expenseCategory = expenseCategory;
+  }
+
+  public ExpenseAttribute(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier,
+      ExpenseAttributeName expenseAttributeName,
+      ExpenseCategory expenseCategory,
+      long version) {
+    this(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+    this.version = version;
   }
 
   public ExpenseAttribute() {}
@@ -48,6 +58,10 @@ public class ExpenseAttribute {
 
   public ExpenseCategory expenseCategory() {
     return expenseCategory;
+  }
+
+  public long version() {
+    return version;
   }
 
   @Override

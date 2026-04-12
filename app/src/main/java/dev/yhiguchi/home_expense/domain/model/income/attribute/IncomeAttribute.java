@@ -8,11 +8,21 @@ public class IncomeAttribute {
 
   IncomeAttributeName incomeAttributeName;
 
+  long version;
+
   public IncomeAttribute(
       IncomeAttributeIdentifier incomeAttributeIdentifier,
       IncomeAttributeName incomeAttributeName) {
     this.incomeAttributeIdentifier = incomeAttributeIdentifier;
     this.incomeAttributeName = incomeAttributeName;
+  }
+
+  public IncomeAttribute(
+      IncomeAttributeIdentifier incomeAttributeIdentifier,
+      IncomeAttributeName incomeAttributeName,
+      long version) {
+    this(incomeAttributeIdentifier, incomeAttributeName);
+    this.version = version;
   }
 
   public IncomeAttribute() {}
@@ -27,6 +37,10 @@ public class IncomeAttribute {
 
   public IncomeAttributeName incomeAttributeName() {
     return incomeAttributeName;
+  }
+
+  public long version() {
+    return version;
   }
 
   @Override

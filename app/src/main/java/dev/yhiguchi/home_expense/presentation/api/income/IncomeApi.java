@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.presentation.api.income;
 
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeDeletionService;
-import dev.yhiguchi.home_expense.application.usecase.income.IncomeGettingService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeRegistrationService;
+import dev.yhiguchi.home_expense.application.usecase.income.IncomeRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeUpdateService;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
@@ -10,10 +10,12 @@ import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
-import dev.yhiguchi.home_expense.query.income.IncomeSummary;
-import dev.yhiguchi.home_expense.query.income.IncomeSummaryCriteria;
+import dev.yhiguchi.home_expense.query.income.IncomeSearchCriteria;
+import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -29,17 +31,17 @@ public class IncomeApi implements LinkHeaderCreatable {
   IncomeRegistrationService incomeRegistrationService;
   IncomeUpdateService incomeUpdateService;
   IncomeDeletionService incomeDeletionService;
-  IncomeGettingService incomeGettingService;
+  IncomeRetrievalService incomeRetrievalService;
 
   public IncomeApi(
       IncomeRegistrationService incomeRegistrationService,
       IncomeUpdateService incomeUpdateService,
       IncomeDeletionService incomeDeletionService,
-      IncomeGettingService incomeGettingService) {
+      IncomeRetrievalService incomeRetrievalService) {
     this.incomeRegistrationService = incomeRegistrationService;
     this.incomeUpdateService = incomeUpdateService;
     this.incomeDeletionService = incomeDeletionService;
-    this.incomeGettingService = incomeGettingService;
+    this.incomeRetrievalService = incomeRetrievalService;
   }
 
   @POST
@@ -58,7 +60,9 @@ public class IncomeApi implements LinkHeaderCreatable {
   @PUT
   @Path("{id}")
   @RunOnVirtualThread
-  public Response put(@PathParam("id") String id, @Valid IncomePutRequest request) {
+  public Response put(
+      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
+      @Valid IncomePutRequest request) {
     incomeUpdateService.update(
         new IncomeIdentifier(id),
         request.toDescription(),
@@ -71,7 +75,8 @@ public class IncomeApi implements LinkHeaderCreatable {
   @DELETE
   @Path("{id}")
   @RunOnVirtualThread
-  public Response delete(@PathParam("id") String id) {
+  public Response delete(
+      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
     incomeDeletionService.delete(new IncomeIdentifier(id));
     return Response.noContent().build();
   }
@@ -79,28 +84,34 @@ public class IncomeApi implements LinkHeaderCreatable {
   @GET
   @RunOnVirtualThread
   public Response get(
-      @QueryParam("page") @DefaultValue("1") Integer page,
-      @QueryParam("per_page") @DefaultValue("20") Integer perPage,
-      @QueryParam("year") Integer year,
+      @QueryParam("page") @DefaultValue("1") @Min(value = 1, message = "pageは1以上を指定してください")
+          Integer page,
+      @QueryParam("per_page")
+          @DefaultValue("20")
+          @Min(value = 1, message = "per_pageは1以上を指定してください")
+          @jakarta.validation.constraints.Max(value = 100, message = "per_pageは100以下を指定してください")
+          Integer perPage,
+      @QueryParam("year") @Min(value = 1, message = "yearは1以上を指定してください") Integer year,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    IncomeSummaryCriteria criteria = new IncomeSummaryCriteria(pagination, year);
-    IncomeSummary incomeSummary = incomeGettingService.findSummary(criteria);
+    IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, year);
+    IncomeSearchResult incomeSearchResult = incomeRetrievalService.search(criteria);
     IncomeGetListResponse response =
-        page <= incomeSummary.totalCount()
-            ? new IncomeGetListResponse(incomeSummary)
+        page <= incomeSearchResult.totalCount()
+            ? new IncomeGetListResponse(incomeSearchResult)
             : new IncomeGetListResponse();
     Response.ResponseBuilder responseBuilder = Response.ok(response);
     responseBuilder.header(
-        "Link", create(uriInfo, criteria.pagination(), incomeSummary.totalCount()));
+        "Link", create(uriInfo, criteria.pagination(), incomeSearchResult.totalCount()));
     return responseBuilder.build();
   }
 
   @GET
   @Path("{id}")
   @RunOnVirtualThread
-  public Response get(@PathParam("id") String id) {
-    Income income = incomeGettingService.get(new IncomeIdentifier(id));
+  public Response get(
+      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
+    Income income = incomeRetrievalService.get(new IncomeIdentifier(id));
     IncomeGetResponse response = IncomeGetResponse.from(income);
     return Response.ok(response).build();
   }

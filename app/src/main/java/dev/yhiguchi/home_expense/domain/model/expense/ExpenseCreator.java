@@ -26,7 +26,7 @@ public class ExpenseCreator {
     ExpenseIdentifier expenseIdentifier = new ExpenseIdentifier(UUID.randomUUID().toString());
     ExpenseAttribute expenseAttribute = getFn.apply(expenseAttributeIdentifier);
     Expense expense =
-        new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute);
+        new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute, 1L);
     registerFn.accept(expense);
     return expense;
   }

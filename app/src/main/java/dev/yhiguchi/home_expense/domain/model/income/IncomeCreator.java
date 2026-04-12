@@ -25,7 +25,8 @@ public class IncomeCreator {
       IncomeAttributeIdentifier incomeAttributeIdentifier) {
     IncomeIdentifier incomeIdentifier = new IncomeIdentifier(UUID.randomUUID().toString());
     IncomeAttribute incomeAttribute = getFn.apply(incomeAttributeIdentifier);
-    Income income = new Income(incomeIdentifier, description, amount, receiveDate, incomeAttribute);
+    Income income =
+        new Income(incomeIdentifier, description, amount, receiveDate, incomeAttribute, 1L);
     registerFn.accept(income);
     return income;
   }

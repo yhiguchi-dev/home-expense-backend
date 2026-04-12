@@ -8,6 +8,7 @@ public class PaymentDate {
   LocalDate value;
 
   public PaymentDate(LocalDate value) {
+    Objects.requireNonNull(value, "支払日は必須です");
     this.value = value;
   }
 

@@ -115,6 +115,94 @@ class IncomeApiTest {
   }
 
   @Test
+  void GET_per_pageが上限を超える場合バリデーションエラー() {
+    given()
+        .queryParam("per_page", 101)
+        .when()
+        .get("/v1/incomes")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Bad Request"))
+        .body("status", equalTo(400))
+        .body("detail", containsString("per_pageは100以下を指定してください"))
+        .body("instance", containsString("/v1/incomes"));
+  }
+
+  @Test
+  void POST_descriptionが512文字を超える場合バリデーションエラー() {
+    String longDescription = "あ".repeat(513);
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"description": "%s", "amount": 300000, "receive_date": "2026-04-25", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            """
+                .formatted(longDescription))
+        .when()
+        .post("/v1/incomes")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("descriptionは512文字以内で入力してください"));
+  }
+
+  @Test
+  void POST_attribute_idがUUID形式でない場合バリデーションエラー() {
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"description": "4月給与", "amount": 300000, "receive_date": "2026-04-25", "attribute_id": "invalid-uuid"}
+            """)
+        .when()
+        .post("/v1/incomes")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("attribute_idの形式に誤りがあります"));
+  }
+
+  @Test
+  void PUT_descriptionが512文字を超える場合バリデーションエラー() {
+    String longDescription = "あ".repeat(513);
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"description": "%s", "amount": 300000, "receive_date": "2026-04-25", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            """
+                .formatted(longDescription))
+        .when()
+        .put("/v1/incomes/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("descriptionは512文字以内で入力してください"));
+  }
+
+  @Test
+  void PUT_attribute_idがUUID形式でない場合バリデーションエラー() {
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"description": "4月給与", "amount": 300000, "receive_date": "2026-04-25", "attribute_id": "not-a-valid-uuid!"}
+            """)
+        .when()
+        .put("/v1/incomes/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("attribute_idの形式に誤りがあります"));
+  }
+
+  @Test
   void POST_必須項目が欠けている場合バリデーションエラー() {
     given()
         .contentType(ContentType.JSON)
@@ -125,6 +213,12 @@ class IncomeApiTest {
         .when()
         .post("/v1/incomes")
         .then()
-        .statusCode(400);
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Bad Request"))
+        .body("status", equalTo(400))
+        .body("detail", notNullValue())
+        .body("instance", containsString("/v1/incomes"));
   }
 }

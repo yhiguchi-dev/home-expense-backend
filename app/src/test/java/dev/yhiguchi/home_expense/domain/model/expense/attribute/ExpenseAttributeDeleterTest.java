@@ -38,7 +38,8 @@ class ExpenseAttributeDeleterTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute);
+            attribute,
+            1L);
     Expenses expensesWithAttribute = new Expenses(List.of(expense));
 
     ExpenseAttributeDeleter deleter =

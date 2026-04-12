@@ -7,6 +7,7 @@ public class ExpenseAttributeName {
   String value;
 
   public ExpenseAttributeName(String value) {
+    Objects.requireNonNull(value, "経費属性名は必須です");
     this.value = value;
   }
 

@@ -7,6 +7,9 @@ public class Price {
   int value;
 
   public Price(int value) {
+    if (value <= 0) {
+      throw new IllegalArgumentException("金額は正の値でなければなりません");
+    }
     this.value = value;
   }
 

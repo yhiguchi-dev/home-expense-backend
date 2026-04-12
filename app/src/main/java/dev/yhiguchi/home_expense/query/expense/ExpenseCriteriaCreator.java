@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class ExpenseCriteriaCreator {
 
-  public static ExpenseSummaryCriteria create(
+  public static ExpenseSearchCriteria create(
       Integer page,
       Integer perPage,
       Integer year,
@@ -21,9 +21,9 @@ public class ExpenseCriteriaCreator {
     if (Objects.nonNull(category)) {
       dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory expenseCategory =
           dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category);
-      return new ExpenseSummaryCriteria(
+      return new ExpenseSearchCriteria(
           pagination, year, month, expenseCategory, expenseAttributeIdentifier);
     }
-    return new ExpenseSummaryCriteria(pagination, year, month, expenseAttributeIdentifier);
+    return new ExpenseSearchCriteria(pagination, year, month, expenseAttributeIdentifier);
   }
 }

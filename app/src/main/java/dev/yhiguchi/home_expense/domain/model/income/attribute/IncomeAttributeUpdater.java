@@ -20,7 +20,9 @@ public class IncomeAttributeUpdater {
       IncomeAttributeIdentifier incomeAttributeIdentifier,
       IncomeAttributeName incomeAttributeName) {
     IncomeAttribute incomeAttribute = getFn.apply(incomeAttributeIdentifier);
-    IncomeAttribute updated = new IncomeAttribute(incomeAttributeIdentifier, incomeAttributeName);
+    IncomeAttribute updated =
+        new IncomeAttribute(
+            incomeAttributeIdentifier, incomeAttributeName, incomeAttribute.version());
     if (incomeAttribute.equals(updated)) {
       return;
     }

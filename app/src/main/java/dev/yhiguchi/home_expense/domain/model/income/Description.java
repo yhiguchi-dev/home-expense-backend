@@ -7,6 +7,7 @@ public class Description {
   String value;
 
   public Description(String value) {
+    Objects.requireNonNull(value, "説明は必須です");
     this.value = value;
   }
 
