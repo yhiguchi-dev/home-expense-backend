@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeRetri
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeUpdateService;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
@@ -59,9 +60,11 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response put(
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
-      @Valid IncomeAttributePutRequest request) {
+      @Valid IncomeAttributePutRequest request,
+      @HeaderParam("If-Match") String ifMatch) {
+    long version = IfMatchParser.parse(ifMatch);
     incomeAttributeUpdateService.update(
-        new IncomeAttributeIdentifier(id), request.toIncomeAttributeName());
+        new IncomeAttributeIdentifier(id), request.toIncomeAttributeName(), version);
     return Response.noContent().build();
   }
 
@@ -107,6 +110,6 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
     IncomeAttribute incomeAttribute =
         incomeAttributeRetrievalService.get(new IncomeAttributeIdentifier(id));
     IncomeAttributeGetResponse response = IncomeAttributeGetResponse.from(incomeAttribute);
-    return Response.ok(response).build();
+    return Response.ok(response).tag(String.valueOf(incomeAttribute.version())).build();
   }
 }

@@ -63,6 +63,7 @@ class ExpenseApiTest {
         .get("/v1/expenses/{id}", expenseId)
         .then()
         .statusCode(200)
+        .header("ETag", notNullValue())
         .body("id", equalTo(expenseId))
         .body("description", equalTo("ランチ"))
         .body("price", equalTo(1000))
@@ -79,8 +80,18 @@ class ExpenseApiTest {
   @Test
   @Order(4)
   void PUT_経費を更新できる() {
+    String etag =
+        given()
+            .when()
+            .get("/v1/expenses/{id}", expenseId)
+            .then()
+            .statusCode(200)
+            .extract()
+            .header("ETag");
+
     given()
         .contentType(ContentType.JSON)
+        .header("If-Match", etag)
         .body(
             """
             {"description": "ディナー", "price": 3000, "payment_date": "2026-04-10", "attribute_id": "%s"}
@@ -112,6 +123,55 @@ class ExpenseApiTest {
   void クリーンアップ_経費属性を削除する() {
     given().when().delete("/v1/expense-attributes/{id}", attributeId).then().statusCode(204);
     attributeId = null;
+  }
+
+  @Test
+  void GET_存在しない経費を取得すると404エラー() {
+    given()
+        .when()
+        .get("/v1/expenses/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(404)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Not Found"))
+        .body("status", equalTo(404))
+        .body("detail", equalTo("経費が見つかりません"));
+  }
+
+  @Test
+  void PUT_存在しない経費を更新すると404エラー() {
+    given()
+        .contentType(ContentType.JSON)
+        .header("If-Match", "\"1\"")
+        .body(
+            """
+            {"description": "テスト", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000001"}
+            """)
+        .when()
+        .put("/v1/expenses/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(404)
+        .contentType("application/problem+json")
+        .body("status", equalTo(404))
+        .body("detail", equalTo("経費が見つかりません"));
+  }
+
+  @Test
+  void POST_存在しない属性IDで経費を登録すると404エラー() {
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"description": "テスト", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            """)
+        .when()
+        .post("/v1/expenses")
+        .then()
+        .statusCode(404)
+        .contentType("application/problem+json")
+        .body("status", equalTo(404))
+        .body("detail", equalTo("経費属性が見つかりません"));
   }
 
   @Test
@@ -171,6 +231,7 @@ class ExpenseApiTest {
     String longDescription = "あ".repeat(513);
     given()
         .contentType(ContentType.JSON)
+        .header("If-Match", "\"1\"")
         .body(
             """
             {"description": "%s", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
@@ -189,6 +250,7 @@ class ExpenseApiTest {
   void PUT_attribute_idがUUID形式でない場合バリデーションエラー() {
     given()
         .contentType(ContentType.JSON)
+        .header("If-Match", "\"1\"")
         .body(
             """
             {"description": "ランチ", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "not-a-valid-uuid!"}

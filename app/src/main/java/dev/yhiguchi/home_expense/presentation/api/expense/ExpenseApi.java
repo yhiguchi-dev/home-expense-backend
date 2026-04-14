@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRetrievalSer
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
+import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteriaCreator;
@@ -61,13 +62,16 @@ public class ExpenseApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response put(
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
-      @Valid ExpensePutRequest request) {
+      @Valid ExpensePutRequest request,
+      @HeaderParam("If-Match") String ifMatch) {
+    long version = IfMatchParser.parse(ifMatch);
     expenseUpdateService.update(
         new ExpenseIdentifier(id),
         request.toDescription(),
         request.toPrice(),
         request.toPaymentDate(),
-        request.toExpenseAttributeIdentifier());
+        request.toExpenseAttributeIdentifier(),
+        version);
     return Response.noContent().build();
   }
 
@@ -118,6 +122,6 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
     Expense expense = expenseRetrievalService.get(new ExpenseIdentifier(id));
     ExpenseGetResponse response = ExpenseGetResponse.from(expense);
-    return Response.ok(response).build();
+    return Response.ok(response).tag(String.valueOf(expense.version())).build();
   }
 }

@@ -6,8 +6,6 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeId
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
@@ -24,14 +22,12 @@ public class IncomeRegistrationService {
 
   public IncomeIdentifier createAndRegister(
       Description description,
-      Amount price,
-      ReceiveDate paymentDate,
+      Amount amount,
+      ReceiveDate receiveDate,
       IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    Function<IncomeAttributeIdentifier, IncomeAttribute> getFn =
-        identifier -> incomeAttributeRepository.get(identifier);
-    Consumer<Income> registerFn = income -> incomeRepository.register(income);
-    IncomeCreator creator = new IncomeCreator(getFn, registerFn);
-    Income income = creator.create(description, price, paymentDate, incomeAttributeIdentifier);
+    IncomeAttribute attribute = incomeAttributeRepository.get(incomeAttributeIdentifier);
+    Income income = Income.create(description, amount, receiveDate, attribute);
+    incomeRepository.register(income);
     return income.incomeIdentifier();
   }
 }

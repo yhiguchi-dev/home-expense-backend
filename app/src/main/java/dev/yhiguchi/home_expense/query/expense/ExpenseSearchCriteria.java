@@ -70,7 +70,7 @@ public class ExpenseSearchCriteria {
   }
 
   public boolean hasExpenseAttributeIdentifier() {
-    return expenseAttributeIdentifier.exists();
+    return Objects.nonNull(expenseAttributeIdentifier);
   }
 
   public String getExpenseAttributeIdentifier() {

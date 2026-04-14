@@ -10,12 +10,6 @@ public class ExpenseAttributeIdentifier {
     this.value = value;
   }
 
-  ExpenseAttributeIdentifier() {}
-
-  public boolean exists() {
-    return Objects.nonNull(value);
-  }
-
   public String value() {
     return value;
   }

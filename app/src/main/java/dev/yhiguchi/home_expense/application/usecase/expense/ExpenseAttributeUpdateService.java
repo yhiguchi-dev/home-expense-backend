@@ -4,8 +4,6 @@ import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
@@ -20,11 +18,12 @@ public class ExpenseAttributeUpdateService {
   public void update(
       ExpenseAttributeIdentifier expenseAttributeIdentifier,
       ExpenseAttributeName expenseAttributeName,
-      ExpenseCategory expenseCategory) {
-    Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn =
-        identifier -> expenseAttributeRepository.get(identifier);
-    Consumer<ExpenseAttribute> updateFn = attribute -> expenseAttributeRepository.update(attribute);
-    ExpenseAttributeUpdater updater = new ExpenseAttributeUpdater(getFn, updateFn);
-    updater.update(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+      ExpenseCategory expenseCategory,
+      long version) {
+    ExpenseAttribute attribute = expenseAttributeRepository.get(expenseAttributeIdentifier);
+    ExpenseAttribute updated = attribute.updateWith(expenseAttributeName, expenseCategory);
+    if (attribute.hasChanges(updated)) {
+      expenseAttributeRepository.update(updated.withVersion(version));
+    }
   }
 }

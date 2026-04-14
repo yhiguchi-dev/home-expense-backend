@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
+import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,6 +17,8 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
     this.dataSource = dataSource;
   }
 
+  private static final String UNIQUE_VIOLATION = "23505";
+
   @Override
   public void register(IncomeAttribute incomeAttribute) {
     String sql = "INSERT INTO expense.income_attribute(id, name, version) VALUES (?, ?, ?)";
@@ -27,6 +29,9 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
       ps.setLong(3, incomeAttribute.version());
       ps.executeUpdate();
     } catch (SQLException e) {
+      if (UNIQUE_VIOLATION.equals(e.getSQLState())) {
+        throw new IncomeAttributeAlreadyExistsException();
+      }
       throw new DataAccessException(e);
     }
   }
@@ -42,9 +47,9 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
       ps.setLong(3, incomeAttribute.version());
       int rowCount = ps.executeUpdate();
       if (rowCount == 0) {
-        throw new OptimisticLockException();
+        throw new ConcurrentUpdateException();
       }
-    } catch (OptimisticLockException e) {
+    } catch (ConcurrentUpdateException e) {
       throw e;
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -70,16 +75,14 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   }
 
   @Override
-  public Optional<IncomeAttribute> find(IncomeAttributeName incomeAttributeName) {
-    String sql = "SELECT id, name, version FROM expense.income_attribute WHERE name = ?";
+  public boolean existsByName(IncomeAttributeName incomeAttributeName) {
+    String sql = "SELECT EXISTS(SELECT 1 FROM expense.income_attribute WHERE name = ?)";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, incomeAttributeName.value());
       try (ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-          return Optional.of(mapIncomeAttribute(rs));
-        }
-        return Optional.empty();
+        rs.next();
+        return rs.getBoolean(1);
       }
     } catch (SQLException e) {
       throw new DataAccessException(e);

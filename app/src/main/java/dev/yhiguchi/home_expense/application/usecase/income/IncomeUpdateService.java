@@ -6,8 +6,6 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeId
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
@@ -25,14 +23,15 @@ public class IncomeUpdateService {
   public void update(
       IncomeIdentifier incomeIdentifier,
       Description description,
-      Amount price,
+      Amount amount,
       ReceiveDate receiveDate,
-      IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    Function<IncomeIdentifier, Income> getFn = identifier -> incomeRepository.get(identifier);
-    Function<IncomeAttributeIdentifier, IncomeAttribute> getAttributeFn =
-        identifier -> incomeAttributeRepository.get(identifier);
-    Consumer<Income> updateFn = income -> incomeRepository.update(income);
-    IncomeUpdater updater = new IncomeUpdater(getFn, getAttributeFn, updateFn);
-    updater.update(incomeIdentifier, description, price, receiveDate, incomeAttributeIdentifier);
+      IncomeAttributeIdentifier incomeAttributeIdentifier,
+      long version) {
+    Income income = incomeRepository.get(incomeIdentifier);
+    IncomeAttribute attribute = incomeAttributeRepository.get(incomeAttributeIdentifier);
+    Income updated = income.updateWith(description, amount, receiveDate, attribute);
+    if (income.hasChanges(updated)) {
+      incomeRepository.update(updated.withVersion(version));
+    }
   }
 }

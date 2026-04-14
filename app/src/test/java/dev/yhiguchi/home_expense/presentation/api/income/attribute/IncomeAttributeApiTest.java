@@ -42,6 +42,7 @@ class IncomeAttributeApiTest {
         .get("/v1/income-attributes/{id}", createdId)
         .then()
         .statusCode(200)
+        .header("ETag", notNullValue())
         .body("id", equalTo(createdId))
         .body("name", equalTo("テスト収入属性A"));
   }
@@ -60,8 +61,18 @@ class IncomeAttributeApiTest {
   @Test
   @Order(4)
   void PUT_収入属性を更新できる() {
+    String etag =
+        given()
+            .when()
+            .get("/v1/income-attributes/{id}", createdId)
+            .then()
+            .statusCode(200)
+            .extract()
+            .header("ETag");
+
     given()
         .contentType(ContentType.JSON)
+        .header("If-Match", etag)
         .body(
             """
             {"name": "テスト収入属性A更新"}
@@ -108,6 +119,38 @@ class IncomeAttributeApiTest {
   }
 
   @Test
+  void GET_存在しない収入属性を取得すると404エラー() {
+    given()
+        .when()
+        .get("/v1/income-attributes/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(404)
+        .contentType("application/problem+json")
+        .body("type", equalTo("about:blank"))
+        .body("title", equalTo("Not Found"))
+        .body("status", equalTo(404))
+        .body("detail", equalTo("収入属性が見つかりません"));
+  }
+
+  @Test
+  void PUT_存在しない収入属性を更新すると404エラー() {
+    given()
+        .contentType(ContentType.JSON)
+        .header("If-Match", "\"1\"")
+        .body(
+            """
+            {"name": "テスト"}
+            """)
+        .when()
+        .put("/v1/income-attributes/{id}", "00000000-0000-0000-0000-000000000000")
+        .then()
+        .statusCode(404)
+        .contentType("application/problem+json")
+        .body("status", equalTo(404))
+        .body("detail", equalTo("収入属性が見つかりません"));
+  }
+
+  @Test
   void GET_per_pageが上限を超える場合バリデーションエラー() {
     given()
         .queryParam("per_page", 101)
@@ -147,6 +190,7 @@ class IncomeAttributeApiTest {
     String longName = "あ".repeat(513);
     given()
         .contentType(ContentType.JSON)
+        .header("If-Match", "\"1\"")
         .body(
             """
             {"name": "%s"}

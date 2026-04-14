@@ -17,7 +17,7 @@ public class ExpenseCriteriaCreator {
       String attributeId) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
-        new ExpenseAttributeIdentifier(attributeId);
+        Objects.nonNull(attributeId) ? new ExpenseAttributeIdentifier(attributeId) : null;
     if (Objects.nonNull(category)) {
       dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory expenseCategory =
           dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category);

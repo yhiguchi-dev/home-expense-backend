@@ -20,7 +20,7 @@ public record IncomePostRequest(
     @NotBlank(message = "receive_dateは必須入力です")
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "receive_dateの形式に誤りがあります")
         @JsonProperty("receive_date")
-        String paymentDate,
+        String receiveDate,
     @NotBlank(message = "attribute_idは必須入力です")
         @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "attribute_idの形式に誤りがあります")
         @JsonProperty("attribute_id")
@@ -34,7 +34,7 @@ public record IncomePostRequest(
   }
 
   ReceiveDate toReceiveDate() {
-    return new ReceiveDate(LocalDate.parse(paymentDate));
+    return new ReceiveDate(LocalDate.parse(receiveDate));
   }
 
   IncomeAttributeIdentifier toIncomeAttributeIdentifier() {

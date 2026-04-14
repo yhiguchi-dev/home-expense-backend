@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeRet
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.*;
@@ -60,11 +61,14 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response put(
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
-      @Valid ExpenseAttributePutRequest request) {
+      @Valid ExpenseAttributePutRequest request,
+      @HeaderParam("If-Match") String ifMatch) {
+    long version = IfMatchParser.parse(ifMatch);
     expenseAttributeUpdateService.update(
         new ExpenseAttributeIdentifier(id),
         request.toExpenseAttributeName(),
-        request.toExpenseCategory());
+        request.toExpenseCategory(),
+        version);
     return Response.noContent().build();
   }
 
@@ -116,6 +120,6 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
     ExpenseAttribute expenseAttribute =
         expenseAttributeRetrievalService.get(new ExpenseAttributeIdentifier(id));
     ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(expenseAttribute);
-    return Response.ok(response).build();
+    return Response.ok(response).tag(String.valueOf(expenseAttribute.version())).build();
   }
 }

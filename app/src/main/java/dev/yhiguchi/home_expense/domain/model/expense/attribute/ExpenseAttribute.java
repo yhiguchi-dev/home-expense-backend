@@ -2,10 +2,11 @@ package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import java.util.Objects;
+import java.util.UUID;
 
 /** 経費属性 */
 public class ExpenseAttribute {
-  ExpenseAttributeIdentifier expenseAttributeIdentifier = new ExpenseAttributeIdentifier();
+  ExpenseAttributeIdentifier expenseAttributeIdentifier;
   ExpenseAttributeName expenseAttributeName;
   ExpenseCategory expenseCategory;
   long version;
@@ -28,23 +29,37 @@ public class ExpenseAttribute {
     this.version = version;
   }
 
-  public ExpenseAttribute() {}
+  public static ExpenseAttribute create(
+      ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
+    ExpenseAttributeIdentifier expenseAttributeIdentifier =
+        new ExpenseAttributeIdentifier(UUID.randomUUID().toString());
+    return new ExpenseAttribute(
+        expenseAttributeIdentifier, expenseAttributeName, expenseCategory, 1L);
+  }
 
-  public boolean exists() {
-    return expenseAttributeIdentifier.exists();
+  public ExpenseAttribute updateWith(
+      ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
+    return new ExpenseAttribute(
+        this.expenseAttributeIdentifier, expenseAttributeName, expenseCategory, this.version);
+  }
+
+  /** 指定したバージョンを持つExpenseAttributeを返す */
+  public ExpenseAttribute withVersion(long version) {
+    return new ExpenseAttribute(
+        this.expenseAttributeIdentifier, this.expenseAttributeName, this.expenseCategory, version);
+  }
+
+  /** 属性値に変更があるか判定する */
+  public boolean hasChanges(ExpenseAttribute other) {
+    return !Objects.equals(expenseAttributeName, other.expenseAttributeName)
+        || expenseCategory != other.expenseCategory;
   }
 
   public boolean isFixed() {
-    if (!exists()) {
-      return false;
-    }
     return expenseCategory.isFixed();
   }
 
   public boolean isVariable() {
-    if (!exists()) {
-      return false;
-    }
     return expenseCategory.isVariable();
   }
 
@@ -69,13 +84,11 @@ public class ExpenseAttribute {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     ExpenseAttribute that = (ExpenseAttribute) o;
-    return Objects.equals(expenseAttributeIdentifier, that.expenseAttributeIdentifier)
-        && Objects.equals(expenseAttributeName, that.expenseAttributeName)
-        && expenseCategory == that.expenseCategory;
+    return Objects.equals(expenseAttributeIdentifier, that.expenseAttributeIdentifier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+    return Objects.hash(expenseAttributeIdentifier);
   }
 }

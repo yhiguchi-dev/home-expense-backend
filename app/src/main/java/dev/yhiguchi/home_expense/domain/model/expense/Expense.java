@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.domain.model.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import java.util.Objects;
+import java.util.UUID;
 
 /** 経費 */
 public class Expense {
@@ -13,7 +14,7 @@ public class Expense {
 
   PaymentDate paymentDate;
 
-  ExpenseAttribute expenseAttribute = new ExpenseAttribute();
+  ExpenseAttribute expenseAttribute;
 
   long version;
 
@@ -32,7 +33,42 @@ public class Expense {
     this.version = version;
   }
 
-  public Expense() {}
+  public static Expense create(
+      Description description,
+      Price price,
+      PaymentDate paymentDate,
+      ExpenseAttribute expenseAttribute) {
+    ExpenseIdentifier expenseIdentifier = new ExpenseIdentifier(UUID.randomUUID().toString());
+    return new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute, 1L);
+  }
+
+  public Expense updateWith(
+      Description description,
+      Price price,
+      PaymentDate paymentDate,
+      ExpenseAttribute expenseAttribute) {
+    return new Expense(
+        this.expenseIdentifier, description, price, paymentDate, expenseAttribute, this.version);
+  }
+
+  /** 指定したバージョンを持つExpenseを返す */
+  public Expense withVersion(long version) {
+    return new Expense(
+        this.expenseIdentifier,
+        this.description,
+        this.price,
+        this.paymentDate,
+        this.expenseAttribute,
+        version);
+  }
+
+  /** 属性値に変更があるか判定する */
+  public boolean hasChanges(Expense other) {
+    return !Objects.equals(description, other.description)
+        || !Objects.equals(price, other.price)
+        || !Objects.equals(paymentDate, other.paymentDate)
+        || !Objects.equals(expenseAttribute, other.expenseAttribute);
+  }
 
   public boolean isFixed() {
     return expenseAttribute.isFixed();
@@ -71,15 +107,11 @@ public class Expense {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Expense expense = (Expense) o;
-    return Objects.equals(expenseIdentifier, expense.expenseIdentifier)
-        && Objects.equals(description, expense.description)
-        && Objects.equals(price, expense.price)
-        && Objects.equals(paymentDate, expense.paymentDate)
-        && Objects.equals(expenseAttribute, expense.expenseAttribute);
+    return Objects.equals(expenseIdentifier, expense.expenseIdentifier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(expenseIdentifier, description, price, paymentDate, expenseAttribute);
+    return Objects.hash(expenseIdentifier);
   }
 }

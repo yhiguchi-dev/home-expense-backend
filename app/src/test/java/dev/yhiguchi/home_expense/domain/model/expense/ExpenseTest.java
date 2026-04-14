@@ -47,15 +47,7 @@ class ExpenseTest {
   }
 
   @Test
-  void 属性未設定の場合どちらもfalseを返す() {
-    Expense expense = new Expense();
-
-    assertFalse(expense.isFixed());
-    assertFalse(expense.isVariable());
-  }
-
-  @Test
-  void 同値のExpenseはequalsがtrueを返す() {
+  void 同一識別子のExpenseはequalsがtrueを返す() {
     ExpenseAttribute attribute =
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
@@ -72,13 +64,116 @@ class ExpenseTest {
     Expense expense2 =
         new Expense(
             new ExpenseIdentifier("exp-1"),
+            new Description("ディナー"),
+            new Price(2000),
+            new PaymentDate(LocalDate.of(2026, 4, 2)),
+            attribute,
+            2L);
+
+    assertEquals(expense1, expense2);
+    assertEquals(expense1.hashCode(), expense2.hashCode());
+  }
+
+  @Test
+  void createでUUIDが生成されversion1のExpenseが作成される() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+
+    Expense expense =
+        Expense.create(
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 10)),
+            attribute);
+
+    assertNotNull(expense.expenseIdentifier().value());
+    assertEquals("ランチ", expense.description().value());
+    assertEquals(1000, expense.price().value());
+    assertEquals("2026-04-10", expense.paymentDate().value());
+    assertEquals(attribute, expense.expenseAttribute());
+    assertEquals(1L, expense.version());
+  }
+
+  @Test
+  void createで毎回異なるUUIDが生成される() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+
+    Expense expense1 =
+        Expense.create(
+            new Description("test"),
+            new Price(100),
+            new PaymentDate(LocalDate.of(2026, 1, 1)),
+            attribute);
+    Expense expense2 =
+        Expense.create(
+            new Description("test"),
+            new Price(100),
+            new PaymentDate(LocalDate.of(2026, 1, 1)),
+            attribute);
+
+    assertNotEquals(expense1.expenseIdentifier(), expense2.expenseIdentifier());
+  }
+
+  @Test
+  void updateWithで新しい値を持つExpenseを返す() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute,
+            3L);
+
+    Expense updated =
+        expense.updateWith(
+            new Description("ディナー"),
+            new Price(2000),
+            new PaymentDate(LocalDate.of(2026, 4, 2)),
+            attribute);
+
+    assertEquals("exp-1", updated.expenseIdentifier().value());
+    assertEquals("ディナー", updated.description().value());
+    assertEquals(2000, updated.price().value());
+    assertEquals(3L, updated.version());
+    assertTrue(expense.hasChanges(updated));
+  }
+
+  @Test
+  void updateWithで同じ値の場合はhasChangesがfalseを返す() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             attribute,
             1L);
 
-    assertEquals(expense1, expense2);
-    assertEquals(expense1.hashCode(), expense2.hashCode());
+    Expense updated =
+        expense.updateWith(
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute);
+
+    assertFalse(expense.hasChanges(updated));
   }
 }

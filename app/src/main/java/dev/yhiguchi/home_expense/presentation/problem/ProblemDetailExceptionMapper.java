@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.presentation.problem;
 
-import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
+import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
@@ -9,6 +9,8 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeAl
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.presentation.api.InvalidIfMatchException;
+import dev.yhiguchi.home_expense.presentation.api.PreconditionRequiredException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -33,6 +35,12 @@ public class ProblemDetailExceptionMapper {
   public RestResponse<ProblemDetail> mapExpenseAttributeNotFoundException(
       ExpenseAttributeNotFoundException e) {
     return toResponse(Response.Status.NOT_FOUND, "経費属性が見つかりません");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<ProblemDetail> mapIncomeNotFoundException(
+      dev.yhiguchi.home_expense.domain.model.income.IncomeNotFoundException e) {
+    return toResponse(Response.Status.NOT_FOUND, "収入が見つかりません");
   }
 
   @ServerExceptionMapper
@@ -76,8 +84,19 @@ public class ProblemDetailExceptionMapper {
   }
 
   @ServerExceptionMapper
-  public RestResponse<ProblemDetail> mapOptimisticLockException(OptimisticLockException e) {
+  public RestResponse<ProblemDetail> mapConcurrentUpdateException(ConcurrentUpdateException e) {
     return toResponse(Response.Status.CONFLICT, "他のユーザーによって更新されています。再度取得してからやり直してください");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<ProblemDetail> mapPreconditionRequiredException(
+      PreconditionRequiredException e) {
+    return toResponse(428, "Precondition Required", "If-Matchヘッダーは必須です");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<ProblemDetail> mapInvalidIfMatchException(InvalidIfMatchException e) {
+    return toResponse(Response.Status.BAD_REQUEST, "If-Matchヘッダーの形式が不正です");
   }
 
   @ServerExceptionMapper
@@ -86,10 +105,14 @@ public class ProblemDetailExceptionMapper {
   }
 
   private RestResponse<ProblemDetail> toResponse(Response.Status status, String detail) {
+    return toResponse(status.getStatusCode(), status.getReasonPhrase(), detail);
+  }
+
+  private RestResponse<ProblemDetail> toResponse(int statusCode, String title, String detail) {
     URI instance = uriInfo.getRequestUri();
-    ProblemDetail problemDetail =
-        ProblemDetail.of(status.getStatusCode(), status.getReasonPhrase(), detail, instance);
-    return RestResponse.ResponseBuilder.create(status, problemDetail)
+    ProblemDetail problemDetail = ProblemDetail.of(statusCode, title, detail, instance);
+    return RestResponse.ResponseBuilder.create(
+            RestResponse.Status.fromStatusCode(statusCode), problemDetail)
         .header("Content-Type", PROBLEM_JSON)
         .build();
   }

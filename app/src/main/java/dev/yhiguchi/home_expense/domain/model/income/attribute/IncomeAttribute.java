@@ -1,10 +1,11 @@
 package dev.yhiguchi.home_expense.domain.model.income.attribute;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /** 収入属性 */
 public class IncomeAttribute {
-  IncomeAttributeIdentifier incomeAttributeIdentifier = new IncomeAttributeIdentifier();
+  IncomeAttributeIdentifier incomeAttributeIdentifier;
 
   IncomeAttributeName incomeAttributeName;
 
@@ -25,10 +26,24 @@ public class IncomeAttribute {
     this.version = version;
   }
 
-  public IncomeAttribute() {}
+  public static IncomeAttribute create(IncomeAttributeName incomeAttributeName) {
+    IncomeAttributeIdentifier incomeAttributeIdentifier =
+        new IncomeAttributeIdentifier(UUID.randomUUID().toString());
+    return new IncomeAttribute(incomeAttributeIdentifier, incomeAttributeName, 1L);
+  }
 
-  public boolean exists() {
-    return incomeAttributeIdentifier().exists();
+  public IncomeAttribute updateWith(IncomeAttributeName incomeAttributeName) {
+    return new IncomeAttribute(this.incomeAttributeIdentifier, incomeAttributeName, this.version);
+  }
+
+  /** 指定したバージョンを持つIncomeAttributeを返す */
+  public IncomeAttribute withVersion(long version) {
+    return new IncomeAttribute(this.incomeAttributeIdentifier, this.incomeAttributeName, version);
+  }
+
+  /** 属性値に変更があるか判定する */
+  public boolean hasChanges(IncomeAttribute other) {
+    return !Objects.equals(incomeAttributeName, other.incomeAttributeName);
   }
 
   public IncomeAttributeIdentifier incomeAttributeIdentifier() {
@@ -48,12 +63,11 @@ public class IncomeAttribute {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     IncomeAttribute that = (IncomeAttribute) o;
-    return Objects.equals(incomeAttributeIdentifier, that.incomeAttributeIdentifier)
-        && Objects.equals(incomeAttributeName, that.incomeAttributeName);
+    return Objects.equals(incomeAttributeIdentifier, that.incomeAttributeIdentifier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(incomeAttributeIdentifier, incomeAttributeName);
+    return Objects.hash(incomeAttributeIdentifier);
   }
 }

@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
-import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
+import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -64,11 +64,6 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   @Override
-  public Optional<Expense> find(ExpenseIdentifier expenseIdentifier) {
-    return selectBy(expenseIdentifier);
-  }
-
-  @Override
   public Expenses find(ExpenseAttribute expenseAttribute) {
     String sql =
         """
@@ -126,7 +121,7 @@ public class ExpenseDataSource implements ExpenseRepository {
         ps.setLong(5, expense.version());
         int rowCount = ps.executeUpdate();
         if (rowCount == 0) {
-          throw new OptimisticLockException();
+          throw new ConcurrentUpdateException();
         }
       }
       try (PreparedStatement ps =
@@ -157,7 +152,7 @@ public class ExpenseDataSource implements ExpenseRepository {
           ps.executeUpdate();
         }
       }
-    } catch (OptimisticLockException e) {
+    } catch (ConcurrentUpdateException e) {
       throw e;
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -193,7 +188,7 @@ public class ExpenseDataSource implements ExpenseRepository {
           ON expense.id = fixed_expense.expense_id
         LEFT JOIN variable_expense
           ON expense.id = variable_expense.expense_id
-        LEFT JOIN attribute
+        JOIN attribute
           ON attribute.id = fixed_expense.attribute_id
             OR attribute.id = variable_expense.attribute_id
         WHERE expense.id = ?
@@ -213,17 +208,11 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   static Expense mapExpense(ResultSet rs) throws SQLException {
-    String attributeId = rs.getString("attribute_id");
-    ExpenseAttribute expenseAttribute;
-    if (attributeId != null) {
-      expenseAttribute =
-          new ExpenseAttribute(
-              new ExpenseAttributeIdentifier(attributeId),
-              new ExpenseAttributeName(rs.getString("attribute_name")),
-              ExpenseCategory.valueOf(rs.getString("category")));
-    } else {
-      expenseAttribute = new ExpenseAttribute();
-    }
+    ExpenseAttribute expenseAttribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier(rs.getString("attribute_id")),
+            new ExpenseAttributeName(rs.getString("attribute_name")),
+            ExpenseCategory.valueOf(rs.getString("category")));
     return new Expense(
         new ExpenseIdentifier(rs.getString("id")),
         new Description(rs.getString("description")),

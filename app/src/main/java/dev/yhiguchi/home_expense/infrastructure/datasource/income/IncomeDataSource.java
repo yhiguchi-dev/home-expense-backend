@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
-import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
+import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -57,9 +57,9 @@ public class IncomeDataSource implements IncomeRepository {
       ps.setLong(6, income.version());
       int rowCount = ps.executeUpdate();
       if (rowCount == 0) {
-        throw new OptimisticLockException();
+        throw new ConcurrentUpdateException();
       }
-    } catch (OptimisticLockException e) {
+    } catch (ConcurrentUpdateException e) {
       throw e;
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -80,7 +80,7 @@ public class IncomeDataSource implements IncomeRepository {
 
   @Override
   public Income get(IncomeIdentifier incomeIdentifier) {
-    return selectBy(incomeIdentifier).orElseThrow();
+    return selectBy(incomeIdentifier).orElseThrow(IncomeNotFoundException::new);
   }
 
   @Override
@@ -96,7 +96,7 @@ public class IncomeDataSource implements IncomeRepository {
           income_attribute.id AS attribute_id,
           income_attribute.name AS attribute_name
         FROM expense.income
-        LEFT JOIN expense.income_attribute
+        JOIN expense.income_attribute
           ON income_attribute.id = income.attribute_id
         WHERE income_attribute.id = ?
         """;
@@ -130,7 +130,7 @@ public class IncomeDataSource implements IncomeRepository {
           income_attribute.id AS attribute_id,
           income_attribute.name AS attribute_name
         FROM expense.income
-        LEFT JOIN expense.income_attribute
+        JOIN expense.income_attribute
           ON income_attribute.id = income.attribute_id
         WHERE income.id = ?
         """;
@@ -149,16 +149,10 @@ public class IncomeDataSource implements IncomeRepository {
   }
 
   static Income mapIncome(ResultSet rs) throws SQLException {
-    String attributeId = rs.getString("attribute_id");
-    IncomeAttribute incomeAttribute;
-    if (attributeId != null) {
-      incomeAttribute =
-          new IncomeAttribute(
-              new IncomeAttributeIdentifier(attributeId),
-              new IncomeAttributeName(rs.getString("attribute_name")));
-    } else {
-      incomeAttribute = new IncomeAttribute();
-    }
+    IncomeAttribute incomeAttribute =
+        new IncomeAttribute(
+            new IncomeAttributeIdentifier(rs.getString("attribute_id")),
+            new IncomeAttributeName(rs.getString("attribute_name")));
     return new Income(
         new IncomeIdentifier(rs.getString("id")),
         new Description(rs.getString("description")),

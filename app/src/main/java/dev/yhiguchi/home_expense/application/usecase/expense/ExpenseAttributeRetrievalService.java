@@ -7,10 +7,8 @@ import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchC
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResult;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
-@Transactional
 public class ExpenseAttributeRetrievalService {
 
   ExpenseAttributeRepository expenseAttributeRepository;

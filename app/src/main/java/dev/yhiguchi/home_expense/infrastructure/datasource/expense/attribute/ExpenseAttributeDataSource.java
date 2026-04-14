@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.OptimisticLockException;
+import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -18,6 +18,8 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
     this.dataSource = dataSource;
   }
 
+  private static final String UNIQUE_VIOLATION = "23505";
+
   @Override
   public void register(ExpenseAttribute expenseAttribute) {
     String sql = "INSERT INTO expense.attribute(id, category, name, version) VALUES (?, ?, ?, ?)";
@@ -29,6 +31,9 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
       ps.setLong(4, expenseAttribute.version());
       ps.executeUpdate();
     } catch (SQLException e) {
+      if (UNIQUE_VIOLATION.equals(e.getSQLState())) {
+        throw new ExpenseAttributeAlreadyExistsException();
+      }
       throw new DataAccessException(e);
     }
   }
@@ -40,16 +45,14 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
   }
 
   @Override
-  public Optional<ExpenseAttribute> find(ExpenseAttributeName expenseAttributeName) {
-    String sql = "SELECT id, category, name, version FROM expense.attribute WHERE name = ?";
+  public boolean existsByName(ExpenseAttributeName expenseAttributeName) {
+    String sql = "SELECT EXISTS(SELECT 1 FROM expense.attribute WHERE name = ?)";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, expenseAttributeName.value());
       try (ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-          return Optional.of(mapExpenseAttribute(rs));
-        }
-        return Optional.empty();
+        rs.next();
+        return rs.getBoolean(1);
       }
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -68,9 +71,9 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
       ps.setLong(4, expenseAttribute.version());
       int rowCount = ps.executeUpdate();
       if (rowCount == 0) {
-        throw new OptimisticLockException();
+        throw new ConcurrentUpdateException();
       }
-    } catch (OptimisticLockException e) {
+    } catch (ConcurrentUpdateException e) {
       throw e;
     } catch (SQLException e) {
       throw new DataAccessException(e);

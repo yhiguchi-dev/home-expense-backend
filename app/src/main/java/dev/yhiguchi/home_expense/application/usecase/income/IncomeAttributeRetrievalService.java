@@ -7,10 +7,8 @@ import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchCri
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResult;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
-@Transactional
 public class IncomeAttributeRetrievalService {
 
   IncomeAttributeRepository incomeAttributeRepository;

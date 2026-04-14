@@ -10,12 +10,6 @@ public class IncomeAttributeIdentifier {
     this.value = value;
   }
 
-  IncomeAttributeIdentifier() {}
-
-  public boolean exists() {
-    return Objects.nonNull(value);
-  }
-
   public String value() {
     return value;
   }

@@ -7,10 +7,8 @@ import dev.yhiguchi.home_expense.query.income.IncomeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 
 @ApplicationScoped
-@Transactional
 public class IncomeRetrievalService {
 
   IncomeRepository incomeRepository;
