@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseRepository;
 import java.time.LocalDate;
@@ -73,5 +74,45 @@ class ExpenseUpdateServiceTest {
 
     Expense result = expenseRepository.get(new ExpenseIdentifier("exp-1"));
     assertSame(existing, result);
+  }
+
+  @Test
+  void 存在しない経費を更新すると例外をスローする() {
+    attributeRepository.register(attribute);
+
+    assertThrows(
+        ExpenseNotFoundException.class,
+        () ->
+            sut.update(
+                new ExpenseIdentifier("not-exist"),
+                new Description("ランチ"),
+                new Price(1000),
+                new PaymentDate(LocalDate.of(2026, 4, 1)),
+                new ExpenseAttributeIdentifier("attr-1"),
+                1L));
+  }
+
+  @Test
+  void 存在しない属性IDで更新すると例外をスローする() {
+    Expense existing =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute,
+            1L);
+    expenseRepository.register(existing);
+
+    assertThrows(
+        ExpenseAttributeNotFoundException.class,
+        () ->
+            sut.update(
+                new ExpenseIdentifier("exp-1"),
+                new Description("ディナー"),
+                new Price(2000),
+                new PaymentDate(LocalDate.of(2026, 4, 2)),
+                new ExpenseAttributeIdentifier("not-exist"),
+                1L));
   }
 }

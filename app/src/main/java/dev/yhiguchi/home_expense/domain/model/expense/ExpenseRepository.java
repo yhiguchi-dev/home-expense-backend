@@ -13,5 +13,5 @@ public interface ExpenseRepository {
 
   void update(Expense expense);
 
-  void delete(ExpenseIdentifier expenseIdentifier);
+  void delete(Expense expense);
 }

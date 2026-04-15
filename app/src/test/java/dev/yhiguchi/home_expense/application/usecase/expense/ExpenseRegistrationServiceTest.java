@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseRepository;
 import java.time.LocalDate;
@@ -28,7 +29,7 @@ class ExpenseRegistrationServiceTest {
     attributeRepository.register(attribute);
 
     ExpenseIdentifier result =
-        sut.createAndRegister(
+        sut.register(
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
@@ -41,5 +42,17 @@ class ExpenseRegistrationServiceTest {
     assertEquals(1000, registered.price().value());
     assertEquals(attribute, registered.expenseAttribute());
     assertEquals(1L, registered.version());
+  }
+
+  @Test
+  void 存在しない属性IDで登録すると例外をスローする() {
+    assertThrows(
+        ExpenseAttributeNotFoundException.class,
+        () ->
+            sut.register(
+                new Description("ランチ"),
+                new Price(1000),
+                new PaymentDate(LocalDate.of(2026, 4, 10)),
+                new ExpenseAttributeIdentifier("not-exist")));
   }
 }

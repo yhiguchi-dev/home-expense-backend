@@ -3,7 +3,7 @@ package dev.yhiguchi.home_expense.presentation.api.income;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 
-record IncomeGetResponse(
+public record IncomeGetResponse(
     @JsonProperty("id") String id,
     @JsonProperty("description") String description,
     @JsonProperty("amount") Integer amount,

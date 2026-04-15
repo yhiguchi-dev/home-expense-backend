@@ -49,7 +49,7 @@ public class IncomeApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response post(@Valid IncomePostRequest request, @Context UriInfo uriInfo) {
     IncomeIdentifier incomeIdentifier =
-        incomeRegistrationService.createAndRegister(
+        incomeRegistrationService.register(
             request.toDescription(),
             request.toAmount(),
             request.toReceiveDate(),

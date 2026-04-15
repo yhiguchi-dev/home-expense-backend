@@ -9,15 +9,17 @@ import jakarta.transaction.Transactional;
 public class IncomeAttributeRegistrationService {
 
   IncomeAttributeRepository incomeAttributeRepository;
+  IncomeAttributeNameUniqueness incomeAttributeNameUniqueness;
 
-  public IncomeAttributeRegistrationService(IncomeAttributeRepository incomeAttributeRepository) {
+  public IncomeAttributeRegistrationService(
+      IncomeAttributeRepository incomeAttributeRepository) {
     this.incomeAttributeRepository = incomeAttributeRepository;
+    this.incomeAttributeNameUniqueness =
+        new IncomeAttributeNameUniqueness(incomeAttributeRepository::existsByName);
   }
 
-  public IncomeAttributeIdentifier createAndRegister(IncomeAttributeName incomeAttributeName) {
-    if (incomeAttributeRepository.existsByName(incomeAttributeName)) {
-      throw new IncomeAttributeAlreadyExistsException();
-    }
+  public IncomeAttributeIdentifier register(IncomeAttributeName incomeAttributeName) {
+    incomeAttributeNameUniqueness.assertUnique(incomeAttributeName);
     IncomeAttribute incomeAttribute = IncomeAttribute.create(incomeAttributeName);
     incomeAttributeRepository.register(incomeAttribute);
     return incomeAttribute.incomeAttributeIdentifier();

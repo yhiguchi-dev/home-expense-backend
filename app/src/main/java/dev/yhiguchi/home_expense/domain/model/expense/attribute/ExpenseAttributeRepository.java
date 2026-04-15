@@ -10,5 +10,5 @@ public interface ExpenseAttributeRepository {
 
   void update(ExpenseAttribute expenseAttribute);
 
-  void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier);
+  void delete(ExpenseAttribute expenseAttribute);
 }

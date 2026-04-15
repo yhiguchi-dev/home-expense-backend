@@ -14,7 +14,7 @@ class IncomeAttributeRegistrationServiceTest {
 
   @Test
   void 収入属性を作成して登録する() {
-    IncomeAttributeIdentifier result = sut.createAndRegister(new IncomeAttributeName("給与"));
+    IncomeAttributeIdentifier result = sut.register(new IncomeAttributeName("給与"));
 
     assertNotNull(result);
     assertEquals(1, attributeRepository.all().size());
@@ -31,6 +31,6 @@ class IncomeAttributeRegistrationServiceTest {
 
     assertThrows(
         IncomeAttributeAlreadyExistsException.class,
-        () -> sut.createAndRegister(new IncomeAttributeName("給与")));
+        () -> sut.register(new IncomeAttributeName("給与")));
   }
 }

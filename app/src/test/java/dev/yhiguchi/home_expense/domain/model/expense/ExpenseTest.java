@@ -176,4 +176,113 @@ class ExpenseTest {
 
     assertFalse(expense.hasChanges(updated));
   }
+
+  @Test
+  void hasChangesはdescriptionのみ変更された場合trueを返す() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute,
+            1L);
+
+    Expense updated =
+        expense.updateWith(
+            new Description("ディナー"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute);
+
+    assertTrue(expense.hasChanges(updated));
+  }
+
+  @Test
+  void hasChangesはpriceのみ変更された場合trueを返す() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute,
+            1L);
+
+    Expense updated =
+        expense.updateWith(
+            new Description("ランチ"),
+            new Price(2000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute);
+
+    assertTrue(expense.hasChanges(updated));
+  }
+
+  @Test
+  void hasChangesはpaymentDateのみ変更された場合trueを返す() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute,
+            1L);
+
+    Expense updated =
+        expense.updateWith(
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 2)),
+            attribute);
+
+    assertTrue(expense.hasChanges(updated));
+  }
+
+  @Test
+  void hasChangesはexpenseAttributeのみ変更された場合trueを返す() {
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費);
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            attribute,
+            1L);
+
+    ExpenseAttribute otherAttribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier("attr-2"),
+            new ExpenseAttributeName("交通費"),
+            ExpenseCategory.変動費);
+    Expense updated =
+        expense.updateWith(
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            otherAttribute);
+
+    assertTrue(expense.hasChanges(updated));
+  }
 }

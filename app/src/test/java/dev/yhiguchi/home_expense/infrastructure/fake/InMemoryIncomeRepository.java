@@ -20,8 +20,8 @@ public class InMemoryIncomeRepository implements IncomeRepository {
   }
 
   @Override
-  public void delete(IncomeIdentifier incomeIdentifier) {
-    store.remove(incomeIdentifier.value());
+  public void delete(Income income) {
+    store.remove(income.incomeIdentifier().value());
   }
 
   @Override

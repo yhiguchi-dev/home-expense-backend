@@ -10,17 +10,18 @@ import jakarta.transaction.Transactional;
 public class ExpenseAttributeRegistrationService {
 
   ExpenseAttributeRepository expenseAttributeRepository;
+  ExpenseAttributeNameUniqueness expenseAttributeNameUniqueness;
 
   public ExpenseAttributeRegistrationService(
       ExpenseAttributeRepository expenseAttributeRepository) {
     this.expenseAttributeRepository = expenseAttributeRepository;
+    this.expenseAttributeNameUniqueness =
+        new ExpenseAttributeNameUniqueness(expenseAttributeRepository::existsByName);
   }
 
-  public ExpenseAttributeIdentifier createAndRegister(
+  public ExpenseAttributeIdentifier register(
       ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
-    if (expenseAttributeRepository.existsByName(expenseAttributeName)) {
-      throw new ExpenseAttributeAlreadyExistsException();
-    }
+    expenseAttributeNameUniqueness.assertUnique(expenseAttributeName);
     ExpenseAttribute expenseAttribute =
         ExpenseAttribute.create(expenseAttributeName, expenseCategory);
     expenseAttributeRepository.register(expenseAttribute);

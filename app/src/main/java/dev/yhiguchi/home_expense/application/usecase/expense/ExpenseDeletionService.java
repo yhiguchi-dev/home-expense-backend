@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
+import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +17,7 @@ public class ExpenseDeletionService {
   }
 
   public void delete(ExpenseIdentifier expenseIdentifier) {
-    expenseRepository.get(expenseIdentifier);
-    expenseRepository.delete(expenseIdentifier);
+    Expense expense = expenseRepository.get(expenseIdentifier);
+    expenseRepository.delete(expense);
   }
 }

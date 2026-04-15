@@ -67,11 +67,11 @@ public class IncomeDataSource implements IncomeRepository {
   }
 
   @Override
-  public void delete(IncomeIdentifier incomeIdentifier) {
+  public void delete(Income income) {
     String sql = "DELETE FROM expense.income WHERE income.id = ?";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, incomeIdentifier.value());
+      ps.setString(1, income.incomeIdentifier().value());
       ps.executeUpdate();
     } catch (SQLException e) {
       throw new DataAccessException(e);

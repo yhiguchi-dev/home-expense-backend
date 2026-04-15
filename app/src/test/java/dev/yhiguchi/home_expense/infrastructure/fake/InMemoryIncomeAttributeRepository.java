@@ -20,8 +20,8 @@ public class InMemoryIncomeAttributeRepository implements IncomeAttributeReposit
   }
 
   @Override
-  public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    store.remove(incomeAttributeIdentifier.value());
+  public void delete(IncomeAttribute incomeAttribute) {
+    store.remove(incomeAttribute.incomeAttributeIdentifier().value());
   }
 
   @Override

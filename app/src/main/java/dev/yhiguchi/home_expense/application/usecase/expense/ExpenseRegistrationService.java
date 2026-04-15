@@ -20,7 +20,7 @@ public class ExpenseRegistrationService {
     this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
-  public ExpenseIdentifier createAndRegister(
+  public ExpenseIdentifier register(
       Description description,
       Price price,
       PaymentDate paymentDate,

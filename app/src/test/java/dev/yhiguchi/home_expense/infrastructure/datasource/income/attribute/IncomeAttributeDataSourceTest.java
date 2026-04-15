@@ -96,7 +96,7 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("その他");
     sut.register(attribute);
 
-    sut.delete(attribute.incomeAttributeIdentifier());
+    sut.delete(attribute);
     assertThrows(
         IncomeAttributeNotFoundException.class,
         () -> sut.get(attribute.incomeAttributeIdentifier()));

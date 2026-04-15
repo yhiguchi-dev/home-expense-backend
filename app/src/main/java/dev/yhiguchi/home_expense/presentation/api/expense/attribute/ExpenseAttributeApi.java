@@ -50,7 +50,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response post(@Valid ExpenseAttributePostRequest request, @Context UriInfo uriInfo) {
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
-        expenseAttributeRegistrationService.createAndRegister(
+        expenseAttributeRegistrationService.register(
             request.toExpenseAttributeName(), request.toExpenseCategory());
     URI uri = uriInfo.getAbsolutePathBuilder().path(expenseAttributeIdentifier.value()).build();
     return Response.created(uri).build();

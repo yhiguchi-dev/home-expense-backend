@@ -6,7 +6,7 @@ public interface IncomeAttributeRepository {
 
   void update(IncomeAttribute incomeAttribute);
 
-  void delete(IncomeAttributeIdentifier incomeAttributeIdentifier);
+  void delete(IncomeAttribute incomeAttribute);
 
   IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier);
 

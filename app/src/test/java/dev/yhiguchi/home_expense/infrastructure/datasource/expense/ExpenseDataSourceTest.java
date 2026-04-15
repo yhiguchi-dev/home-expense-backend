@@ -163,7 +163,7 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("おやつ", 200, "2026-04-10", attribute);
     sut.register(expense);
 
-    sut.delete(expense.expenseIdentifier());
+    sut.delete(expense);
     assertThrows(ExpenseNotFoundException.class, () -> sut.get(expense.expenseIdentifier()));
   }
 
@@ -173,7 +173,7 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("定期配送", 1500, "2026-04-01", attribute);
     sut.register(expense);
 
-    sut.delete(expense.expenseIdentifier());
+    sut.delete(expense);
     assertThrows(ExpenseNotFoundException.class, () -> sut.get(expense.expenseIdentifier()));
   }
 

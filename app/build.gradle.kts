@@ -1,5 +1,6 @@
 plugins {
   java
+  jacoco
   alias(libs.plugins.io.quarkus)
   alias(libs.plugins.com.diffplug.spotless)
 }
@@ -14,13 +15,15 @@ dependencies {
   implementation(libs.quarkus.hibernate.validator)
   implementation(libs.quarkus.jdbc.postgresql)
   implementation(libs.quarkus.logging.json)
+  implementation(libs.quarkus.opentelemetry)
+  testImplementation(libs.quarkus.jacoco)
   testImplementation(libs.quarkus.junit5)
   testImplementation(libs.rest.assured)
 }
 
 group = "dev.yhiguchi.home_expense"
 
-version = "1.1.0"
+version = "2.0.0"
 
 System.getenv("DEPLOY_ENV")?.let { deployEnv ->
   version = "$version-$deployEnv"
@@ -41,6 +44,20 @@ configurations["integrationTestRuntimeOnly"].extendsFrom(configurations.testRunt
 
 tasks.withType<Test> {
   systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+  finalizedBy(tasks.jacocoTestReport)
+  configure<JacocoTaskExtension> {
+    excludeClassLoaders = listOf("*QuarkusClassLoader")
+    destinationFile = layout.buildDirectory.file("jacoco-quarkus.exec").get().asFile
+  }
+}
+
+tasks.jacocoTestReport {
+  executionData.setFrom(layout.buildDirectory.file("jacoco-quarkus.exec"))
+  reports {
+    xml.required.set(true)
+    html.required.set(true)
+    csv.required.set(true)
+  }
 }
 tasks.withType<JavaCompile> {
   options.encoding = "UTF-8"

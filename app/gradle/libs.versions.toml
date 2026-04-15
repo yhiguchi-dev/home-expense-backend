@@ -1,7 +1,6 @@
 [versions]
 io-quarkus = "3.34.3"
 com-diffplug-spotless = "8.4.0"
-rest-assured = "5.5.1"
 
 [libraries]
 quarkus-bom = { group = "io.quarkus.platform", name = "quarkus-bom", version.ref = "io-quarkus" }
@@ -9,8 +8,10 @@ quarkus-rest-jackson = { group = "io.quarkus", name = "quarkus-rest-jackson" }
 quarkus-hibernate-validator = { group = "io.quarkus", name = "quarkus-hibernate-validator" }
 quarkus-jdbc-postgresql = { group = "io.quarkus", name = "quarkus-jdbc-postgresql" }
 quarkus-logging-json = { group = "io.quarkus", name = "quarkus-logging-json" }
+quarkus-opentelemetry = { group = "io.quarkus", name = "quarkus-opentelemetry" }
+quarkus-jacoco = { group = "io.quarkus", name = "quarkus-jacoco" }
 quarkus-junit5 = { group = "io.quarkus", name = "quarkus-junit5" }
-rest-assured = { group = "io.rest-assured", name = "rest-assured", version.ref = "rest-assured" }
+rest-assured = { group = "io.rest-assured", name = "rest-assured" }
 
 [plugins]
 io-quarkus = { id = "io.quarkus", version.ref = "io-quarkus" }

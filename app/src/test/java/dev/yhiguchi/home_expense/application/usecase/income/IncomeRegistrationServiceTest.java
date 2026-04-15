@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeRepository;
 import java.time.LocalDate;
@@ -25,7 +26,7 @@ class IncomeRegistrationServiceTest {
     attributeRepository.register(attribute);
 
     IncomeIdentifier result =
-        sut.createAndRegister(
+        sut.register(
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
@@ -38,5 +39,17 @@ class IncomeRegistrationServiceTest {
     assertEquals(300000, registered.amount().value());
     assertEquals(attribute, registered.incomeAttribute());
     assertEquals(1L, registered.version());
+  }
+
+  @Test
+  void 存在しない属性IDで登録すると例外をスローする() {
+    assertThrows(
+        IncomeAttributeNotFoundException.class,
+        () ->
+            sut.register(
+                new Description("4月給与"),
+                new Amount(300000),
+                new ReceiveDate(LocalDate.of(2026, 4, 25)),
+                new IncomeAttributeIdentifier("not-exist")));
   }
 }

@@ -20,7 +20,7 @@ public class IncomeRegistrationService {
     this.incomeAttributeRepository = incomeAttributeRepository;
   }
 
-  public IncomeIdentifier createAndRegister(
+  public IncomeIdentifier register(
       Description description,
       Amount amount,
       ReceiveDate receiveDate,

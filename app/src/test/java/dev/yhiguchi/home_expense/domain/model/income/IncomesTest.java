@@ -30,6 +30,23 @@ class IncomesTest {
   }
 
   @Test
+  void 一致する属性を持つ収入がない場合falseを返す() {
+    IncomeAttribute otherAttribute =
+        new IncomeAttribute(new IncomeAttributeIdentifier("attr-2"), new IncomeAttributeName("賞与"));
+    Income income =
+        new Income(
+            new IncomeIdentifier("inc-1"),
+            new Description("4月給与"),
+            new Amount(300000),
+            new ReceiveDate(LocalDate.of(2026, 4, 25)),
+            otherAttribute,
+            1L);
+    Incomes incomes = new Incomes(List.of(income));
+
+    assertFalse(incomes.has(attribute));
+  }
+
+  @Test
   void 空の場合falseを返す() {
     Incomes incomes = new Incomes();
 

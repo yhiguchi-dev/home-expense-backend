@@ -16,12 +16,14 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 /** RFC 9457 Problem Details を返すグローバル例外マッパー */
 public class ProblemDetailExceptionMapper {
 
+  private static final Logger LOG = Logger.getLogger(ProblemDetailExceptionMapper.class);
   private static final String PROBLEM_JSON = "application/problem+json";
 
   @Context UriInfo uriInfo;
@@ -85,6 +87,7 @@ public class ProblemDetailExceptionMapper {
 
   @ServerExceptionMapper
   public RestResponse<ProblemDetail> mapConcurrentUpdateException(ConcurrentUpdateException e) {
+    LOG.warnv("楽観ロック違反: {0}", uriInfo.getRequestUri());
     return toResponse(Response.Status.CONFLICT, "他のユーザーによって更新されています。再度取得してからやり直してください");
   }
 
@@ -101,6 +104,7 @@ public class ProblemDetailExceptionMapper {
 
   @ServerExceptionMapper
   public RestResponse<ProblemDetail> mapDataAccessException(DataAccessException e) {
+    LOG.error("データアクセスエラー", e);
     return toResponse(Response.Status.INTERNAL_SERVER_ERROR, "データアクセスエラーが発生しました");
   }
 

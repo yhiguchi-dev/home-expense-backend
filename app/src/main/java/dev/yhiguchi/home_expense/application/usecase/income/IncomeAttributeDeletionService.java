@@ -1,7 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
 import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
-import dev.yhiguchi.home_expense.domain.model.income.Incomes;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -11,20 +10,19 @@ import jakarta.transaction.Transactional;
 public class IncomeAttributeDeletionService {
 
   IncomeAttributeRepository incomeAttributeRepository;
-  IncomeRepository incomeRepository;
+  IncomeAttributeDeletionPolicy incomeAttributeDeletionPolicy;
 
   public IncomeAttributeDeletionService(
-      IncomeAttributeRepository incomeAttributeRepository, IncomeRepository incomeRepository) {
+      IncomeAttributeRepository incomeAttributeRepository,
+      IncomeRepository incomeRepository) {
     this.incomeAttributeRepository = incomeAttributeRepository;
-    this.incomeRepository = incomeRepository;
+    this.incomeAttributeDeletionPolicy =
+        new IncomeAttributeDeletionPolicy(incomeRepository::find);
   }
 
   public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
     IncomeAttribute attribute = incomeAttributeRepository.get(incomeAttributeIdentifier);
-    Incomes incomes = incomeRepository.find(attribute);
-    if (incomes.has(attribute)) {
-      throw new IncomeAttributeConstraintException();
-    }
-    incomeAttributeRepository.delete(incomeAttributeIdentifier);
+    incomeAttributeDeletionPolicy.assertDeletable(attribute);
+    incomeAttributeRepository.delete(attribute);
   }
 }

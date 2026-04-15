@@ -6,7 +6,7 @@ import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-record ExpenseAttributePostRequest(
+public record ExpenseAttributePostRequest(
     @NotBlank(message = "nameは必須入力です")
         @Size(max = 512, message = "nameは512文字以内で入力してください")
         @JsonProperty("name")

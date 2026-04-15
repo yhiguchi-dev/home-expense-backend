@@ -81,11 +81,11 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
   }
 
   @Override
-  public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+  public void delete(ExpenseAttribute expenseAttribute) {
     String sql = "DELETE FROM expense.attribute WHERE id = ?";
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, expenseAttributeIdentifier.value());
+      ps.setString(1, expenseAttribute.expenseAttributeIdentifier().value());
       ps.executeUpdate();
     } catch (SQLException e) {
       throw new DataAccessException(e);

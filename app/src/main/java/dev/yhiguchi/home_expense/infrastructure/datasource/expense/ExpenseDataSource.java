@@ -160,11 +160,11 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   @Override
-  public void delete(ExpenseIdentifier expenseIdentifier) {
+  public void delete(Expense expense) {
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps =
             conn.prepareStatement("DELETE FROM expense.expense WHERE expense.id = ?")) {
-      ps.setString(1, expenseIdentifier.value());
+      ps.setString(1, expense.expenseIdentifier().value());
       ps.executeUpdate();
     } catch (SQLException e) {
       throw new DataAccessException(e);

@@ -109,7 +109,7 @@ class ExpenseAttributeDataSourceTest {
     ExpenseAttribute attribute = createAttribute("交際費", ExpenseCategory.変動費);
     sut.register(attribute);
 
-    sut.delete(attribute.expenseAttributeIdentifier());
+    sut.delete(attribute);
     assertThrows(
         ExpenseAttributeNotFoundException.class,
         () -> sut.get(attribute.expenseAttributeIdentifier()));

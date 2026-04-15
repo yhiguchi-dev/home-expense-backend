@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeRepository;
 import java.time.LocalDate;
@@ -70,5 +71,45 @@ class IncomeUpdateServiceTest {
 
     Income result = incomeRepository.get(new IncomeIdentifier("inc-1"));
     assertSame(existing, result);
+  }
+
+  @Test
+  void 存在しない収入を更新すると例外をスローする() {
+    attributeRepository.register(attribute);
+
+    assertThrows(
+        IncomeNotFoundException.class,
+        () ->
+            sut.update(
+                new IncomeIdentifier("not-exist"),
+                new Description("4月給与"),
+                new Amount(300000),
+                new ReceiveDate(LocalDate.of(2026, 4, 25)),
+                new IncomeAttributeIdentifier("attr-1"),
+                1L));
+  }
+
+  @Test
+  void 存在しない属性IDで更新すると例外をスローする() {
+    Income existing =
+        new Income(
+            new IncomeIdentifier("inc-1"),
+            new Description("4月給与"),
+            new Amount(300000),
+            new ReceiveDate(LocalDate.of(2026, 4, 25)),
+            attribute,
+            1L);
+    incomeRepository.register(existing);
+
+    assertThrows(
+        IncomeAttributeNotFoundException.class,
+        () ->
+            sut.update(
+                new IncomeIdentifier("inc-1"),
+                new Description("5月給与"),
+                new Amount(310000),
+                new ReceiveDate(LocalDate.of(2026, 5, 25)),
+                new IncomeAttributeIdentifier("not-exist"),
+                1L));
   }
 }

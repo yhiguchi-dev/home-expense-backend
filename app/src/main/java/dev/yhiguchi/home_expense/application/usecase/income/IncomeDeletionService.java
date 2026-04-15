@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +17,7 @@ public class IncomeDeletionService {
   }
 
   public void delete(IncomeIdentifier incomeIdentifier) {
-    incomeRepository.get(incomeIdentifier);
-    incomeRepository.delete(incomeIdentifier);
+    Income income = incomeRepository.get(incomeIdentifier);
+    incomeRepository.delete(income);
   }
 }

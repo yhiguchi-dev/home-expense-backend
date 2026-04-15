@@ -120,7 +120,7 @@ class IncomeDataSourceTest {
     Income income = createIncome("4月給与", 300000, "2026-04-25", attribute);
     sut.register(income);
 
-    sut.delete(income.incomeIdentifier());
+    sut.delete(income);
     assertThrows(IncomeNotFoundException.class, () -> sut.get(income.incomeIdentifier()));
   }
 

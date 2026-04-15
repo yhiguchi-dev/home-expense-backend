@@ -48,7 +48,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response post(@Valid ExpensePostRequest request, @Context UriInfo uriInfo) {
     ExpenseIdentifier expenseIdentifier =
-        expenseRegistrationService.createAndRegister(
+        expenseRegistrationService.register(
             request.toDescription(),
             request.toPrice(),
             request.toPaymentDate(),

@@ -50,7 +50,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response post(@Valid IncomeAttributePostRequest request, @Context UriInfo uriInfo) {
     IncomeAttributeIdentifier incomeAttributeIdentifier =
-        incomeAttributeRegistrationService.createAndRegister(request.toIncomeAttributeName());
+        incomeAttributeRegistrationService.register(request.toIncomeAttributeName());
     URI uri = uriInfo.getAbsolutePathBuilder().path(incomeAttributeIdentifier.value()).build();
     return Response.created(uri).build();
   }

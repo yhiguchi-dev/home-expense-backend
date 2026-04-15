@@ -4,16 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResult;
 import java.util.List;
 
-class ExpenseAttributeGetListResponse {
-
-  @JsonProperty("expense_attributes")
-  List<ExpenseAttributeGetResponse> list;
+public record ExpenseAttributeGetListResponse(
+    @JsonProperty("expense_attributes") List<ExpenseAttributeGetResponse> list) {
 
   ExpenseAttributeGetListResponse(ExpenseAttributeSearchResult searchResult) {
-    this.list = searchResult.list().stream().map(ExpenseAttributeGetResponse::from).toList();
+    this(searchResult.list().stream().map(ExpenseAttributeGetResponse::from).toList());
   }
 
   ExpenseAttributeGetListResponse() {
-    this.list = List.of();
+    this(List.of());
   }
 }

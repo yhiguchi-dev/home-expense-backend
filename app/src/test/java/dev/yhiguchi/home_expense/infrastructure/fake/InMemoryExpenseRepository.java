@@ -40,8 +40,8 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
   }
 
   @Override
-  public void delete(ExpenseIdentifier expenseIdentifier) {
-    store.remove(expenseIdentifier.value());
+  public void delete(Expense expense) {
+    store.remove(expense.expenseIdentifier().value());
   }
 
   public List<Expense> all() {

@@ -4,15 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import java.util.List;
 
-class IncomeGetListResponse {
-  @JsonProperty("incomes")
-  List<IncomeGetResponse> list;
+public record IncomeGetListResponse(@JsonProperty("incomes") List<IncomeGetResponse> list) {
 
   IncomeGetListResponse(IncomeSearchResult searchResult) {
-    this.list = searchResult.list().stream().map(IncomeGetResponse::from).toList();
+    this(searchResult.list().stream().map(IncomeGetResponse::from).toList());
   }
 
   IncomeGetListResponse() {
-    this.list = List.of();
+    this(List.of());
   }
 }

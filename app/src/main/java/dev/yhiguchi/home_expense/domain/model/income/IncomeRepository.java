@@ -9,7 +9,7 @@ public interface IncomeRepository {
 
   void update(Income income);
 
-  void delete(IncomeIdentifier incomeIdentifier);
+  void delete(Income income);
 
   Income get(IncomeIdentifier incomeIdentifier);
 

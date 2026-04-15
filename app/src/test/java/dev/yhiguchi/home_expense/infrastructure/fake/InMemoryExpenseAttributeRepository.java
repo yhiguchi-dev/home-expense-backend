@@ -35,8 +35,8 @@ public class InMemoryExpenseAttributeRepository implements ExpenseAttributeRepos
   }
 
   @Override
-  public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    store.remove(expenseAttributeIdentifier.value());
+  public void delete(ExpenseAttribute expenseAttribute) {
+    store.remove(expenseAttribute.expenseAttributeIdentifier().value());
   }
 
   public List<ExpenseAttribute> all() {
