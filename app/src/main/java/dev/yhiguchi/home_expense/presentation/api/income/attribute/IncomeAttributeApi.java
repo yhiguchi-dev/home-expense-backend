@@ -16,6 +16,7 @@ import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchRes
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResultQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
@@ -87,7 +88,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
       @QueryParam("per_page")
           @DefaultValue("20")
           @Min(value = 1, message = "per_pageは1以上を指定してください")
-          @jakarta.validation.constraints.Max(value = 100, message = "per_pageは100以下を指定してください")
+          @Max(value = 100, message = "per_pageは100以下を指定してください")
           Integer perPage,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
