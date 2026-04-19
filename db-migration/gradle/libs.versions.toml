@@ -1,0 +1,18 @@
+[versions]
+# Plugins
+com-diffplug-spotless = "8.1.0"
+
+# Dependencies
+flyway = "11.20.0"
+logback = "1.5.23"
+logstash-logback-encoder = "9.0"
+postgresql = "42.7.8"
+
+[libraries]
+flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+
+[plugins]
+com-diffplug-spotless = { id = "com.diffplug.spotless", version.ref = "com-diffplug-spotless" }
