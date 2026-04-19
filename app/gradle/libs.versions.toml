@@ -9,6 +9,7 @@ quarkus-hibernate-validator = { group = "io.quarkus", name = "quarkus-hibernate-
 quarkus-jdbc-postgresql = { group = "io.quarkus", name = "quarkus-jdbc-postgresql" }
 quarkus-logging-json = { group = "io.quarkus", name = "quarkus-logging-json" }
 quarkus-opentelemetry = { group = "io.quarkus", name = "quarkus-opentelemetry" }
+quarkus-smallrye-health = { group = "io.quarkus", name = "quarkus-smallrye-health" }
 quarkus-jacoco = { group = "io.quarkus", name = "quarkus-jacoco" }
 quarkus-junit5 = { group = "io.quarkus", name = "quarkus-junit5" }
 rest-assured = { group = "io.rest-assured", name = "rest-assured" }

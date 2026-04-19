@@ -16,6 +16,7 @@ dependencies {
   implementation(libs.quarkus.jdbc.postgresql)
   implementation(libs.quarkus.logging.json)
   implementation(libs.quarkus.opentelemetry)
+  implementation(libs.quarkus.smallrye.health)
   testImplementation(libs.quarkus.jacoco)
   testImplementation(libs.quarkus.junit5)
   testImplementation(libs.rest.assured)
