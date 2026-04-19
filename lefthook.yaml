@@ -1,0 +1,27 @@
+pre-commit:
+  parallel: false
+  jobs:
+    - name: sort openapi.yaml
+      files: git ls-files -m
+      glob: "docs/openapi.yaml"
+      run: bash scripts/sort_openapi.sh {files}
+    - name: format openapi.yaml
+      files: git ls-files -m
+      glob: "docs/openapi.yaml"
+      run: yamllint {files}
+    - name: vacuum lint
+      files: git ls-files -m
+      glob: "docs/openapi.yaml"
+      run: vacuum lint -r .vacuum.yaml -d {files}
+    - name: biome
+      files: git ls-files -m
+      glob: "*.html"
+      run: pnpm biome check {files}
+    - name: spotless apply
+      files: git ls-files -m
+      glob: "*.java"
+      run: ./gradlew --console=plain -q spotlessApply
+commit-msg:
+  commands:
+    "lint commit message":
+      run: pnpm commitlint --edit {1}
