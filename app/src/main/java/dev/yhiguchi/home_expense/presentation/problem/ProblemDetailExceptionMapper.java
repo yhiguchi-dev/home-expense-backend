@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.presentation.problem;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
@@ -8,6 +7,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeAlreadyExistsException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import dev.yhiguchi.home_expense.presentation.api.InvalidIfMatchException;
 import dev.yhiguchi.home_expense.presentation.api.PreconditionRequiredException;
