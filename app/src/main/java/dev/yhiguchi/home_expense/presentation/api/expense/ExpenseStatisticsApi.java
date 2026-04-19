@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
-import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseStatisticsService;
 import dev.yhiguchi.home_expense.query.expense.ExpenseStatistics;
 import dev.yhiguchi.home_expense.query.expense.ExpenseStatisticsCriteria;
+import dev.yhiguchi.home_expense.query.expense.ExpenseStatisticsQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -15,10 +15,10 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class ExpenseStatisticsApi {
 
-  ExpenseStatisticsService expenseStatisticsService;
+  ExpenseStatisticsQuerier expenseStatisticsQuerier;
 
-  public ExpenseStatisticsApi(ExpenseStatisticsService expenseStatisticsService) {
-    this.expenseStatisticsService = expenseStatisticsService;
+  public ExpenseStatisticsApi(ExpenseStatisticsQuerier expenseStatisticsQuerier) {
+    this.expenseStatisticsQuerier = expenseStatisticsQuerier;
   }
 
   @GET
@@ -30,7 +30,7 @@ public class ExpenseStatisticsApi {
           @Max(value = 12, message = "monthは1〜12を指定してください")
           int month) {
     ExpenseStatisticsCriteria criteria = new ExpenseStatisticsCriteria(year, month);
-    ExpenseStatistics statistics = expenseStatisticsService.findStatistics(criteria);
+    ExpenseStatistics statistics = expenseStatisticsQuerier.find(criteria);
     ExpenseGetStatisticsResponse response = new ExpenseGetStatisticsResponse(statistics);
     return Response.ok(response).build();
   }

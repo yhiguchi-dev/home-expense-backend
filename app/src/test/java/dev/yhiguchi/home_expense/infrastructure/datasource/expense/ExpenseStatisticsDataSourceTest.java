@@ -108,11 +108,7 @@ class ExpenseStatisticsDataSourceTest {
   }
 
   private ExpenseAttribute registerExpenseAttribute(String name, ExpenseCategory category) {
-    ExpenseAttribute attribute =
-        new ExpenseAttribute(
-            new ExpenseAttributeIdentifier(UUID.randomUUID().toString()),
-            new ExpenseAttributeName(name),
-            category);
+    ExpenseAttribute attribute = ExpenseAttribute.create(new ExpenseAttributeName(name), category);
     expenseAttributeDataSource.register(attribute);
     return attribute;
   }
@@ -125,16 +121,14 @@ class ExpenseStatisticsDataSourceTest {
             new Description(description),
             new Price(price),
             new PaymentDate(LocalDate.parse(paymentDate)),
-            attribute,
+            attribute.expenseAttributeIdentifier(),
+            attribute.expenseCategory(),
             1L);
     expenseDataSource.register(expense);
   }
 
   private IncomeAttribute registerIncomeAttribute(String name) {
-    IncomeAttribute attribute =
-        new IncomeAttribute(
-            new IncomeAttributeIdentifier(UUID.randomUUID().toString()),
-            new IncomeAttributeName(name));
+    IncomeAttribute attribute = IncomeAttribute.create(new IncomeAttributeName(name));
     incomeAttributeDataSource.register(attribute);
     return attribute;
   }
@@ -147,7 +141,7 @@ class ExpenseStatisticsDataSourceTest {
             new dev.yhiguchi.home_expense.domain.model.income.Description(description),
             new Amount(amount),
             new ReceiveDate(LocalDate.parse(receiveDate)),
-            attribute,
+            attribute.incomeAttributeIdentifier(),
             1L);
     incomeDataSource.register(income);
   }

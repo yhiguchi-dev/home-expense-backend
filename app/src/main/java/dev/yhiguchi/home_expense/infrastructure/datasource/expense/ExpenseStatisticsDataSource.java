@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import dev.yhiguchi.home_expense.query.expense.*;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
   }
 
   @Override
+  @Transactional
   public ExpenseStatistics find(ExpenseStatisticsCriteria criteria) {
     try (Connection conn = dataSource.getConnection()) {
       long incomeTotalAmount = selectIncomeTotalAmount(conn, criteria).orElse(0L);
