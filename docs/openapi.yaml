@@ -12,6 +12,7 @@ info:
 servers:
   - url: http://localhost:8080
     description: Local development server
+    x-internal: true
 paths:
   /v1/expense-attributes:
     get:
@@ -39,9 +40,7 @@ paths:
           description: Successful response
           headers:
             Link:
-              description: Pagination links (RFC 5988)
-              schema:
-                type: string
+              $ref: '#/components/headers/Link'
         "400":
           $ref: '#/components/responses/BadRequest'
     post:
@@ -60,9 +59,7 @@ paths:
           description: Expense attribute created successfully
           headers:
             Location:
-              description: URI of the created resource
-              schema:
-                type: string
+              $ref: '#/components/headers/Location'
         "400":
           $ref: '#/components/responses/BadRequest'
         "409":
@@ -140,12 +137,15 @@ paths:
           in: query
           name: year
           schema:
+            format: int32
+            maximum: 2200
             minimum: 1
             type: integer
         - description: Filter by month
           in: query
           name: month
           schema:
+            format: int32
             maximum: 12
             minimum: 1
             type: integer
@@ -161,6 +161,8 @@ paths:
           in: query
           name: attribute_id
           schema:
+            format: uuid
+            maxLength: 36
             type: string
       responses:
         "200":
@@ -171,9 +173,7 @@ paths:
           description: Successful response
           headers:
             Link:
-              description: Pagination links (RFC 5988)
-              schema:
-                type: string
+              $ref: '#/components/headers/Link'
         "400":
           $ref: '#/components/responses/BadRequest'
     post:
@@ -192,9 +192,7 @@ paths:
           description: Expense created successfully
           headers:
             Location:
-              description: URI of the created resource
-              schema:
-                type: string
+              $ref: '#/components/headers/Location'
         "400":
           $ref: '#/components/responses/BadRequest'
   /v1/expenses/statistics:
@@ -210,6 +208,8 @@ paths:
           name: year
           required: true
           schema:
+            format: int32
+            maximum: 2200
             minimum: 1
             type: integer
         - description: Month for statistics
@@ -217,6 +217,7 @@ paths:
           name: month
           required: true
           schema:
+            format: int32
             maximum: 12
             minimum: 1
             type: integer
@@ -306,9 +307,7 @@ paths:
           description: Successful response
           headers:
             Link:
-              description: Pagination links (RFC 5988)
-              schema:
-                type: string
+              $ref: '#/components/headers/Link'
         "400":
           $ref: '#/components/responses/BadRequest'
     post:
@@ -327,9 +326,7 @@ paths:
           description: Income attribute created successfully
           headers:
             Location:
-              description: URI of the created resource
-              schema:
-                type: string
+              $ref: '#/components/headers/Location'
         "400":
           $ref: '#/components/responses/BadRequest'
         "409":
@@ -406,6 +403,8 @@ paths:
           in: query
           name: year
           schema:
+            format: int32
+            maximum: 2200
             minimum: 1
             type: integer
       responses:
@@ -417,9 +416,7 @@ paths:
           description: Successful response
           headers:
             Link:
-              description: Pagination links (RFC 5988)
-              schema:
-                type: string
+              $ref: '#/components/headers/Link'
         "400":
           $ref: '#/components/responses/BadRequest'
     post:
@@ -438,9 +435,7 @@ paths:
           description: Income created successfully
           headers:
             Location:
-              description: URI of the created resource
-              schema:
-                type: string
+              $ref: '#/components/headers/Location'
         "400":
           $ref: '#/components/responses/BadRequest'
   /v1/incomes/{id}:
@@ -505,11 +500,16 @@ components:
     ExpenseAttributeGetResponse:
       properties:
         category:
+          enum:
+            - 固定費
+            - 変動費
           type: string
         id:
           format: uuid
+          maxLength: 36
           type: string
         name:
+          maxLength: 512
           type: string
       type: object
     ExpenseAttributeListResponse:
@@ -517,6 +517,7 @@ components:
         expense_attributes:
           items:
             $ref: '#/components/schemas/ExpenseAttributeGetResponse'
+          maxItems: 100
           type: array
       type: object
     ExpenseAttributePostRequest:
@@ -550,36 +551,52 @@ components:
     ExpenseAttributeResponse:
       properties:
         category:
+          enum:
+            - 固定費
+            - 変動費
           type: string
         id:
           format: uuid
+          maxLength: 36
           type: string
         name:
+          maxLength: 512
           type: string
       type: object
     ExpenseAttributeStatisticsResponse:
       properties:
         attribute_id:
           format: uuid
+          maxLength: 36
           type: string
         attribute_name:
+          maxLength: 512
           type: string
         total_amount:
+          format: int64
+          maximum: 1000000000000
+          minimum: 0
           type: integer
       type: object
     ExpenseGetResponse:
       properties:
         description:
+          maxLength: 512
           type: string
         expense_attribute:
           $ref: '#/components/schemas/ExpenseAttributeResponse'
         id:
           format: uuid
+          maxLength: 36
           type: string
         payment_date:
           format: date
+          maxLength: 10
           type: string
         price:
+          format: int32
+          maximum: 1000000000
+          minimum: 1
           type: integer
       type: object
     ExpenseListResponse:
@@ -587,12 +604,14 @@ components:
         expenses:
           items:
             $ref: '#/components/schemas/ExpenseGetResponse'
+          maxItems: 100
           type: array
       type: object
     ExpensePostRequest:
       properties:
         attribute_id:
           format: uuid
+          maxLength: 36
           type: string
         description:
           maxLength: 512
@@ -600,9 +619,12 @@ components:
         payment_date:
           example: "2026-04-10"
           format: date
+          maxLength: 10
           pattern: ^\d{4}-\d{2}-\d{2}$
           type: string
         price:
+          format: int32
+          maximum: 1000000000
           minimum: 1
           type: integer
       required:
@@ -615,6 +637,7 @@ components:
       properties:
         attribute_id:
           format: uuid
+          maxLength: 36
           type: string
         description:
           maxLength: 512
@@ -622,9 +645,12 @@ components:
         payment_date:
           example: "2026-04-10"
           format: date
+          maxLength: 10
           pattern: ^\d{4}-\d{2}-\d{2}$
           type: string
         price:
+          format: int32
+          maximum: 1000000000
           minimum: 1
           type: integer
       required:
@@ -638,23 +664,36 @@ components:
         attribute_statistics:
           items:
             $ref: '#/components/schemas/ExpenseAttributeStatisticsResponse'
+          maxItems: 100
           type: array
         total_amount:
           description: Total amount for the category
+          format: int64
+          maximum: 1000000000000
+          minimum: 0
           type: integer
       type: object
     ExpenseStatisticsResponse:
       properties:
         disposal_income_amount:
           description: Disposable income (income - total expenses)
+          format: int64
+          maximum: 1000000000000
+          minimum: -1000000000000
           type: integer
         fixed_expense_detail:
           $ref: '#/components/schemas/ExpenseStatisticsDetailResponse'
         income_total_amount:
           description: Total income amount for the month
+          format: int64
+          maximum: 1000000000000
+          minimum: 0
           type: integer
         total_amount:
           description: Total expense amount
+          format: int64
+          maximum: 1000000000000
+          minimum: 0
           type: integer
         variable_expense_detail:
           $ref: '#/components/schemas/ExpenseStatisticsDetailResponse'
@@ -663,8 +702,10 @@ components:
       properties:
         id:
           format: uuid
+          maxLength: 36
           type: string
         name:
+          maxLength: 512
           type: string
       type: object
     IncomeAttributeListResponse:
@@ -672,6 +713,7 @@ components:
         income_attributes:
           items:
             $ref: '#/components/schemas/IncomeAttributeGetResponse'
+          maxItems: 100
           type: array
       type: object
     IncomeAttributePostRequest:
@@ -694,23 +736,31 @@ components:
       properties:
         id:
           format: uuid
+          maxLength: 36
           type: string
         name:
+          maxLength: 512
           type: string
       type: object
     IncomeGetResponse:
       properties:
         amount:
+          format: int32
+          maximum: 1000000000
+          minimum: 1
           type: integer
         description:
+          maxLength: 512
           type: string
         id:
           format: uuid
+          maxLength: 36
           type: string
         income_attribute:
           $ref: '#/components/schemas/IncomeAttributeResponse'
         receive_date:
           format: date
+          maxLength: 10
           type: string
       type: object
     IncomeListResponse:
@@ -718,15 +768,19 @@ components:
         incomes:
           items:
             $ref: '#/components/schemas/IncomeGetResponse'
+          maxItems: 100
           type: array
       type: object
     IncomePostRequest:
       properties:
         amount:
+          format: int32
+          maximum: 1000000000
           minimum: 1
           type: integer
         attribute_id:
           format: uuid
+          maxLength: 36
           type: string
         description:
           maxLength: 512
@@ -734,6 +788,7 @@ components:
         receive_date:
           example: "2026-04-25"
           format: date
+          maxLength: 10
           pattern: ^\d{4}-\d{2}-\d{2}$
           type: string
       required:
@@ -745,10 +800,13 @@ components:
     IncomePutRequest:
       properties:
         amount:
+          format: int32
+          maximum: 1000000000
           minimum: 1
           type: integer
         attribute_id:
           format: uuid
+          maxLength: 36
           type: string
         description:
           maxLength: 512
@@ -756,6 +814,7 @@ components:
         receive_date:
           example: "2026-04-25"
           format: date
+          maxLength: 10
           pattern: ^\d{4}-\d{2}-\d{2}$
           type: string
       required:
@@ -770,24 +829,31 @@ components:
         detail:
           description: A human-readable explanation specific to this occurrence of the problem
           example: descriptionは必須入力です
+          maxLength: 1024
           type: string
         instance:
           description: A URI reference that identifies the specific occurrence of the problem
           example: /v1/expenses
-          format: uri
+          format: uri-reference
+          maxLength: 2048
           type: string
         status:
           description: The HTTP status code
           example: 400
+          format: int32
+          maximum: 599
+          minimum: 100
           type: integer
         title:
           description: A short, human-readable summary of the problem type
           example: Bad Request
+          maxLength: 256
           type: string
         type:
           description: A URI reference that identifies the problem type
           example: about:blank
           format: uri
+          maxLength: 2048
           type: string
       type: object
   responses:
@@ -862,6 +928,7 @@ components:
       required: true
       schema:
         format: uuid
+        maxLength: 36
         type: string
     ExpenseId:
       name: id
@@ -870,6 +937,7 @@ components:
       required: true
       schema:
         format: uuid
+        maxLength: 36
         type: string
     IfMatch:
       name: If-Match
@@ -879,6 +947,7 @@ components:
         Used for optimistic locking on `PUT` operations (RFC 9110 §13.1.1).
       required: true
       schema:
+        maxLength: 128
         type: string
     IncomeAttributeId:
       name: id
@@ -887,6 +956,7 @@ components:
       required: true
       schema:
         format: uuid
+        maxLength: 36
         type: string
     IncomeId:
       name: id
@@ -895,6 +965,7 @@ components:
       required: true
       schema:
         format: uuid
+        maxLength: 36
         type: string
     Page:
       name: page
@@ -902,6 +973,8 @@ components:
       description: Page number
       schema:
         default: 1
+        format: int32
+        maximum: 1000000
         minimum: 1
         type: integer
     PerPage:
@@ -910,6 +983,7 @@ components:
       description: Number of items per page
       schema:
         default: 20
+        format: int32
         maximum: 100
         minimum: 1
         type: integer
@@ -919,9 +993,18 @@ components:
         Opaque resource version identifier used for optimistic locking (RFC 9110 §8.8.3).
         Echo this value in `If-Match` on subsequent `PUT` requests.
       schema:
+        maxLength: 128
         type: string
-  requestBodies: []
-  securitySchemes: []
+    Link:
+      description: Pagination links (RFC 5988)
+      schema:
+        maxLength: 2048
+        type: string
+    Location:
+      description: URI of the created resource
+      schema:
+        maxLength: 2048
+        type: string
 tags:
   - name: Expenses
     description: Operations related to expenses
