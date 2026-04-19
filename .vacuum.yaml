@@ -1,0 +1,12 @@
+extends:
+  - [vacuum:oas, recommended]
+  - [vacuum:owasp, all]
+rules:
+  owasp-string-restricted: off
+  owasp-rate-limit: off
+  owasp-define-error-responses-429: off
+  owasp-define-error-responses-401: off
+  owasp-define-error-responses-500: off
+  owasp-define-error-validation: off
+  owasp-security-hosts-https-oas3: off
+  operation-description: off
