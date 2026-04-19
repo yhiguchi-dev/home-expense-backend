@@ -131,11 +131,7 @@ class ExpenseSearchResultDataSourceTest {
   }
 
   private ExpenseAttribute registerAttribute(String name, ExpenseCategory category) {
-    ExpenseAttribute attribute =
-        new ExpenseAttribute(
-            new ExpenseAttributeIdentifier(UUID.randomUUID().toString()),
-            new ExpenseAttributeName(name),
-            category);
+    ExpenseAttribute attribute = ExpenseAttribute.create(new ExpenseAttributeName(name), category);
     expenseAttributeDataSource.register(attribute);
     return attribute;
   }
@@ -148,7 +144,8 @@ class ExpenseSearchResultDataSourceTest {
             new Description(description),
             new Price(price),
             new PaymentDate(LocalDate.parse(paymentDate)),
-            attribute,
+            attribute.expenseAttributeIdentifier(),
+            attribute.expenseCategory(),
             1L);
     expenseDataSource.register(expense);
   }

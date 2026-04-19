@@ -4,6 +4,7 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class InMemoryExpenseAttributeRepository implements ExpenseAttributeRepository {
 
@@ -15,12 +16,8 @@ public class InMemoryExpenseAttributeRepository implements ExpenseAttributeRepos
   }
 
   @Override
-  public ExpenseAttribute get(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    ExpenseAttribute attribute = store.get(expenseAttributeIdentifier.value());
-    if (attribute == null) {
-      throw new ExpenseAttributeNotFoundException();
-    }
-    return attribute;
+  public Optional<ExpenseAttribute> findBy(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    return Optional.ofNullable(store.get(expenseAttributeIdentifier.value()));
   }
 
   @Override

@@ -1,8 +1,8 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.sql.*;
@@ -39,14 +39,18 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
   }
 
   @Override
-  public ExpenseAttribute get(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    Optional<ExpenseAttribute> expenseAttribute = selectBy(expenseAttributeIdentifier);
-    return expenseAttribute.orElseThrow(ExpenseAttributeNotFoundException::new);
+  public Optional<ExpenseAttribute> findBy(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    return selectBy(expenseAttributeIdentifier);
   }
 
   @Override
   public boolean existsByName(ExpenseAttributeName expenseAttributeName) {
-    String sql = "SELECT EXISTS(SELECT 1 FROM expense.attribute WHERE name = ?)";
+    String sql =
+        """
+        SELECT CASE WHEN EXISTS(SELECT 1 FROM expense.attribute WHERE name = ?)
+          THEN TRUE ELSE FALSE END
+        FROM (VALUES (1)) AS t(x)
+        """;
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, expenseAttributeName.value());

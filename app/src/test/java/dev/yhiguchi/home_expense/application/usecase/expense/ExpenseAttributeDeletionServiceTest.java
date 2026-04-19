@@ -3,7 +3,10 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.yhiguchi.home_expense.domain.model.expense.*;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseRepository;
 import java.time.LocalDate;
@@ -20,7 +23,8 @@ class ExpenseAttributeDeletionServiceTest {
       new ExpenseAttribute(
           new ExpenseAttributeIdentifier("attr-1"),
           new ExpenseAttributeName("食費"),
-          ExpenseCategory.変動費);
+          ExpenseCategory.変動費,
+          1L);
 
   @Test
   void 経費属性を削除する() {
@@ -40,7 +44,8 @@ class ExpenseAttributeDeletionServiceTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute,
+            new ExpenseAttributeIdentifier("attr-1"),
+            ExpenseCategory.変動費,
             1L);
     expenseRepository.register(expense);
 

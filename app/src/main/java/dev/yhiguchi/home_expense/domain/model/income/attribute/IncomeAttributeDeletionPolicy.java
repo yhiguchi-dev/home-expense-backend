@@ -1,24 +1,22 @@
 package dev.yhiguchi.home_expense.domain.model.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.income.Incomes;
-
 /** 収入属性の削除可否を判定する */
 public class IncomeAttributeDeletionPolicy {
 
   @FunctionalInterface
-  public interface IncomeFinder {
-    Incomes findBy(IncomeAttribute incomeAttribute);
+  public interface IncomeExistsByAttribute {
+    boolean existsByAttributeIdentifier(IncomeAttributeIdentifier incomeAttributeIdentifier);
   }
 
-  IncomeFinder incomeFinder;
+  IncomeExistsByAttribute incomeExistsByAttribute;
 
-  public IncomeAttributeDeletionPolicy(IncomeFinder incomeFinder) {
-    this.incomeFinder = incomeFinder;
+  public IncomeAttributeDeletionPolicy(IncomeExistsByAttribute incomeExistsByAttribute) {
+    this.incomeExistsByAttribute = incomeExistsByAttribute;
   }
 
   public void assertDeletable(IncomeAttribute incomeAttribute) {
-    Incomes incomes = incomeFinder.findBy(incomeAttribute);
-    if (incomes.has(incomeAttribute)) {
+    if (incomeExistsByAttribute.existsByAttributeIdentifier(
+        incomeAttribute.incomeAttributeIdentifier())) {
       throw new IncomeAttributeConstraintException();
     }
   }

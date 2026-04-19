@@ -8,16 +8,14 @@ public record IncomeGetResponse(
     @JsonProperty("description") String description,
     @JsonProperty("amount") Integer amount,
     @JsonProperty("receive_date") String receiveDate,
-    @JsonProperty("income_attribute") IncomeAttributeResponse incomeAttributeResponse) {
+    @JsonProperty("income_attribute_id") String incomeAttributeId) {
 
   static IncomeGetResponse from(Income income) {
-    IncomeAttributeResponse expenseAttributeResponse =
-        IncomeAttributeResponse.from(income.incomeAttribute());
     return new IncomeGetResponse(
         income.incomeIdentifier().value(),
         income.description().value(),
         income.amount().value(),
-        income.receiveDate().value(),
-        expenseAttributeResponse);
+        income.receiveDate().asString(),
+        income.incomeAttributeIdentifier().value());
   }
 }

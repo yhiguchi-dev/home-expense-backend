@@ -13,15 +13,17 @@ public class ExpenseAttributeDeletionService {
   ExpenseAttributeDeletionPolicy expenseAttributeDeletionPolicy;
 
   public ExpenseAttributeDeletionService(
-      ExpenseAttributeRepository expenseAttributeRepository,
-      ExpenseRepository expenseRepository) {
+      ExpenseAttributeRepository expenseAttributeRepository, ExpenseRepository expenseRepository) {
     this.expenseAttributeRepository = expenseAttributeRepository;
     this.expenseAttributeDeletionPolicy =
-        new ExpenseAttributeDeletionPolicy(expenseRepository::find);
+        new ExpenseAttributeDeletionPolicy(expenseRepository::existsByAttributeIdentifier);
   }
 
   public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    ExpenseAttribute attribute = expenseAttributeRepository.get(expenseAttributeIdentifier);
+    ExpenseAttribute attribute =
+        expenseAttributeRepository
+            .findBy(expenseAttributeIdentifier)
+            .orElseThrow(ExpenseAttributeNotFoundException::new);
     expenseAttributeDeletionPolicy.assertDeletable(attribute);
     expenseAttributeRepository.delete(attribute);
   }

@@ -18,9 +18,12 @@ class IncomeAttributeUpdateServiceTest {
             new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
     attributeRepository.register(existing);
 
-    sut.update(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("賞与"), 1L);
+    sut.update(
+        new IncomeAttributeUpdateCommand(
+            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("賞与"), 1L));
 
-    IncomeAttribute updated = attributeRepository.get(new IncomeAttributeIdentifier("attr-1"));
+    IncomeAttribute updated =
+        attributeRepository.findBy(new IncomeAttributeIdentifier("attr-1")).orElseThrow();
     assertEquals("賞与", updated.incomeAttributeName().value());
     assertEquals(1L, updated.version());
   }
@@ -32,9 +35,12 @@ class IncomeAttributeUpdateServiceTest {
             new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
     attributeRepository.register(existing);
 
-    sut.update(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
+    sut.update(
+        new IncomeAttributeUpdateCommand(
+            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L));
 
-    IncomeAttribute result = attributeRepository.get(new IncomeAttributeIdentifier("attr-1"));
+    IncomeAttribute result =
+        attributeRepository.findBy(new IncomeAttributeIdentifier("attr-1")).orElseThrow();
     assertSame(existing, result);
   }
 }

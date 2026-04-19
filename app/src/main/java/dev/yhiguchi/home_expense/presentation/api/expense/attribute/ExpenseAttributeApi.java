@@ -12,6 +12,7 @@ import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.*;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResult;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResultQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -31,6 +32,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
 
   ExpenseAttributeRegistrationService expenseAttributeRegistrationService;
   ExpenseAttributeRetrievalService expenseAttributeRetrievalService;
+  ExpenseAttributeSearchResultQuerier expenseAttributeSearchResultQuerier;
   ExpenseAttributeUpdateService expenseAttributeUpdateService;
 
   ExpenseAttributeDeletionService expenseAttributeDeletionService;
@@ -38,10 +40,12 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   public ExpenseAttributeApi(
       ExpenseAttributeRegistrationService expenseAttributeRegistrationService,
       ExpenseAttributeRetrievalService expenseAttributeRetrievalService,
+      ExpenseAttributeSearchResultQuerier expenseAttributeSearchResultQuerier,
       ExpenseAttributeUpdateService expenseAttributeUpdateService,
       ExpenseAttributeDeletionService expenseAttributeDeletionService) {
     this.expenseAttributeRegistrationService = expenseAttributeRegistrationService;
     this.expenseAttributeRetrievalService = expenseAttributeRetrievalService;
+    this.expenseAttributeSearchResultQuerier = expenseAttributeSearchResultQuerier;
     this.expenseAttributeUpdateService = expenseAttributeUpdateService;
     this.expenseAttributeDeletionService = expenseAttributeDeletionService;
   }
@@ -50,8 +54,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @RunOnVirtualThread
   public Response post(@Valid ExpenseAttributePostRequest request, @Context UriInfo uriInfo) {
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
-        expenseAttributeRegistrationService.register(
-            request.toExpenseAttributeName(), request.toExpenseCategory());
+        expenseAttributeRegistrationService.register(request.toCommand());
     URI uri = uriInfo.getAbsolutePathBuilder().path(expenseAttributeIdentifier.value()).build();
     return Response.created(uri).build();
   }
@@ -63,12 +66,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
       @Valid ExpenseAttributePutRequest request,
       @HeaderParam("If-Match") String ifMatch) {
-    long version = IfMatchParser.parse(ifMatch);
-    expenseAttributeUpdateService.update(
-        new ExpenseAttributeIdentifier(id),
-        request.toExpenseAttributeName(),
-        request.toExpenseCategory(),
-        version);
+    expenseAttributeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
 
@@ -101,7 +99,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
                 pagination)
             : new ExpenseAttributeSearchCriteria(pagination);
     ExpenseAttributeSearchResult expenseAttributeSearchResult =
-        expenseAttributeRetrievalService.search(criteria);
+        expenseAttributeSearchResultQuerier.find(criteria);
     ExpenseAttributeGetListResponse response =
         page <= expenseAttributeSearchResult.totalCount()
             ? new ExpenseAttributeGetListResponse(expenseAttributeSearchResult)

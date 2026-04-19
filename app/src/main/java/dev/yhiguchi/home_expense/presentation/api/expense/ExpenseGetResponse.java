@@ -8,16 +8,16 @@ public record ExpenseGetResponse(
     @JsonProperty("description") String description,
     @JsonProperty("price") Integer price,
     @JsonProperty("payment_date") String paymentDate,
-    @JsonProperty("expense_attribute") ExpenseAttributeResponse expenseAttributeResponse) {
+    @JsonProperty("expense_attribute_id") String expenseAttributeId,
+    @JsonProperty("expense_category") String expenseCategory) {
 
   static ExpenseGetResponse from(Expense expense) {
-    ExpenseAttributeResponse expenseAttributeResponse =
-        ExpenseAttributeResponse.from(expense.expenseAttribute());
     return new ExpenseGetResponse(
         expense.expenseIdentifier().value(),
         expense.description().value(),
         expense.price().value(),
-        expense.paymentDate().value(),
-        expenseAttributeResponse);
+        expense.paymentDate().asString(),
+        expense.expenseAttributeIdentifier().value(),
+        expense.expenseCategory().name());
   }
 }

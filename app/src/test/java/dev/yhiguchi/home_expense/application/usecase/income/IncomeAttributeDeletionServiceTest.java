@@ -3,7 +3,10 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.yhiguchi.home_expense.domain.model.income.*;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeRepository;
 import java.time.LocalDate;
@@ -17,7 +20,8 @@ class IncomeAttributeDeletionServiceTest {
       new IncomeAttributeDeletionService(attributeRepository, incomeRepository);
 
   IncomeAttribute attribute =
-      new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
+      new IncomeAttribute(
+          new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
 
   @Test
   void 収入属性を削除する() {
@@ -37,7 +41,7 @@ class IncomeAttributeDeletionServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute,
+            new IncomeAttributeIdentifier("attr-1"),
             1L);
     incomeRepository.register(income);
 

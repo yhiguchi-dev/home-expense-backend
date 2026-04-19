@@ -3,9 +3,7 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.yhiguchi.home_expense.domain.model.income.*;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -23,8 +21,7 @@ class IncomeDeletionServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            new IncomeAttribute(
-                new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与")),
+            new IncomeAttributeIdentifier("attr-1"),
             1L);
     incomeRepository.register(existing);
 

@@ -22,7 +22,8 @@ class ExpenseUpdateServiceTest {
       new ExpenseAttribute(
           new ExpenseAttributeIdentifier("attr-1"),
           new ExpenseAttributeName("食費"),
-          ExpenseCategory.変動費);
+          ExpenseCategory.変動費,
+          1L);
 
   @Test
   void 経費を更新する() {
@@ -32,20 +33,22 @@ class ExpenseUpdateServiceTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute,
+            new ExpenseAttributeIdentifier("attr-1"),
+            ExpenseCategory.変動費,
             1L);
     expenseRepository.register(existing);
     attributeRepository.register(attribute);
 
     sut.update(
-        new ExpenseIdentifier("exp-1"),
-        new Description("ディナー"),
-        new Price(2000),
-        new PaymentDate(LocalDate.of(2026, 4, 2)),
-        new ExpenseAttributeIdentifier("attr-1"),
-        1L);
+        new ExpenseUpdateCommand(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ディナー"),
+            new Price(2000),
+            new PaymentDate(LocalDate.of(2026, 4, 2)),
+            new ExpenseAttributeIdentifier("attr-1"),
+            1L));
 
-    Expense updated = expenseRepository.get(new ExpenseIdentifier("exp-1"));
+    Expense updated = expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
     assertEquals("ディナー", updated.description().value());
     assertEquals(2000, updated.price().value());
     assertEquals(1L, updated.version());
@@ -59,20 +62,22 @@ class ExpenseUpdateServiceTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute,
+            new ExpenseAttributeIdentifier("attr-1"),
+            ExpenseCategory.変動費,
             1L);
     expenseRepository.register(existing);
     attributeRepository.register(attribute);
 
     sut.update(
-        new ExpenseIdentifier("exp-1"),
-        new Description("ランチ"),
-        new Price(1000),
-        new PaymentDate(LocalDate.of(2026, 4, 1)),
-        new ExpenseAttributeIdentifier("attr-1"),
-        1L);
+        new ExpenseUpdateCommand(
+            new ExpenseIdentifier("exp-1"),
+            new Description("ランチ"),
+            new Price(1000),
+            new PaymentDate(LocalDate.of(2026, 4, 1)),
+            new ExpenseAttributeIdentifier("attr-1"),
+            1L));
 
-    Expense result = expenseRepository.get(new ExpenseIdentifier("exp-1"));
+    Expense result = expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
     assertSame(existing, result);
   }
 
@@ -84,12 +89,13 @@ class ExpenseUpdateServiceTest {
         ExpenseNotFoundException.class,
         () ->
             sut.update(
-                new ExpenseIdentifier("not-exist"),
-                new Description("ランチ"),
-                new Price(1000),
-                new PaymentDate(LocalDate.of(2026, 4, 1)),
-                new ExpenseAttributeIdentifier("attr-1"),
-                1L));
+                new ExpenseUpdateCommand(
+                    new ExpenseIdentifier("not-exist"),
+                    new Description("ランチ"),
+                    new Price(1000),
+                    new PaymentDate(LocalDate.of(2026, 4, 1)),
+                    new ExpenseAttributeIdentifier("attr-1"),
+                    1L)));
   }
 
   @Test
@@ -100,7 +106,8 @@ class ExpenseUpdateServiceTest {
             new Description("ランチ"),
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attribute,
+            new ExpenseAttributeIdentifier("attr-1"),
+            ExpenseCategory.変動費,
             1L);
     expenseRepository.register(existing);
 
@@ -108,11 +115,12 @@ class ExpenseUpdateServiceTest {
         ExpenseAttributeNotFoundException.class,
         () ->
             sut.update(
-                new ExpenseIdentifier("exp-1"),
-                new Description("ディナー"),
-                new Price(2000),
-                new PaymentDate(LocalDate.of(2026, 4, 2)),
-                new ExpenseAttributeIdentifier("not-exist"),
-                1L));
+                new ExpenseUpdateCommand(
+                    new ExpenseIdentifier("exp-1"),
+                    new Description("ディナー"),
+                    new Price(2000),
+                    new PaymentDate(LocalDate.of(2026, 4, 2)),
+                    new ExpenseAttributeIdentifier("not-exist"),
+                    1L)));
   }
 }

@@ -2,9 +2,9 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute.ExpenseAttributeDataSource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -50,15 +50,13 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("4月家賃", 80000, "2026-04-01", attribute);
     sut.register(expense);
 
-    Expense result = sut.get(expense.expenseIdentifier());
+    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     assertEquals(expense.expenseIdentifier(), result.expenseIdentifier());
     assertEquals("4月家賃", result.description().value());
     assertEquals(80000, result.price().value());
     assertTrue(result.isFixed());
     assertFalse(result.isVariable());
-    assertEquals(
-        attribute.expenseAttributeIdentifier(),
-        result.expenseAttribute().expenseAttributeIdentifier());
+    assertEquals(attribute.expenseAttributeIdentifier(), result.expenseAttributeIdentifier());
   }
 
   @Test
@@ -67,31 +65,29 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("ランチ", 1000, "2026-04-10", attribute);
     sut.register(expense);
 
-    Expense result = sut.get(expense.expenseIdentifier());
+    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     assertTrue(result.isVariable());
     assertFalse(result.isFixed());
   }
 
   @Test
-  void 存在しないIDで取得すると例外が発生する() {
+  void 存在しないIDで取得すると空のOptionalを返す() {
     ExpenseIdentifier unknownId = new ExpenseIdentifier(UUID.randomUUID().toString());
-    assertThrows(ExpenseNotFoundException.class, () -> sut.get(unknownId));
+    assertTrue(sut.findBy(unknownId).isEmpty());
   }
 
   @Test
-  void 属性で経費を検索できる() {
+  void 属性で経費の存在を確認できる() {
     ExpenseAttribute attribute = registerAttribute("交通費", ExpenseCategory.変動費);
     Expense expense1 = createExpense("電車", 500, "2026-04-01", attribute);
     Expense expense2 = createExpense("バス", 300, "2026-04-02", attribute);
     sut.register(expense1);
     sut.register(expense2);
 
-    Expenses result = sut.find(attribute);
-    int count = 0;
-    for (Expense e : result) {
-      count++;
-    }
-    assertEquals(2, count);
+    assertTrue(sut.existsByAttributeIdentifier(attribute.expenseAttributeIdentifier()));
+    assertFalse(
+        sut.existsByAttributeIdentifier(
+            new ExpenseAttributeIdentifier(UUID.randomUUID().toString())));
   }
 
   @Test
@@ -100,18 +96,19 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("ランチ", 1000, "2026-04-10", attribute);
     sut.register(expense);
 
-    Expense fetched = sut.get(expense.expenseIdentifier());
+    Expense fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     Expense updated =
         new Expense(
             fetched.expenseIdentifier(),
             new Description("ディナー"),
             new Price(3000),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
-            attribute,
+            attribute.expenseAttributeIdentifier(),
+            attribute.expenseCategory(),
             fetched.version());
     sut.update(updated);
 
-    Expense result = sut.get(expense.expenseIdentifier());
+    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     assertEquals("ディナー", result.description().value());
     assertEquals(3000, result.price().value());
   }
@@ -122,20 +119,21 @@ class ExpenseDataSourceTest {
     ExpenseAttribute varAttr = registerAttribute("雑費", ExpenseCategory.変動費);
     Expense expense = createExpense("保険", 5000, "2026-04-01", fixedAttr);
     sut.register(expense);
-    assertTrue(sut.get(expense.expenseIdentifier()).isFixed());
+    assertTrue(sut.findBy(expense.expenseIdentifier()).orElseThrow().isFixed());
 
-    Expense fetched = sut.get(expense.expenseIdentifier());
+    Expense fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     Expense updated =
         new Expense(
             fetched.expenseIdentifier(),
             fetched.description(),
             fetched.price(),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            varAttr,
+            varAttr.expenseAttributeIdentifier(),
+            varAttr.expenseCategory(),
             fetched.version());
     sut.update(updated);
 
-    Expense result = sut.get(expense.expenseIdentifier());
+    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     assertTrue(result.isVariable());
     assertFalse(result.isFixed());
   }
@@ -152,7 +150,8 @@ class ExpenseDataSourceTest {
             new Description("朝食更新"),
             new Price(600),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
-            attribute,
+            attribute.expenseAttributeIdentifier(),
+            attribute.expenseCategory(),
             999L);
     assertThrows(ConcurrentUpdateException.class, () -> sut.update(stale));
   }
@@ -164,7 +163,7 @@ class ExpenseDataSourceTest {
     sut.register(expense);
 
     sut.delete(expense);
-    assertThrows(ExpenseNotFoundException.class, () -> sut.get(expense.expenseIdentifier()));
+    assertTrue(sut.findBy(expense.expenseIdentifier()).isEmpty());
   }
 
   @Test
@@ -174,15 +173,11 @@ class ExpenseDataSourceTest {
     sut.register(expense);
 
     sut.delete(expense);
-    assertThrows(ExpenseNotFoundException.class, () -> sut.get(expense.expenseIdentifier()));
+    assertTrue(sut.findBy(expense.expenseIdentifier()).isEmpty());
   }
 
   private ExpenseAttribute registerAttribute(String name, ExpenseCategory category) {
-    ExpenseAttribute attribute =
-        new ExpenseAttribute(
-            new ExpenseAttributeIdentifier(UUID.randomUUID().toString()),
-            new ExpenseAttributeName(name),
-            category);
+    ExpenseAttribute attribute = ExpenseAttribute.create(new ExpenseAttributeName(name), category);
     expenseAttributeDataSource.register(attribute);
     return attribute;
   }
@@ -194,7 +189,8 @@ class ExpenseDataSourceTest {
         new Description(description),
         new Price(price),
         new PaymentDate(LocalDate.parse(paymentDate)),
-        attribute,
+        attribute.expenseAttributeIdentifier(),
+        attribute.expenseCategory(),
         1L);
   }
 }

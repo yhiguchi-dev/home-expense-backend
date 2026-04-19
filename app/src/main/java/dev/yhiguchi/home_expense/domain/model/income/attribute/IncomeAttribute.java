@@ -13,16 +13,10 @@ public class IncomeAttribute {
 
   public IncomeAttribute(
       IncomeAttributeIdentifier incomeAttributeIdentifier,
-      IncomeAttributeName incomeAttributeName) {
-    this.incomeAttributeIdentifier = incomeAttributeIdentifier;
-    this.incomeAttributeName = incomeAttributeName;
-  }
-
-  public IncomeAttribute(
-      IncomeAttributeIdentifier incomeAttributeIdentifier,
       IncomeAttributeName incomeAttributeName,
       long version) {
-    this(incomeAttributeIdentifier, incomeAttributeName);
+    this.incomeAttributeIdentifier = incomeAttributeIdentifier;
+    this.incomeAttributeName = incomeAttributeName;
     this.version = version;
   }
 
@@ -44,6 +38,11 @@ public class IncomeAttribute {
   /** 属性値に変更があるか判定する */
   public boolean hasChanges(IncomeAttribute other) {
     return !Objects.equals(incomeAttributeName, other.incomeAttributeName);
+  }
+
+  /** 指定した名前が現在の名前と同一か判定する */
+  public boolean hasSameName(IncomeAttributeName incomeAttributeName) {
+    return Objects.equals(this.incomeAttributeName, incomeAttributeName);
   }
 
   public IncomeAttributeIdentifier incomeAttributeIdentifier() {

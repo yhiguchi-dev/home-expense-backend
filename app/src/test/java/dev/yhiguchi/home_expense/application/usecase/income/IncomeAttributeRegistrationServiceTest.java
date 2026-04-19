@@ -26,7 +26,8 @@ class IncomeAttributeRegistrationServiceTest {
   @Test
   void 同名の収入属性が存在する場合は例外をスローする() {
     IncomeAttribute existing =
-        new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
+        new IncomeAttribute(
+            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
     attributeRepository.register(existing);
 
     assertThrows(

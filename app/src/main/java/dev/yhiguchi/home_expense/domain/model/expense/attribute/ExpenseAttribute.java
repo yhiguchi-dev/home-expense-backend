@@ -14,18 +14,11 @@ public class ExpenseAttribute {
   public ExpenseAttribute(
       ExpenseAttributeIdentifier expenseAttributeIdentifier,
       ExpenseAttributeName expenseAttributeName,
-      ExpenseCategory expenseCategory) {
+      ExpenseCategory expenseCategory,
+      long version) {
     this.expenseAttributeIdentifier = expenseAttributeIdentifier;
     this.expenseAttributeName = expenseAttributeName;
     this.expenseCategory = expenseCategory;
-  }
-
-  public ExpenseAttribute(
-      ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      ExpenseAttributeName expenseAttributeName,
-      ExpenseCategory expenseCategory,
-      long version) {
-    this(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
     this.version = version;
   }
 
@@ -55,12 +48,9 @@ public class ExpenseAttribute {
         || expenseCategory != other.expenseCategory;
   }
 
-  public boolean isFixed() {
-    return expenseCategory.isFixed();
-  }
-
-  public boolean isVariable() {
-    return expenseCategory.isVariable();
+  /** 指定した名前が現在の名前と同一か判定する */
+  public boolean hasSameName(ExpenseAttributeName expenseAttributeName) {
+    return Objects.equals(this.expenseAttributeName, expenseAttributeName);
   }
 
   public ExpenseAttributeIdentifier expenseAttributeIdentifier() {

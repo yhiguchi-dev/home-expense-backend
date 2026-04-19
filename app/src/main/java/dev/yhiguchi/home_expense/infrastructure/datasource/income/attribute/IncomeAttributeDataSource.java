@@ -1,7 +1,7 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.sql.*;
@@ -69,14 +69,18 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   }
 
   @Override
-  public IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    Optional<IncomeAttribute> incomeAttribute = selectBy(incomeAttributeIdentifier);
-    return incomeAttribute.orElseThrow(IncomeAttributeNotFoundException::new);
+  public Optional<IncomeAttribute> findBy(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    return selectBy(incomeAttributeIdentifier);
   }
 
   @Override
   public boolean existsByName(IncomeAttributeName incomeAttributeName) {
-    String sql = "SELECT EXISTS(SELECT 1 FROM expense.income_attribute WHERE name = ?)";
+    String sql =
+        """
+        SELECT CASE WHEN EXISTS(SELECT 1 FROM expense.income_attribute WHERE name = ?)
+          THEN TRUE ELSE FALSE END
+        FROM (VALUES (1)) AS t(x)
+        """;
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
       ps.setString(1, incomeAttributeName.value());

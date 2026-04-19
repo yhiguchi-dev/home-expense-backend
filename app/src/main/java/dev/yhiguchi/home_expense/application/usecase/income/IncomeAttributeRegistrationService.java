@@ -11,8 +11,7 @@ public class IncomeAttributeRegistrationService {
   IncomeAttributeRepository incomeAttributeRepository;
   IncomeAttributeNameUniqueness incomeAttributeNameUniqueness;
 
-  public IncomeAttributeRegistrationService(
-      IncomeAttributeRepository incomeAttributeRepository) {
+  public IncomeAttributeRegistrationService(IncomeAttributeRepository incomeAttributeRepository) {
     this.incomeAttributeRepository = incomeAttributeRepository;
     this.incomeAttributeNameUniqueness =
         new IncomeAttributeNameUniqueness(incomeAttributeRepository::existsByName);

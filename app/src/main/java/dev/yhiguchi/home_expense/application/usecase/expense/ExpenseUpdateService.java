@@ -2,7 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -20,18 +20,24 @@ public class ExpenseUpdateService {
     this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
-  public void update(
-      ExpenseIdentifier expenseIdentifier,
-      Description description,
-      Price price,
-      PaymentDate paymentDate,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      long version) {
-    Expense expense = expenseRepository.get(expenseIdentifier);
-    ExpenseAttribute attribute = expenseAttributeRepository.get(expenseAttributeIdentifier);
-    Expense updated = expense.updateWith(description, price, paymentDate, attribute);
+  public void update(ExpenseUpdateCommand command) {
+    Expense expense =
+        expenseRepository
+            .findBy(command.expenseIdentifier())
+            .orElseThrow(ExpenseNotFoundException::new);
+    ExpenseAttribute attribute =
+        expenseAttributeRepository
+            .findBy(command.expenseAttributeIdentifier())
+            .orElseThrow(ExpenseAttributeNotFoundException::new);
+    Expense updated =
+        expense.updateWith(
+            command.description(),
+            command.price(),
+            command.paymentDate(),
+            attribute.expenseAttributeIdentifier(),
+            attribute.expenseCategory());
     if (expense.hasChanges(updated)) {
-      expenseRepository.update(updated.withVersion(version));
+      expenseRepository.update(updated.withVersion(command.version()));
     }
   }
 }

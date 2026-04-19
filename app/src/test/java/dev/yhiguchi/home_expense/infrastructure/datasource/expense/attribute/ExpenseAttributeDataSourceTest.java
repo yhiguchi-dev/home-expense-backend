@@ -2,9 +2,9 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.sql.Connection;
@@ -45,17 +45,17 @@ class ExpenseAttributeDataSourceTest {
     ExpenseAttribute attribute = createAttribute("テスト食費", ExpenseCategory.変動費);
     sut.register(attribute);
 
-    ExpenseAttribute result = sut.get(attribute.expenseAttributeIdentifier());
+    ExpenseAttribute result = sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
     assertEquals(attribute.expenseAttributeIdentifier(), result.expenseAttributeIdentifier());
     assertEquals(attribute.expenseAttributeName(), result.expenseAttributeName());
     assertEquals(attribute.expenseCategory(), result.expenseCategory());
   }
 
   @Test
-  void 存在しないIDで取得すると例外が発生する() {
+  void 存在しないIDで取得すると空のOptionalを返す() {
     ExpenseAttributeIdentifier unknownId =
         new ExpenseAttributeIdentifier(UUID.randomUUID().toString());
-    assertThrows(ExpenseAttributeNotFoundException.class, () -> sut.get(unknownId));
+    assertTrue(sut.findBy(unknownId).isEmpty());
   }
 
   @Test
@@ -76,7 +76,7 @@ class ExpenseAttributeDataSourceTest {
     ExpenseAttribute attribute = createAttribute("光熱費", ExpenseCategory.固定費);
     sut.register(attribute);
 
-    ExpenseAttribute fetched = sut.get(attribute.expenseAttributeIdentifier());
+    ExpenseAttribute fetched = sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
     ExpenseAttribute updated =
         new ExpenseAttribute(
             fetched.expenseAttributeIdentifier(),
@@ -85,7 +85,7 @@ class ExpenseAttributeDataSourceTest {
             fetched.version());
     sut.update(updated);
 
-    ExpenseAttribute result = sut.get(attribute.expenseAttributeIdentifier());
+    ExpenseAttribute result = sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
     assertEquals("水道光熱費", result.expenseAttributeName().value());
     assertEquals(ExpenseCategory.変動費, result.expenseCategory());
   }
@@ -110,15 +110,10 @@ class ExpenseAttributeDataSourceTest {
     sut.register(attribute);
 
     sut.delete(attribute);
-    assertThrows(
-        ExpenseAttributeNotFoundException.class,
-        () -> sut.get(attribute.expenseAttributeIdentifier()));
+    assertTrue(sut.findBy(attribute.expenseAttributeIdentifier()).isEmpty());
   }
 
   private ExpenseAttribute createAttribute(String name, ExpenseCategory category) {
-    return new ExpenseAttribute(
-        new ExpenseAttributeIdentifier(UUID.randomUUID().toString()),
-        new ExpenseAttributeName(name),
-        category);
+    return ExpenseAttribute.create(new ExpenseAttributeName(name), category);
   }
 }

@@ -23,12 +23,14 @@ class ExpenseAttributeUpdateServiceTest {
     attributeRepository.register(existing);
 
     sut.update(
-        new ExpenseAttributeIdentifier("attr-1"),
-        new ExpenseAttributeName("交通費"),
-        ExpenseCategory.変動費,
-        1L);
+        new ExpenseAttributeUpdateCommand(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("交通費"),
+            ExpenseCategory.変動費,
+            1L));
 
-    ExpenseAttribute updated = attributeRepository.get(new ExpenseAttributeIdentifier("attr-1"));
+    ExpenseAttribute updated =
+        attributeRepository.findBy(new ExpenseAttributeIdentifier("attr-1")).orElseThrow();
     assertEquals("交通費", updated.expenseAttributeName().value());
     assertEquals(1L, updated.version());
   }
@@ -44,12 +46,14 @@ class ExpenseAttributeUpdateServiceTest {
     attributeRepository.register(existing);
 
     sut.update(
-        new ExpenseAttributeIdentifier("attr-1"),
-        new ExpenseAttributeName("食費"),
-        ExpenseCategory.変動費,
-        1L);
+        new ExpenseAttributeUpdateCommand(
+            new ExpenseAttributeIdentifier("attr-1"),
+            new ExpenseAttributeName("食費"),
+            ExpenseCategory.変動費,
+            1L));
 
-    ExpenseAttribute result = attributeRepository.get(new ExpenseAttributeIdentifier("attr-1"));
+    ExpenseAttribute result =
+        attributeRepository.findBy(new ExpenseAttributeIdentifier("attr-1")).orElseThrow();
     assertSame(existing, result);
   }
 }

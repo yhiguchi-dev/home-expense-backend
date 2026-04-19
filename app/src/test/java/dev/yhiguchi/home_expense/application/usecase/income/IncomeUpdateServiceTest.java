@@ -3,10 +3,7 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.yhiguchi.home_expense.domain.model.income.*;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeName;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeAttributeRepository;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeRepository;
 import java.time.LocalDate;
@@ -19,7 +16,8 @@ class IncomeUpdateServiceTest {
   IncomeUpdateService sut = new IncomeUpdateService(incomeRepository, attributeRepository);
 
   IncomeAttribute attribute =
-      new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
+      new IncomeAttribute(
+          new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
 
   @Test
   void 収入を更新する() {
@@ -29,20 +27,21 @@ class IncomeUpdateServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute,
+            new IncomeAttributeIdentifier("attr-1"),
             1L);
     incomeRepository.register(existing);
     attributeRepository.register(attribute);
 
     sut.update(
-        new IncomeIdentifier("inc-1"),
-        new Description("5月給与"),
-        new Amount(310000),
-        new ReceiveDate(LocalDate.of(2026, 5, 25)),
-        new IncomeAttributeIdentifier("attr-1"),
-        1L);
+        new IncomeUpdateCommand(
+            new IncomeIdentifier("inc-1"),
+            new Description("5月給与"),
+            new Amount(310000),
+            new ReceiveDate(LocalDate.of(2026, 5, 25)),
+            new IncomeAttributeIdentifier("attr-1"),
+            1L));
 
-    Income updated = incomeRepository.get(new IncomeIdentifier("inc-1"));
+    Income updated = incomeRepository.findBy(new IncomeIdentifier("inc-1")).orElseThrow();
     assertEquals("5月給与", updated.description().value());
     assertEquals(310000, updated.amount().value());
     assertEquals(1L, updated.version());
@@ -56,20 +55,21 @@ class IncomeUpdateServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute,
+            new IncomeAttributeIdentifier("attr-1"),
             1L);
     incomeRepository.register(existing);
     attributeRepository.register(attribute);
 
     sut.update(
-        new IncomeIdentifier("inc-1"),
-        new Description("4月給与"),
-        new Amount(300000),
-        new ReceiveDate(LocalDate.of(2026, 4, 25)),
-        new IncomeAttributeIdentifier("attr-1"),
-        1L);
+        new IncomeUpdateCommand(
+            new IncomeIdentifier("inc-1"),
+            new Description("4月給与"),
+            new Amount(300000),
+            new ReceiveDate(LocalDate.of(2026, 4, 25)),
+            new IncomeAttributeIdentifier("attr-1"),
+            1L));
 
-    Income result = incomeRepository.get(new IncomeIdentifier("inc-1"));
+    Income result = incomeRepository.findBy(new IncomeIdentifier("inc-1")).orElseThrow();
     assertSame(existing, result);
   }
 
@@ -81,12 +81,13 @@ class IncomeUpdateServiceTest {
         IncomeNotFoundException.class,
         () ->
             sut.update(
-                new IncomeIdentifier("not-exist"),
-                new Description("4月給与"),
-                new Amount(300000),
-                new ReceiveDate(LocalDate.of(2026, 4, 25)),
-                new IncomeAttributeIdentifier("attr-1"),
-                1L));
+                new IncomeUpdateCommand(
+                    new IncomeIdentifier("not-exist"),
+                    new Description("4月給与"),
+                    new Amount(300000),
+                    new ReceiveDate(LocalDate.of(2026, 4, 25)),
+                    new IncomeAttributeIdentifier("attr-1"),
+                    1L)));
   }
 
   @Test
@@ -97,7 +98,7 @@ class IncomeUpdateServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute,
+            new IncomeAttributeIdentifier("attr-1"),
             1L);
     incomeRepository.register(existing);
 
@@ -105,11 +106,12 @@ class IncomeUpdateServiceTest {
         IncomeAttributeNotFoundException.class,
         () ->
             sut.update(
-                new IncomeIdentifier("inc-1"),
-                new Description("5月給与"),
-                new Amount(310000),
-                new ReceiveDate(LocalDate.of(2026, 5, 25)),
-                new IncomeAttributeIdentifier("not-exist"),
-                1L));
+                new IncomeUpdateCommand(
+                    new IncomeIdentifier("inc-1"),
+                    new Description("5月給与"),
+                    new Amount(310000),
+                    new ReceiveDate(LocalDate.of(2026, 5, 25)),
+                    new IncomeAttributeIdentifier("not-exist"),
+                    1L)));
   }
 }

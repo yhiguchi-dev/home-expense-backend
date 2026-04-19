@@ -2,8 +2,8 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.sql.Connection;
@@ -38,16 +38,16 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("給与");
     sut.register(attribute);
 
-    IncomeAttribute result = sut.get(attribute.incomeAttributeIdentifier());
+    IncomeAttribute result = sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
     assertEquals(attribute.incomeAttributeIdentifier(), result.incomeAttributeIdentifier());
     assertEquals("給与", result.incomeAttributeName().value());
   }
 
   @Test
-  void 存在しないIDで取得すると例外が発生する() {
+  void 存在しないIDで取得すると空のOptionalを返す() {
     IncomeAttributeIdentifier unknownId =
         new IncomeAttributeIdentifier(UUID.randomUUID().toString());
-    assertThrows(IncomeAttributeNotFoundException.class, () -> sut.get(unknownId));
+    assertTrue(sut.findBy(unknownId).isEmpty());
   }
 
   @Test
@@ -68,7 +68,7 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("副業");
     sut.register(attribute);
 
-    IncomeAttribute fetched = sut.get(attribute.incomeAttributeIdentifier());
+    IncomeAttribute fetched = sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
     IncomeAttribute updated =
         new IncomeAttribute(
             fetched.incomeAttributeIdentifier(),
@@ -76,7 +76,7 @@ class IncomeAttributeDataSourceTest {
             fetched.version());
     sut.update(updated);
 
-    IncomeAttribute result = sut.get(attribute.incomeAttributeIdentifier());
+    IncomeAttribute result = sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
     assertEquals("副業収入", result.incomeAttributeName().value());
   }
 
@@ -97,13 +97,10 @@ class IncomeAttributeDataSourceTest {
     sut.register(attribute);
 
     sut.delete(attribute);
-    assertThrows(
-        IncomeAttributeNotFoundException.class,
-        () -> sut.get(attribute.incomeAttributeIdentifier()));
+    assertTrue(sut.findBy(attribute.incomeAttributeIdentifier()).isEmpty());
   }
 
   private IncomeAttribute createAttribute(String name) {
-    return new IncomeAttribute(
-        new IncomeAttributeIdentifier(UUID.randomUUID().toString()), new IncomeAttributeName(name));
+    return IncomeAttribute.create(new IncomeAttributeName(name));
   }
 }

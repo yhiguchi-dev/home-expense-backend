@@ -25,22 +25,25 @@ class ExpenseRegistrationServiceTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費);
+            ExpenseCategory.変動費,
+            1L);
     attributeRepository.register(attribute);
 
     ExpenseIdentifier result =
         sut.register(
-            new Description("ランチ"),
-            new Price(1000),
-            new PaymentDate(LocalDate.of(2026, 4, 10)),
-            new ExpenseAttributeIdentifier("attr-1"));
+            new ExpenseRegistrationCommand(
+                new Description("ランチ"),
+                new Price(1000),
+                new PaymentDate(LocalDate.of(2026, 4, 10)),
+                new ExpenseAttributeIdentifier("attr-1")));
 
     assertNotNull(result);
     assertEquals(1, expenseRepository.all().size());
     Expense registered = expenseRepository.all().getFirst();
     assertEquals("ランチ", registered.description().value());
     assertEquals(1000, registered.price().value());
-    assertEquals(attribute, registered.expenseAttribute());
+    assertEquals(new ExpenseAttributeIdentifier("attr-1"), registered.expenseAttributeIdentifier());
+    assertEquals(ExpenseCategory.変動費, registered.expenseCategory());
     assertEquals(1L, registered.version());
   }
 
@@ -50,9 +53,10 @@ class ExpenseRegistrationServiceTest {
         ExpenseAttributeNotFoundException.class,
         () ->
             sut.register(
-                new Description("ランチ"),
-                new Price(1000),
-                new PaymentDate(LocalDate.of(2026, 4, 10)),
-                new ExpenseAttributeIdentifier("not-exist")));
+                new ExpenseRegistrationCommand(
+                    new Description("ランチ"),
+                    new Price(1000),
+                    new PaymentDate(LocalDate.of(2026, 4, 10)),
+                    new ExpenseAttributeIdentifier("not-exist"))));
   }
 }

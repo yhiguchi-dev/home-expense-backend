@@ -13,6 +13,7 @@ import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResult;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResultQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -34,16 +35,19 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   IncomeAttributeDeletionService incomeAttributeDeletionService;
 
   IncomeAttributeRetrievalService incomeAttributeRetrievalService;
+  IncomeAttributeSearchResultQuerier incomeAttributeSearchResultQuerier;
 
   public IncomeAttributeApi(
       IncomeAttributeRegistrationService incomeAttributeRegistrationService,
       IncomeAttributeUpdateService incomeAttributeUpdateService,
       IncomeAttributeDeletionService incomeAttributeDeletionService,
-      IncomeAttributeRetrievalService incomeAttributeRetrievalService) {
+      IncomeAttributeRetrievalService incomeAttributeRetrievalService,
+      IncomeAttributeSearchResultQuerier incomeAttributeSearchResultQuerier) {
     this.incomeAttributeRegistrationService = incomeAttributeRegistrationService;
     this.incomeAttributeUpdateService = incomeAttributeUpdateService;
     this.incomeAttributeDeletionService = incomeAttributeDeletionService;
     this.incomeAttributeRetrievalService = incomeAttributeRetrievalService;
+    this.incomeAttributeSearchResultQuerier = incomeAttributeSearchResultQuerier;
   }
 
   @POST
@@ -62,9 +66,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
       @Valid IncomeAttributePutRequest request,
       @HeaderParam("If-Match") String ifMatch) {
-    long version = IfMatchParser.parse(ifMatch);
-    incomeAttributeUpdateService.update(
-        new IncomeAttributeIdentifier(id), request.toIncomeAttributeName(), version);
+    incomeAttributeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
 
@@ -91,7 +93,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     IncomeAttributeSearchCriteria criteria = new IncomeAttributeSearchCriteria(pagination);
     IncomeAttributeSearchResult incomeAttributeSearchResult =
-        incomeAttributeRetrievalService.search(criteria);
+        incomeAttributeSearchResultQuerier.find(criteria);
     IncomeAttributeGetListResponse response =
         page <= incomeAttributeSearchResult.totalCount()
             ? new IncomeAttributeGetListResponse(incomeAttributeSearchResult)

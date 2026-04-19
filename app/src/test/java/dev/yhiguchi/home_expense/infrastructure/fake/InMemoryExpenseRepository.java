@@ -1,11 +1,11 @@
 package dev.yhiguchi.home_expense.infrastructure.fake;
 
 import dev.yhiguchi.home_expense.domain.model.expense.*;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class InMemoryExpenseRepository implements ExpenseRepository {
 
@@ -17,21 +17,15 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
   }
 
   @Override
-  public Expense get(ExpenseIdentifier expenseIdentifier) {
-    Expense expense = store.get(expenseIdentifier.value());
-    if (expense == null) {
-      throw new ExpenseNotFoundException();
-    }
-    return expense;
+  public Optional<Expense> findBy(ExpenseIdentifier expenseIdentifier) {
+    return Optional.ofNullable(store.get(expenseIdentifier.value()));
   }
 
   @Override
-  public Expenses find(ExpenseAttribute expenseAttribute) {
-    List<Expense> found =
-        store.values().stream()
-            .filter(e -> e.expenseAttribute().equals(expenseAttribute))
-            .collect(Collectors.toList());
-    return new Expenses(found);
+  public boolean existsByAttributeIdentifier(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    return store.values().stream()
+        .anyMatch(e -> e.expenseAttributeIdentifier().equals(expenseAttributeIdentifier));
   }
 
   @Override

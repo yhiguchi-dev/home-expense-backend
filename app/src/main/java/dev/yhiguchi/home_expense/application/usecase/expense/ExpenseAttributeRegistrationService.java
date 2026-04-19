@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -19,11 +18,10 @@ public class ExpenseAttributeRegistrationService {
         new ExpenseAttributeNameUniqueness(expenseAttributeRepository::existsByName);
   }
 
-  public ExpenseAttributeIdentifier register(
-      ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
-    expenseAttributeNameUniqueness.assertUnique(expenseAttributeName);
+  public ExpenseAttributeIdentifier register(ExpenseAttributeRegistrationCommand command) {
+    expenseAttributeNameUniqueness.assertUnique(command.expenseAttributeName());
     ExpenseAttribute expenseAttribute =
-        ExpenseAttribute.create(expenseAttributeName, expenseCategory);
+        ExpenseAttribute.create(command.expenseAttributeName(), command.expenseCategory());
     expenseAttributeRepository.register(expenseAttribute);
     return expenseAttribute.expenseAttributeIdentifier();
   }

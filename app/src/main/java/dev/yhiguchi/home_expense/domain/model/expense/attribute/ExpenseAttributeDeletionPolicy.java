@@ -1,24 +1,22 @@
 package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expenses;
-
 /** 経費属性の削除可否を判定する */
 public class ExpenseAttributeDeletionPolicy {
 
   @FunctionalInterface
-  public interface ExpenseFinder {
-    Expenses findBy(ExpenseAttribute expenseAttribute);
+  public interface ExpenseExistsByAttribute {
+    boolean existsByAttributeIdentifier(ExpenseAttributeIdentifier expenseAttributeIdentifier);
   }
 
-  ExpenseFinder expenseFinder;
+  ExpenseExistsByAttribute expenseExistsByAttribute;
 
-  public ExpenseAttributeDeletionPolicy(ExpenseFinder expenseFinder) {
-    this.expenseFinder = expenseFinder;
+  public ExpenseAttributeDeletionPolicy(ExpenseExistsByAttribute expenseExistsByAttribute) {
+    this.expenseExistsByAttribute = expenseExistsByAttribute;
   }
 
   public void assertDeletable(ExpenseAttribute expenseAttribute) {
-    Expenses expenses = expenseFinder.findBy(expenseAttribute);
-    if (expenses.has(expenseAttribute)) {
+    if (expenseExistsByAttribute.existsByAttributeIdentifier(
+        expenseAttribute.expenseAttributeIdentifier())) {
       throw new ExpenseAttributeConstraintException();
     }
   }

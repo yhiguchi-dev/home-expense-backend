@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRegistrationCommand;
 import dev.yhiguchi.home_expense.domain.model.expense.Description;
 import dev.yhiguchi.home_expense.domain.model.expense.PaymentDate;
 import dev.yhiguchi.home_expense.domain.model.expense.Price;
@@ -25,19 +26,12 @@ public record ExpensePostRequest(
         @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "attribute_idの形式に誤りがあります")
         @JsonProperty("attribute_id")
         String attributeId) {
-  Description toDescription() {
-    return new Description(description);
-  }
 
-  Price toPrice() {
-    return new Price(price);
-  }
-
-  PaymentDate toPaymentDate() {
-    return new PaymentDate(LocalDate.parse(paymentDate));
-  }
-
-  ExpenseAttributeIdentifier toExpenseAttributeIdentifier() {
-    return new ExpenseAttributeIdentifier(attributeId);
+  ExpenseRegistrationCommand toCommand() {
+    return new ExpenseRegistrationCommand(
+        new Description(description),
+        new Price(price),
+        new PaymentDate(LocalDate.parse(paymentDate)),
+        new ExpenseAttributeIdentifier(attributeId));
   }
 }

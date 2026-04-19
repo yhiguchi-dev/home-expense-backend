@@ -16,7 +16,9 @@ class ExpenseAttributeRegistrationServiceTest {
   @Test
   void 経費属性を作成して登録する() {
     ExpenseAttributeIdentifier result =
-        sut.register(new ExpenseAttributeName("食費"), ExpenseCategory.変動費);
+        sut.register(
+            new ExpenseAttributeRegistrationCommand(
+                new ExpenseAttributeName("食費"), ExpenseCategory.変動費));
 
     assertNotNull(result);
     assertEquals(1, attributeRepository.all().size());
@@ -32,11 +34,15 @@ class ExpenseAttributeRegistrationServiceTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費);
+            ExpenseCategory.変動費,
+            1L);
     attributeRepository.register(existing);
 
     assertThrows(
         ExpenseAttributeAlreadyExistsException.class,
-        () -> sut.register(new ExpenseAttributeName("食費"), ExpenseCategory.変動費));
+        () ->
+            sut.register(
+                new ExpenseAttributeRegistrationCommand(
+                    new ExpenseAttributeName("食費"), ExpenseCategory.変動費)));
   }
 }

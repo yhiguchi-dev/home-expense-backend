@@ -2,7 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -20,13 +20,18 @@ public class ExpenseRegistrationService {
     this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
-  public ExpenseIdentifier register(
-      Description description,
-      Price price,
-      PaymentDate paymentDate,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    ExpenseAttribute attribute = expenseAttributeRepository.get(expenseAttributeIdentifier);
-    Expense expense = Expense.create(description, price, paymentDate, attribute);
+  public ExpenseIdentifier register(ExpenseRegistrationCommand command) {
+    ExpenseAttribute attribute =
+        expenseAttributeRepository
+            .findBy(command.expenseAttributeIdentifier())
+            .orElseThrow(ExpenseAttributeNotFoundException::new);
+    Expense expense =
+        Expense.create(
+            command.description(),
+            command.price(),
+            command.paymentDate(),
+            attribute.expenseAttributeIdentifier(),
+            attribute.expenseCategory());
     expenseRepository.register(expense);
     return expense.expenseIdentifier();
   }

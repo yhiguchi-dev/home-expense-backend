@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.income.IncomeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -17,7 +18,8 @@ public class IncomeDeletionService {
   }
 
   public void delete(IncomeIdentifier incomeIdentifier) {
-    Income income = incomeRepository.get(incomeIdentifier);
+    Income income =
+        incomeRepository.findBy(incomeIdentifier).orElseThrow(IncomeNotFoundException::new);
     incomeRepository.delete(income);
   }
 }

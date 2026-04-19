@@ -1,9 +1,9 @@
 package dev.yhiguchi.home_expense.infrastructure.fake;
 
 import dev.yhiguchi.home_expense.domain.model.income.*;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class InMemoryIncomeRepository implements IncomeRepository {
 
@@ -25,21 +25,14 @@ public class InMemoryIncomeRepository implements IncomeRepository {
   }
 
   @Override
-  public Income get(IncomeIdentifier incomeIdentifier) {
-    Income income = store.get(incomeIdentifier.value());
-    if (income == null) {
-      throw new IncomeNotFoundException();
-    }
-    return income;
+  public Optional<Income> findBy(IncomeIdentifier incomeIdentifier) {
+    return Optional.ofNullable(store.get(incomeIdentifier.value()));
   }
 
   @Override
-  public Incomes find(IncomeAttribute incomeAttribute) {
-    List<Income> found =
-        store.values().stream()
-            .filter(i -> i.incomeAttribute().equals(incomeAttribute))
-            .collect(Collectors.toList());
-    return new Incomes(found);
+  public boolean existsByAttributeIdentifier(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    return store.values().stream()
+        .anyMatch(i -> i.incomeAttributeIdentifier().equals(incomeAttributeIdentifier));
   }
 
   public List<Income> all() {

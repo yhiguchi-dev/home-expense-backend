@@ -4,6 +4,7 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class InMemoryIncomeAttributeRepository implements IncomeAttributeRepository {
 
@@ -25,12 +26,8 @@ public class InMemoryIncomeAttributeRepository implements IncomeAttributeReposit
   }
 
   @Override
-  public IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    IncomeAttribute attribute = store.get(incomeAttributeIdentifier.value());
-    if (attribute == null) {
-      throw new IncomeAttributeNotFoundException();
-    }
-    return attribute;
+  public Optional<IncomeAttribute> findBy(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    return Optional.ofNullable(store.get(incomeAttributeIdentifier.value()));
   }
 
   @Override

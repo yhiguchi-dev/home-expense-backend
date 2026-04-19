@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.domain.model.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -14,7 +14,9 @@ public class Expense {
 
   PaymentDate paymentDate;
 
-  ExpenseAttribute expenseAttribute;
+  ExpenseAttributeIdentifier expenseAttributeIdentifier;
+
+  ExpenseCategory expenseCategory;
 
   long version;
 
@@ -23,13 +25,15 @@ public class Expense {
       Description description,
       Price price,
       PaymentDate paymentDate,
-      ExpenseAttribute expenseAttribute,
+      ExpenseAttributeIdentifier expenseAttributeIdentifier,
+      ExpenseCategory expenseCategory,
       long version) {
     this.expenseIdentifier = expenseIdentifier;
     this.description = description;
     this.price = price;
     this.paymentDate = paymentDate;
-    this.expenseAttribute = expenseAttribute;
+    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
+    this.expenseCategory = expenseCategory;
     this.version = version;
   }
 
@@ -37,18 +41,27 @@ public class Expense {
       Description description,
       Price price,
       PaymentDate paymentDate,
-      ExpenseAttribute expenseAttribute) {
-    ExpenseIdentifier expenseIdentifier = new ExpenseIdentifier(UUID.randomUUID().toString());
-    return new Expense(expenseIdentifier, description, price, paymentDate, expenseAttribute, 1L);
+      ExpenseAttributeIdentifier expenseAttributeIdentifier,
+      ExpenseCategory expenseCategory) {
+    ExpenseIdentifier id = new ExpenseIdentifier(UUID.randomUUID().toString());
+    return new Expense(
+        id, description, price, paymentDate, expenseAttributeIdentifier, expenseCategory, 1L);
   }
 
   public Expense updateWith(
       Description description,
       Price price,
       PaymentDate paymentDate,
-      ExpenseAttribute expenseAttribute) {
+      ExpenseAttributeIdentifier expenseAttributeIdentifier,
+      ExpenseCategory expenseCategory) {
     return new Expense(
-        this.expenseIdentifier, description, price, paymentDate, expenseAttribute, this.version);
+        this.expenseIdentifier,
+        description,
+        price,
+        paymentDate,
+        expenseAttributeIdentifier,
+        expenseCategory,
+        this.version);
   }
 
   /** 指定したバージョンを持つExpenseを返す */
@@ -58,7 +71,8 @@ public class Expense {
         this.description,
         this.price,
         this.paymentDate,
-        this.expenseAttribute,
+        this.expenseAttributeIdentifier,
+        this.expenseCategory,
         version);
   }
 
@@ -67,15 +81,16 @@ public class Expense {
     return !Objects.equals(description, other.description)
         || !Objects.equals(price, other.price)
         || !Objects.equals(paymentDate, other.paymentDate)
-        || !Objects.equals(expenseAttribute, other.expenseAttribute);
+        || !Objects.equals(expenseAttributeIdentifier, other.expenseAttributeIdentifier)
+        || expenseCategory != other.expenseCategory;
   }
 
   public boolean isFixed() {
-    return expenseAttribute.isFixed();
+    return expenseCategory.isFixed();
   }
 
   public boolean isVariable() {
-    return expenseAttribute.isVariable();
+    return expenseCategory.isVariable();
   }
 
   public ExpenseIdentifier expenseIdentifier() {
@@ -94,8 +109,12 @@ public class Expense {
     return paymentDate;
   }
 
-  public ExpenseAttribute expenseAttribute() {
-    return expenseAttribute;
+  public ExpenseAttributeIdentifier expenseAttributeIdentifier() {
+    return expenseAttributeIdentifier;
+  }
+
+  public ExpenseCategory expenseCategory() {
+    return expenseCategory;
   }
 
   public long version() {

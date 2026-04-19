@@ -1,6 +1,6 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -11,7 +11,7 @@ public class Income {
   Amount amount;
   ReceiveDate receiveDate;
 
-  IncomeAttribute incomeAttribute;
+  IncomeAttributeIdentifier incomeAttributeIdentifier;
 
   long version;
 
@@ -20,13 +20,13 @@ public class Income {
       Description description,
       Amount amount,
       ReceiveDate receiveDate,
-      IncomeAttribute incomeAttribute,
+      IncomeAttributeIdentifier incomeAttributeIdentifier,
       long version) {
     this.incomeIdentifier = incomeIdentifier;
     this.description = description;
     this.amount = amount;
     this.receiveDate = receiveDate;
-    this.incomeAttribute = incomeAttribute;
+    this.incomeAttributeIdentifier = incomeAttributeIdentifier;
     this.version = version;
   }
 
@@ -34,18 +34,23 @@ public class Income {
       Description description,
       Amount amount,
       ReceiveDate receiveDate,
-      IncomeAttribute incomeAttribute) {
-    IncomeIdentifier incomeIdentifier = new IncomeIdentifier(UUID.randomUUID().toString());
-    return new Income(incomeIdentifier, description, amount, receiveDate, incomeAttribute, 1L);
+      IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    IncomeIdentifier id = new IncomeIdentifier(UUID.randomUUID().toString());
+    return new Income(id, description, amount, receiveDate, incomeAttributeIdentifier, 1L);
   }
 
   public Income updateWith(
       Description description,
       Amount amount,
       ReceiveDate receiveDate,
-      IncomeAttribute incomeAttribute) {
+      IncomeAttributeIdentifier incomeAttributeIdentifier) {
     return new Income(
-        this.incomeIdentifier, description, amount, receiveDate, incomeAttribute, this.version);
+        this.incomeIdentifier,
+        description,
+        amount,
+        receiveDate,
+        incomeAttributeIdentifier,
+        this.version);
   }
 
   /** 指定したバージョンを持つIncomeを返す */
@@ -55,7 +60,7 @@ public class Income {
         this.description,
         this.amount,
         this.receiveDate,
-        this.incomeAttribute,
+        this.incomeAttributeIdentifier,
         version);
   }
 
@@ -64,7 +69,7 @@ public class Income {
     return !Objects.equals(description, other.description)
         || !Objects.equals(amount, other.amount)
         || !Objects.equals(receiveDate, other.receiveDate)
-        || !Objects.equals(incomeAttribute, other.incomeAttribute);
+        || !Objects.equals(incomeAttributeIdentifier, other.incomeAttributeIdentifier);
   }
 
   public IncomeIdentifier incomeIdentifier() {
@@ -83,8 +88,8 @@ public class Income {
     return receiveDate;
   }
 
-  public IncomeAttribute incomeAttribute() {
-    return incomeAttribute;
+  public IncomeAttributeIdentifier incomeAttributeIdentifier() {
+    return incomeAttributeIdentifier;
   }
 
   public long version() {

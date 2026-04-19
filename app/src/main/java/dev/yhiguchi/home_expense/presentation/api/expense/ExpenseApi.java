@@ -12,6 +12,7 @@ import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteriaCreator;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResult;
+import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResultQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -30,16 +31,19 @@ public class ExpenseApi implements LinkHeaderCreatable {
 
   ExpenseRegistrationService expenseRegistrationService;
   ExpenseRetrievalService expenseRetrievalService;
+  ExpenseSearchResultQuerier expenseSearchResultQuerier;
   ExpenseUpdateService expenseUpdateService;
   ExpenseDeletionService expenseDeletionService;
 
   public ExpenseApi(
       ExpenseRegistrationService expenseRegistrationService,
       ExpenseRetrievalService expenseRetrievalService,
+      ExpenseSearchResultQuerier expenseSearchResultQuerier,
       ExpenseUpdateService expenseUpdateService,
       ExpenseDeletionService expenseDeletionService) {
     this.expenseRegistrationService = expenseRegistrationService;
     this.expenseRetrievalService = expenseRetrievalService;
+    this.expenseSearchResultQuerier = expenseSearchResultQuerier;
     this.expenseUpdateService = expenseUpdateService;
     this.expenseDeletionService = expenseDeletionService;
   }
@@ -47,12 +51,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
   @POST
   @RunOnVirtualThread
   public Response post(@Valid ExpensePostRequest request, @Context UriInfo uriInfo) {
-    ExpenseIdentifier expenseIdentifier =
-        expenseRegistrationService.register(
-            request.toDescription(),
-            request.toPrice(),
-            request.toPaymentDate(),
-            request.toExpenseAttributeIdentifier());
+    ExpenseIdentifier expenseIdentifier = expenseRegistrationService.register(request.toCommand());
     URI uri = uriInfo.getAbsolutePathBuilder().path(expenseIdentifier.value()).build();
     return Response.created(uri).build();
   }
@@ -64,14 +63,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
       @Valid ExpensePutRequest request,
       @HeaderParam("If-Match") String ifMatch) {
-    long version = IfMatchParser.parse(ifMatch);
-    expenseUpdateService.update(
-        new ExpenseIdentifier(id),
-        request.toDescription(),
-        request.toPrice(),
-        request.toPaymentDate(),
-        request.toExpenseAttributeIdentifier(),
-        version);
+    expenseUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
 
@@ -104,7 +96,7 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @Context UriInfo uriInfo) {
     ExpenseSearchCriteria criteria =
         ExpenseCriteriaCreator.create(page, perPage, year, month, category, attributeId);
-    ExpenseSearchResult expenseSearchResult = expenseRetrievalService.search(criteria);
+    ExpenseSearchResult expenseSearchResult = expenseSearchResultQuerier.find(criteria);
     ExpenseGetListResponse response =
         page <= expenseSearchResult.totalCount()
             ? new ExpenseGetListResponse(expenseSearchResult)

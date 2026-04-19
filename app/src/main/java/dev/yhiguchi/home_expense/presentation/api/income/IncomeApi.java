@@ -13,6 +13,7 @@ import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
+import dev.yhiguchi.home_expense.query.income.IncomeSearchResultQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -33,27 +34,25 @@ public class IncomeApi implements LinkHeaderCreatable {
   IncomeUpdateService incomeUpdateService;
   IncomeDeletionService incomeDeletionService;
   IncomeRetrievalService incomeRetrievalService;
+  IncomeSearchResultQuerier incomeSearchResultQuerier;
 
   public IncomeApi(
       IncomeRegistrationService incomeRegistrationService,
       IncomeUpdateService incomeUpdateService,
       IncomeDeletionService incomeDeletionService,
-      IncomeRetrievalService incomeRetrievalService) {
+      IncomeRetrievalService incomeRetrievalService,
+      IncomeSearchResultQuerier incomeSearchResultQuerier) {
     this.incomeRegistrationService = incomeRegistrationService;
     this.incomeUpdateService = incomeUpdateService;
     this.incomeDeletionService = incomeDeletionService;
     this.incomeRetrievalService = incomeRetrievalService;
+    this.incomeSearchResultQuerier = incomeSearchResultQuerier;
   }
 
   @POST
   @RunOnVirtualThread
   public Response post(@Valid IncomePostRequest request, @Context UriInfo uriInfo) {
-    IncomeIdentifier incomeIdentifier =
-        incomeRegistrationService.register(
-            request.toDescription(),
-            request.toAmount(),
-            request.toReceiveDate(),
-            request.toIncomeAttributeIdentifier());
+    IncomeIdentifier incomeIdentifier = incomeRegistrationService.register(request.toCommand());
     URI uri = uriInfo.getAbsolutePathBuilder().path(incomeIdentifier.value()).build();
     return Response.created(uri).build();
   }
@@ -65,14 +64,7 @@ public class IncomeApi implements LinkHeaderCreatable {
       @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
       @Valid IncomePutRequest request,
       @HeaderParam("If-Match") String ifMatch) {
-    long version = IfMatchParser.parse(ifMatch);
-    incomeUpdateService.update(
-        new IncomeIdentifier(id),
-        request.toDescription(),
-        request.toAmount(),
-        request.toReceiveDate(),
-        request.toIncomeAttributeIdentifier(),
-        version);
+    incomeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
 
@@ -99,7 +91,7 @@ public class IncomeApi implements LinkHeaderCreatable {
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, year);
-    IncomeSearchResult incomeSearchResult = incomeRetrievalService.search(criteria);
+    IncomeSearchResult incomeSearchResult = incomeSearchResultQuerier.find(criteria);
     IncomeGetListResponse response =
         page <= incomeSearchResult.totalCount()
             ? new IncomeGetListResponse(incomeSearchResult)

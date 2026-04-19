@@ -98,10 +98,7 @@ class IncomeSearchResultDataSourceTest {
   }
 
   private IncomeAttribute registerAttribute(String name) {
-    IncomeAttribute attribute =
-        new IncomeAttribute(
-            new IncomeAttributeIdentifier(UUID.randomUUID().toString()),
-            new IncomeAttributeName(name));
+    IncomeAttribute attribute = IncomeAttribute.create(new IncomeAttributeName(name));
     incomeAttributeDataSource.register(attribute);
     return attribute;
   }
@@ -114,7 +111,7 @@ class IncomeSearchResultDataSourceTest {
             new Description(description),
             new Amount(amount),
             new ReceiveDate(LocalDate.parse(receiveDate)),
-            attribute,
+            attribute.incomeAttributeIdentifier(),
             1L);
     incomeDataSource.register(income);
   }

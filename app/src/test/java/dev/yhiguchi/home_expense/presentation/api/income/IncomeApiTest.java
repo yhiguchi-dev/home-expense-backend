@@ -68,7 +68,7 @@ class IncomeApiTest {
         .body("description", equalTo("4月給与"))
         .body("amount", equalTo(300000))
         .body("receive_date", equalTo("2026-04-25"))
-        .body("income_attribute.id", equalTo(attributeId));
+        .body("income_attribute_id", equalTo(attributeId));
   }
 
   @Test

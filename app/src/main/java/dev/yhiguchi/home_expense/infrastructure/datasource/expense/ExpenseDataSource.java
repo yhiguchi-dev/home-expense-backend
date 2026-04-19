@@ -1,14 +1,12 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
-import dev.yhiguchi.home_expense.domain.model.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
 
@@ -30,7 +28,7 @@ public class ExpenseDataSource implements ExpenseRepository {
         ps.setString(1, expense.expenseIdentifier().value());
         ps.setString(2, expense.description().value());
         ps.setInt(3, expense.price().value());
-        ps.setDate(4, Date.valueOf(expense.paymentDate().value()));
+        ps.setDate(4, Date.valueOf(expense.paymentDate().asString()));
         ps.setLong(5, expense.version());
         ps.executeUpdate();
       }
@@ -39,7 +37,7 @@ public class ExpenseDataSource implements ExpenseRepository {
             conn.prepareStatement(
                 "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)")) {
           ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttribute().expenseAttributeIdentifier().value());
+          ps.setString(2, expense.expenseAttributeIdentifier().value());
           ps.executeUpdate();
         }
       }
@@ -48,7 +46,7 @@ public class ExpenseDataSource implements ExpenseRepository {
             conn.prepareStatement(
                 "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)")) {
           ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttribute().expenseAttributeIdentifier().value());
+          ps.setString(2, expense.expenseAttributeIdentifier().value());
           ps.executeUpdate();
         }
       }
@@ -58,46 +56,29 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   @Override
-  public Expense get(ExpenseIdentifier expenseIdentifier) {
-    Optional<Expense> expense = selectBy(expenseIdentifier);
-    return expense.orElseThrow(ExpenseNotFoundException::new);
+  public Optional<Expense> findBy(ExpenseIdentifier expenseIdentifier) {
+    return selectBy(expenseIdentifier);
   }
 
   @Override
-  public Expenses find(ExpenseAttribute expenseAttribute) {
+  public boolean existsByAttributeIdentifier(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     String sql =
         """
-        SELECT
-          expense.id,
-          expense.description,
-          expense.price,
-          expense.payment_date,
-          expense.version,
-          attribute.id AS attribute_id,
-          attribute.category,
-          attribute.name AS attribute_name
-        FROM expense.expense
-        LEFT JOIN fixed_expense
-          ON expense.id = fixed_expense.expense_id
-        LEFT JOIN variable_expense
-          ON expense.id = variable_expense.expense_id
-        LEFT JOIN attribute
-          ON attribute.id = fixed_expense.attribute_id
-            OR attribute.id = variable_expense.attribute_id
-        WHERE attribute.id = ?
+        SELECT CASE WHEN EXISTS(
+          SELECT 1 FROM expense.fixed_expense WHERE attribute_id = ?
+          UNION ALL
+          SELECT 1 FROM expense.variable_expense WHERE attribute_id = ?
+        ) THEN TRUE ELSE FALSE END
+        FROM (VALUES (1)) AS t(x)
         """;
     try (Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, expenseAttribute.expenseAttributeIdentifier().value());
+      ps.setString(1, expenseAttributeIdentifier.value());
+      ps.setString(2, expenseAttributeIdentifier.value());
       try (ResultSet rs = ps.executeQuery()) {
-        List<Expense> list = new ArrayList<>();
-        while (rs.next()) {
-          list.add(mapExpense(rs));
-        }
-        if (list.isEmpty()) {
-          return new Expenses();
-        }
-        return new Expenses(list);
+        rs.next();
+        return rs.getBoolean(1);
       }
     } catch (SQLException e) {
       throw new DataAccessException(e);
@@ -116,7 +97,7 @@ public class ExpenseDataSource implements ExpenseRepository {
       try (PreparedStatement ps = conn.prepareStatement(sql)) {
         ps.setString(1, expense.description().value());
         ps.setInt(2, expense.price().value());
-        ps.setDate(3, Date.valueOf(expense.paymentDate().value()));
+        ps.setDate(3, Date.valueOf(expense.paymentDate().asString()));
         ps.setString(4, expense.expenseIdentifier().value());
         ps.setLong(5, expense.version());
         int rowCount = ps.executeUpdate();
@@ -139,7 +120,7 @@ public class ExpenseDataSource implements ExpenseRepository {
             conn.prepareStatement(
                 "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)")) {
           ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttribute().expenseAttributeIdentifier().value());
+          ps.setString(2, expense.expenseAttributeIdentifier().value());
           ps.executeUpdate();
         }
       }
@@ -148,7 +129,7 @@ public class ExpenseDataSource implements ExpenseRepository {
             conn.prepareStatement(
                 "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)")) {
           ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttribute().expenseAttributeIdentifier().value());
+          ps.setString(2, expense.expenseAttributeIdentifier().value());
           ps.executeUpdate();
         }
       }
@@ -180,17 +161,16 @@ public class ExpenseDataSource implements ExpenseRepository {
           expense.price,
           expense.payment_date,
           expense.version,
-          attribute.id AS attribute_id,
-          attribute.category,
-          attribute.name AS attribute_name
+          COALESCE(fixed_expense.attribute_id, variable_expense.attribute_id) AS attribute_id,
+          CASE
+            WHEN fixed_expense.attribute_id IS NOT NULL THEN '固定費'
+            ELSE '変動費'
+          END AS category
         FROM expense.expense
-        LEFT JOIN fixed_expense
+        LEFT JOIN expense.fixed_expense
           ON expense.id = fixed_expense.expense_id
-        LEFT JOIN variable_expense
+        LEFT JOIN expense.variable_expense
           ON expense.id = variable_expense.expense_id
-        JOIN attribute
-          ON attribute.id = fixed_expense.attribute_id
-            OR attribute.id = variable_expense.attribute_id
         WHERE expense.id = ?
         """;
     try (Connection conn = dataSource.getConnection();
@@ -208,17 +188,13 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   static Expense mapExpense(ResultSet rs) throws SQLException {
-    ExpenseAttribute expenseAttribute =
-        new ExpenseAttribute(
-            new ExpenseAttributeIdentifier(rs.getString("attribute_id")),
-            new ExpenseAttributeName(rs.getString("attribute_name")),
-            ExpenseCategory.valueOf(rs.getString("category")));
     return new Expense(
         new ExpenseIdentifier(rs.getString("id")),
         new Description(rs.getString("description")),
         new Price(rs.getInt("price")),
         new PaymentDate(rs.getObject("payment_date", LocalDate.class)),
-        expenseAttribute,
+        new ExpenseAttributeIdentifier(rs.getString("attribute_id")),
+        ExpenseCategory.valueOf(rs.getString("category")),
         rs.getLong("version"));
   }
 }

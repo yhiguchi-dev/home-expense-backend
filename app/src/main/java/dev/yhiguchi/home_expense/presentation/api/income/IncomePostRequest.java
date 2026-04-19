@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.presentation.api.income;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.yhiguchi.home_expense.application.usecase.income.IncomeRegistrationCommand;
 import dev.yhiguchi.home_expense.domain.model.income.Amount;
 import dev.yhiguchi.home_expense.domain.model.income.Description;
 import dev.yhiguchi.home_expense.domain.model.income.ReceiveDate;
@@ -25,19 +26,12 @@ public record IncomePostRequest(
         @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "attribute_idの形式に誤りがあります")
         @JsonProperty("attribute_id")
         String attributeId) {
-  Description toDescription() {
-    return new Description(description);
-  }
 
-  Amount toAmount() {
-    return new Amount(amount);
-  }
-
-  ReceiveDate toReceiveDate() {
-    return new ReceiveDate(LocalDate.parse(receiveDate));
-  }
-
-  IncomeAttributeIdentifier toIncomeAttributeIdentifier() {
-    return new IncomeAttributeIdentifier(attributeId);
+  IncomeRegistrationCommand toCommand() {
+    return new IncomeRegistrationCommand(
+        new Description(description),
+        new Amount(amount),
+        new ReceiveDate(LocalDate.parse(receiveDate)),
+        new IncomeAttributeIdentifier(attributeId));
   }
 }

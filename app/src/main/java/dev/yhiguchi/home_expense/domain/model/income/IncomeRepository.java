@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import java.util.Optional;
 
 /** 収入リポジトリ */
 public interface IncomeRepository {
@@ -11,7 +12,7 @@ public interface IncomeRepository {
 
   void delete(Income income);
 
-  Income get(IncomeIdentifier incomeIdentifier);
+  Optional<Income> findBy(IncomeIdentifier incomeIdentifier);
 
-  Incomes find(IncomeAttribute incomeAttribute);
+  boolean existsByAttributeIdentifier(IncomeAttributeIdentifier incomeAttributeIdentifier);
 }
