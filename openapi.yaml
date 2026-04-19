@@ -3,17 +3,6 @@ info:
   title: Home Expense API
   description: |
     API for managing home expenses and income.
-
-    ## Conventions
-
-    - **Optimistic locking**: Single-resource `GET` responses include an `ETag` header.
-      `PUT` requests require the `If-Match` header echoing the last observed `ETag` value.
-      Missing `If-Match` → `428 Precondition Required`. Mismatched `If-Match` → `412 Precondition Failed`.
-    - **Caching**: All `/v1/*` responses carry `Cache-Control: no-store` to prevent intermediate
-      caches from retaining private financial data.
-    - **Edge concerns**: TLS termination, CORS, HSTS and other security response headers are
-      applied by the Envoy Gateway in front of this service and are not documented in this spec.
-      See `docs/http-headers.md` for the policy.
   contact:
     name: API Support
   license:
