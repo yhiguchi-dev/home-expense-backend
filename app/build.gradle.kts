@@ -72,6 +72,13 @@ tasks.register("printVersion") {
   }
 }
 
+tasks.register("resolveDependencies") {
+  description = "Pre-resolves all resolvable configurations so their artifacts are cached."
+  doLast {
+    configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
+  }
+}
+
 spotless {
   java {
     target("**/src/**/*.java")

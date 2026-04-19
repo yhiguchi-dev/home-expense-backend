@@ -1,0 +1,12 @@
+**/.git
+**/.gradle
+**/build
+**/out
+**/.idea
+**/*.iml
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+.sdkmanrc
+Dockerfile
+.dockerignore
