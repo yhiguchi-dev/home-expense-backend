@@ -11,7 +11,7 @@ db_name=expense
 
 cd "$(dirname "$0")"/..
 
-source scripts/setup_postgres.sh
+source scripts/lib/setup_postgres.sh
 
 echo "Create User and Database for Local Development"
 
@@ -24,20 +24,7 @@ echo "GRANT ALL PRIVILEGES ON DATABASE :db_name TO :db_user;" | container exec -
 db_host=$(container inspect "${postgres_container_name}" | jq -r --arg name "${postgres_container_name}" '.[] | select(.configuration.id == $name) | .networks[] | select(.hostname == $name) | .ipv4Address' | sed 's/\/.*//')
 echo "Database Host: ${db_host}"
 
-echo "Building Flyway migration container..."
-container build -t flyway-migration ./flyway
-
-container run --rm \
-  --name db-migration \
-  -e FLYWAY_URL="jdbc:postgresql://${db_host}:5432/${db_name}" \
-  -e FLYWAY_USER="${db_user}" \
-  -e FLYWAY_PASSWORD="${db_password}" \
-  -e FLYWAY_CONNECT_RETRIES=60 \
-  -e FLYWAY_CLEAN_DISABLED=false \
-  -e FLYWAY_BASELINE_VERSION=0.0.0 \
-  -e FLYWAY_SCHEMAS=expense \
-  -e FLYWAY_DEFAULT_SCHEMA=public \
-  flyway-migration clean migrate
+source scripts/lib/migrate_database.sh
 
 echo "Database setup completed."
 echo "  Host: ${db_host}"

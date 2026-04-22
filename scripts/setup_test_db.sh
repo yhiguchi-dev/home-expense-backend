@@ -11,7 +11,7 @@ test_db_name=expense_test
 
 cd "$(dirname "$0")"/..
 
-source scripts/setup_postgres.sh
+source scripts/lib/setup_postgres.sh
 
 echo "Setting up test database..."
 
