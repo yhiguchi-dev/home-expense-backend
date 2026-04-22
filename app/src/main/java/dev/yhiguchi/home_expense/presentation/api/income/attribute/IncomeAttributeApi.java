@@ -8,6 +8,8 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
+import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
+import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
@@ -18,7 +20,6 @@ import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -64,9 +65,9 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @Path("{id}")
   @RunOnVirtualThread
   public Response put(
-      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
+      @PathParam("id") @UuidFormat String id,
       @Valid IncomeAttributePutRequest request,
-      @HeaderParam("If-Match") String ifMatch) {
+      @HeaderParam("If-Match") @IfMatch String ifMatch) {
     incomeAttributeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
@@ -74,8 +75,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @DELETE
   @Path("{id}")
   @RunOnVirtualThread
-  public Response delete(
-      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
+  public Response delete(@PathParam("id") @UuidFormat String id) {
     incomeAttributeDeletionService.delete(new IncomeAttributeIdentifier(id));
     return Response.noContent().build();
   }
@@ -108,8 +108,7 @@ public class IncomeAttributeApi implements LinkHeaderCreatable {
   @GET
   @Path("{id}")
   @RunOnVirtualThread
-  public Response get(
-      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
+  public Response get(@PathParam("id") @UuidFormat String id) {
     IncomeAttribute incomeAttribute =
         incomeAttributeRetrievalService.get(new IncomeAttributeIdentifier(id));
     IncomeAttributeGetResponse response = IncomeAttributeGetResponse.from(incomeAttribute);

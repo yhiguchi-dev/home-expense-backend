@@ -6,6 +6,7 @@ import dev.yhiguchi.home_expense.domain.model.income.Amount;
 import dev.yhiguchi.home_expense.domain.model.income.Description;
 import dev.yhiguchi.home_expense.domain.model.income.ReceiveDate;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
@@ -23,7 +24,7 @@ public record IncomePostRequest(
         @JsonProperty("receive_date")
         String receiveDate,
     @NotBlank(message = "attribute_idは必須入力です")
-        @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "attribute_idの形式に誤りがあります")
+        @UuidFormat(message = "attribute_idの形式に誤りがあります")
         @JsonProperty("attribute_id")
         String attributeId) {
 

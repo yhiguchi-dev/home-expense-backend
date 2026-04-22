@@ -9,13 +9,14 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeCo
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
-import dev.yhiguchi.home_expense.presentation.api.InvalidIfMatchException;
-import dev.yhiguchi.home_expense.presentation.api.PreconditionRequiredException;
+import dev.yhiguchi.home_expense.presentation.validation.payload.PreconditionRequired;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.stream.Collectors;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
@@ -78,28 +79,27 @@ public class ProblemDetailExceptionMapper {
   @ServerExceptionMapper
   public RestResponse<ProblemDetail> mapConstraintViolationException(
       ConstraintViolationException e) {
+    var violations = e.getConstraintViolations();
+
+    var preconditionRequired =
+        violations.stream()
+            .filter(
+                v -> v.getConstraintDescriptor().getPayload().contains(PreconditionRequired.class))
+            .findFirst();
+    if (preconditionRequired.isPresent()) {
+      return toResponse(428, "Precondition Required", preconditionRequired.get().getMessage());
+    }
+
     String detail =
-        e.getConstraintViolations().stream()
-            .map(jakarta.validation.ConstraintViolation::getMessage)
-            .collect(java.util.stream.Collectors.joining(", "));
+        violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(", "));
     return toResponse(Response.Status.BAD_REQUEST, detail);
   }
 
   @ServerExceptionMapper
   public RestResponse<ProblemDetail> mapConcurrentUpdateException(ConcurrentUpdateException e) {
     LOG.warnv("楽観ロック違反: {0}", uriInfo.getRequestUri());
-    return toResponse(Response.Status.CONFLICT, "他のユーザーによって更新されています。再度取得してからやり直してください");
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<ProblemDetail> mapPreconditionRequiredException(
-      PreconditionRequiredException e) {
-    return toResponse(428, "Precondition Required", "If-Matchヘッダーは必須です");
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<ProblemDetail> mapInvalidIfMatchException(InvalidIfMatchException e) {
-    return toResponse(Response.Status.BAD_REQUEST, "If-Matchヘッダーの形式が不正です");
+    return toResponse(
+        Response.Status.PRECONDITION_FAILED, "指定されたバージョンは既に更新されています。最新を取得して再試行してください");
   }
 
   @ServerExceptionMapper

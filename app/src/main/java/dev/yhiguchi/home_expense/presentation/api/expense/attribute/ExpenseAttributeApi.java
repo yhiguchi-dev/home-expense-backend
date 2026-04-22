@@ -9,6 +9,8 @@ import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
+import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
+import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.*;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResult;
@@ -17,7 +19,6 @@ import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -64,9 +65,9 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @Path("{id}")
   @RunOnVirtualThread
   public Response put(
-      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id,
+      @PathParam("id") @UuidFormat String id,
       @Valid ExpenseAttributePutRequest request,
-      @HeaderParam("If-Match") String ifMatch) {
+      @HeaderParam("If-Match") @IfMatch String ifMatch) {
     expenseAttributeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
@@ -74,8 +75,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @DELETE
   @Path("{id}")
   @RunOnVirtualThread
-  public Response delete(
-      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
+  public Response delete(@PathParam("id") @UuidFormat String id) {
     expenseAttributeDeletionService.delete(new ExpenseAttributeIdentifier(id));
     return Response.noContent().build();
   }
@@ -114,8 +114,7 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @GET
   @Path("{id}")
   @RunOnVirtualThread
-  public Response get(
-      @PathParam("id") @Pattern(regexp = "^[a-f0-9\\-]{36}$", message = "IDの形式が不正です") String id) {
+  public Response get(@PathParam("id") @UuidFormat String id) {
     ExpenseAttribute expenseAttribute =
         expenseAttributeRetrievalService.get(new ExpenseAttributeIdentifier(id));
     ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(expenseAttribute);
