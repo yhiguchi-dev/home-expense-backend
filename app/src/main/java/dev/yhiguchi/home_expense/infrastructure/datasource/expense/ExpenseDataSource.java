@@ -2,10 +2,11 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
-import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.sql.*;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
 import javax.sql.DataSource;
@@ -13,146 +14,43 @@ import javax.sql.DataSource;
 @ApplicationScoped
 public class ExpenseDataSource implements ExpenseRepository {
 
-  DataSource dataSource;
+  private final JdbcOperator jdbc;
 
   public ExpenseDataSource(DataSource dataSource) {
-    this.dataSource = dataSource;
+    this.jdbc = new JdbcOperator(dataSource);
   }
 
   @Override
   public void register(Expense expense) {
-    try (Connection conn = dataSource.getConnection()) {
-      try (PreparedStatement ps =
-          conn.prepareStatement(
-              "INSERT INTO expense.expense(id, description, price, payment_date, version) VALUES (?, ?, ?, ?, ?)")) {
-        ps.setString(1, expense.expenseIdentifier().value());
-        ps.setString(2, expense.description().value());
-        ps.setInt(3, expense.price().value());
-        ps.setDate(4, Date.valueOf(expense.paymentDate().asString()));
-        ps.setLong(5, expense.version());
-        ps.executeUpdate();
-      }
-      if (expense.isFixed()) {
-        try (PreparedStatement ps =
-            conn.prepareStatement(
-                "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)")) {
+    jdbc.update(
+        "INSERT INTO expense.expense(id, description, price, payment_date, version) VALUES (?, ?, ?, ?, ?)",
+        ps -> {
           ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttributeIdentifier().value());
-          ps.executeUpdate();
-        }
-      }
-      if (expense.isVariable()) {
-        try (PreparedStatement ps =
-            conn.prepareStatement(
-                "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)")) {
-          ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttributeIdentifier().value());
-          ps.executeUpdate();
-        }
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
+          ps.setString(2, expense.description().value());
+          ps.setInt(3, expense.price().value());
+          ps.setDate(4, Date.valueOf(expense.paymentDate().asString()));
+          ps.setLong(5, expense.version());
+        });
+    if (expense.isFixed()) {
+      jdbc.update(
+          "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)",
+          ps -> {
+            ps.setString(1, expense.expenseIdentifier().value());
+            ps.setString(2, expense.expenseAttributeIdentifier().value());
+          });
+    }
+    if (expense.isVariable()) {
+      jdbc.update(
+          "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)",
+          ps -> {
+            ps.setString(1, expense.expenseIdentifier().value());
+            ps.setString(2, expense.expenseAttributeIdentifier().value());
+          });
     }
   }
 
   @Override
   public Optional<Expense> findBy(ExpenseIdentifier expenseIdentifier) {
-    return selectBy(expenseIdentifier);
-  }
-
-  @Override
-  public boolean existsByAttributeIdentifier(
-      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    String sql =
-        """
-        SELECT CASE WHEN EXISTS(
-          SELECT 1 FROM expense.fixed_expense WHERE attribute_id = ?
-          UNION ALL
-          SELECT 1 FROM expense.variable_expense WHERE attribute_id = ?
-        ) THEN TRUE ELSE FALSE END
-        FROM (VALUES (1)) AS t(x)
-        """;
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, expenseAttributeIdentifier.value());
-      ps.setString(2, expenseAttributeIdentifier.value());
-      try (ResultSet rs = ps.executeQuery()) {
-        rs.next();
-        return rs.getBoolean(1);
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
-  }
-
-  @Override
-  public void update(Expense expense) {
-    try (Connection conn = dataSource.getConnection()) {
-      String sql =
-          """
-          UPDATE expense.expense
-          SET description = ?, price = ?, payment_date = ?, version = version + 1
-          WHERE id = ? AND version = ?
-          """;
-      try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setString(1, expense.description().value());
-        ps.setInt(2, expense.price().value());
-        ps.setDate(3, Date.valueOf(expense.paymentDate().asString()));
-        ps.setString(4, expense.expenseIdentifier().value());
-        ps.setLong(5, expense.version());
-        int rowCount = ps.executeUpdate();
-        if (rowCount == 0) {
-          throw new ConcurrentUpdateException();
-        }
-      }
-      try (PreparedStatement ps =
-          conn.prepareStatement("DELETE FROM expense.fixed_expense WHERE expense_id = ?")) {
-        ps.setString(1, expense.expenseIdentifier().value());
-        ps.executeUpdate();
-      }
-      try (PreparedStatement ps =
-          conn.prepareStatement("DELETE FROM expense.variable_expense WHERE expense_id = ?")) {
-        ps.setString(1, expense.expenseIdentifier().value());
-        ps.executeUpdate();
-      }
-      if (expense.isFixed()) {
-        try (PreparedStatement ps =
-            conn.prepareStatement(
-                "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)")) {
-          ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttributeIdentifier().value());
-          ps.executeUpdate();
-        }
-      }
-      if (expense.isVariable()) {
-        try (PreparedStatement ps =
-            conn.prepareStatement(
-                "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)")) {
-          ps.setString(1, expense.expenseIdentifier().value());
-          ps.setString(2, expense.expenseAttributeIdentifier().value());
-          ps.executeUpdate();
-        }
-      }
-    } catch (ConcurrentUpdateException e) {
-      throw e;
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
-  }
-
-  @Override
-  public void delete(Expense expense) {
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps =
-            conn.prepareStatement("DELETE FROM expense.expense WHERE expense.id = ?")) {
-      ps.setString(1, expense.expenseIdentifier().value());
-      ps.executeUpdate();
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
-  }
-
-  private Optional<Expense> selectBy(ExpenseIdentifier expenseIdentifier) {
     String sql =
         """
         SELECT
@@ -173,18 +71,76 @@ public class ExpenseDataSource implements ExpenseRepository {
           ON expense.id = variable_expense.expense_id
         WHERE expense.id = ?
         """;
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, expenseIdentifier.value());
-      try (ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-          return Optional.of(mapExpense(rs));
-        }
-        return Optional.empty();
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
+    return jdbc.queryForOptional(
+        sql, ps -> ps.setString(1, expenseIdentifier.value()), ExpenseDataSource::mapExpense);
+  }
+
+  @Override
+  public boolean existsByAttributeIdentifier(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    String sql =
+        """
+        SELECT CASE WHEN EXISTS(
+          SELECT 1 FROM expense.fixed_expense WHERE attribute_id = ?
+          UNION ALL
+          SELECT 1 FROM expense.variable_expense WHERE attribute_id = ?
+        ) THEN TRUE ELSE FALSE END
+        FROM (VALUES (1)) AS t(x)
+        """;
+    return jdbc.queryForOptional(
+            sql,
+            ps -> {
+              ps.setString(1, expenseAttributeIdentifier.value());
+              ps.setString(2, expenseAttributeIdentifier.value());
+            },
+            rs -> rs.getBoolean(1))
+        .orElse(false);
+  }
+
+  @Override
+  public void update(Expense expense) {
+    jdbc.updateWithOptimisticLock(
+        """
+        UPDATE expense.expense
+        SET description = ?, price = ?, payment_date = ?, version = version + 1
+        WHERE id = ? AND version = ?
+        """,
+        ps -> {
+          ps.setString(1, expense.description().value());
+          ps.setInt(2, expense.price().value());
+          ps.setDate(3, Date.valueOf(expense.paymentDate().asString()));
+          ps.setString(4, expense.expenseIdentifier().value());
+          ps.setLong(5, expense.version());
+        });
+    jdbc.update(
+        "DELETE FROM expense.fixed_expense WHERE expense_id = ?",
+        ps -> ps.setString(1, expense.expenseIdentifier().value()));
+    jdbc.update(
+        "DELETE FROM expense.variable_expense WHERE expense_id = ?",
+        ps -> ps.setString(1, expense.expenseIdentifier().value()));
+    if (expense.isFixed()) {
+      jdbc.update(
+          "INSERT INTO expense.fixed_expense(expense_id, attribute_id) VALUES (?, ?)",
+          ps -> {
+            ps.setString(1, expense.expenseIdentifier().value());
+            ps.setString(2, expense.expenseAttributeIdentifier().value());
+          });
     }
+    if (expense.isVariable()) {
+      jdbc.update(
+          "INSERT INTO expense.variable_expense(expense_id, attribute_id) VALUES (?, ?)",
+          ps -> {
+            ps.setString(1, expense.expenseIdentifier().value());
+            ps.setString(2, expense.expenseAttributeIdentifier().value());
+          });
+    }
+  }
+
+  @Override
+  public void delete(Expense expense) {
+    jdbc.update(
+        "DELETE FROM expense.expense WHERE expense.id = ?",
+        ps -> ps.setString(1, expense.expenseIdentifier().value()));
   }
 
   static Expense mapExpense(ResultSet rs) throws SQLException {

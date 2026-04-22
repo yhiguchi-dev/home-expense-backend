@@ -1,24 +1,26 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResult;
 import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.sql.*;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
 @ApplicationScoped
+@Transactional
 public class ExpenseAttributeSearchResultDataSource implements ExpenseAttributeSearchResultQuerier {
 
-  DataSource dataSource;
+  private final JdbcOperator jdbc;
 
   public ExpenseAttributeSearchResultDataSource(
       @io.quarkus.agroal.DataSource("readonly") DataSource dataSource) {
-    this.dataSource = dataSource;
+    this.jdbc = new JdbcOperator(dataSource);
   }
 
   @Override
@@ -35,16 +37,8 @@ public class ExpenseAttributeSearchResultDataSource implements ExpenseAttributeS
     StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM expense.attribute");
     List<Object> params = new ArrayList<>();
     appendCategoryFilter(criteria, sql, params);
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-      setParams(ps, params);
-      try (ResultSet rs = ps.executeQuery()) {
-        rs.next();
-        return rs.getInt(1);
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    return jdbc.queryForOptional(sql.toString(), ParameterBinder.of(params), rs -> rs.getInt(1))
+        .orElse(0);
   }
 
   private List<ExpenseAttribute> selectBy(ExpenseAttributeSearchCriteria criteria) {
@@ -55,19 +49,10 @@ public class ExpenseAttributeSearchResultDataSource implements ExpenseAttributeS
     sql.append(" ORDER BY attribute.created_at OFFSET ? ROWS FETCH FIRST ? ROWS ONLY");
     params.add(criteria.offset());
     params.add(criteria.perPage());
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-      setParams(ps, params);
-      try (ResultSet rs = ps.executeQuery()) {
-        List<ExpenseAttribute> list = new ArrayList<>();
-        while (rs.next()) {
-          list.add(ExpenseAttributeDataSource.mapExpenseAttribute(rs));
-        }
-        return list;
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    return jdbc.queryForList(
+        sql.toString(),
+        ParameterBinder.of(params),
+        ExpenseAttributeDataSource::mapExpenseAttribute);
   }
 
   private void appendCategoryFilter(
@@ -75,17 +60,6 @@ public class ExpenseAttributeSearchResultDataSource implements ExpenseAttributeS
     if (criteria.getExpenseCategory() != null) {
       sql.append(" WHERE attribute.category = ?");
       params.add(criteria.getExpenseCategory().name());
-    }
-  }
-
-  private void setParams(PreparedStatement ps, List<Object> params) throws SQLException {
-    for (int i = 0; i < params.size(); i++) {
-      Object param = params.get(i);
-      if (param instanceof Integer intVal) {
-        ps.setInt(i + 1, intVal);
-      } else if (param instanceof String strVal) {
-        ps.setString(i + 1, strVal);
-      }
     }
   }
 }

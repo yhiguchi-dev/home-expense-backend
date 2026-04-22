@@ -1,104 +1,110 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
-import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResult;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.sql.*;
+import jakarta.transaction.Transactional;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
 @ApplicationScoped
+@Transactional
 public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier {
 
-  DataSource dataSource;
+  private final JdbcOperator jdbc;
 
   public ExpenseSearchResultDataSource(
       @io.quarkus.agroal.DataSource("readonly") DataSource dataSource) {
-    this.dataSource = dataSource;
+    this.jdbc = new JdbcOperator(dataSource);
   }
 
   @Override
   public ExpenseSearchResult find(ExpenseSearchCriteria criteria) {
-    StringBuilder sql = new StringBuilder();
-    sql.append(
-        """
-        SELECT
-          expense.id,
-          expense.description,
-          expense.price,
-          expense.payment_date,
-          expense.version,
-          attribute.id AS attribute_id,
-          attribute.category,
-          attribute.name AS attribute_name,
-          COUNT(*) OVER() AS total_count
-        FROM expense.expense
-        LEFT JOIN fixed_expense
-          ON expense.id = fixed_expense.expense_id
-        LEFT JOIN variable_expense
-          ON expense.id = variable_expense.expense_id
-        LEFT JOIN attribute
-          ON attribute.id = fixed_expense.attribute_id
-            OR attribute.id = variable_expense.attribute_id
-        WHERE 1=1
-        """);
-    List<Object> params = buildWhereParams(criteria, sql);
+    int totalCount = selectCount(criteria);
+    if (totalCount == 0) {
+      return new ExpenseSearchResult();
+    }
+    List<Expense> list = selectBy(criteria);
+    return new ExpenseSearchResult(totalCount, list);
+  }
+
+  private int selectCount(ExpenseSearchCriteria criteria) {
+    StringBuilder sql =
+        new StringBuilder(
+            """
+            SELECT COUNT(*)
+            FROM expense.expense
+            LEFT JOIN fixed_expense
+              ON expense.id = fixed_expense.expense_id
+            LEFT JOIN variable_expense
+              ON expense.id = variable_expense.expense_id
+            LEFT JOIN attribute
+              ON attribute.id = fixed_expense.attribute_id
+                OR attribute.id = variable_expense.attribute_id
+            """);
+    List<Object> params = new ArrayList<>();
+    appendWhere(criteria, sql, params);
+    return jdbc.queryForOptional(sql.toString(), ParameterBinder.of(params), rs -> rs.getInt(1))
+        .orElse(0);
+  }
+
+  private List<Expense> selectBy(ExpenseSearchCriteria criteria) {
+    StringBuilder sql =
+        new StringBuilder(
+            """
+            SELECT
+              expense.id,
+              expense.description,
+              expense.price,
+              expense.payment_date,
+              expense.version,
+              attribute.id AS attribute_id,
+              attribute.category,
+              attribute.name AS attribute_name
+            FROM expense.expense
+            LEFT JOIN fixed_expense
+              ON expense.id = fixed_expense.expense_id
+            LEFT JOIN variable_expense
+              ON expense.id = variable_expense.expense_id
+            LEFT JOIN attribute
+              ON attribute.id = fixed_expense.attribute_id
+                OR attribute.id = variable_expense.attribute_id
+            """);
+    List<Object> params = new ArrayList<>();
+    appendWhere(criteria, sql, params);
     sql.append(" ORDER BY attribute.category DESC, expense.payment_date DESC");
     sql.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY");
     params.add(criteria.pagination().offset());
     params.add(criteria.pagination().perPage());
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-      setParams(ps, params);
-      try (ResultSet rs = ps.executeQuery()) {
-        List<Expense> list = new ArrayList<>();
-        int totalCount = 0;
-        while (rs.next()) {
-          list.add(ExpenseDataSource.mapExpense(rs));
-          totalCount = rs.getInt("total_count");
-        }
-        if (list.isEmpty()) {
-          return new ExpenseSearchResult();
-        }
-        return new ExpenseSearchResult(totalCount, list);
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    return jdbc.queryForList(
+        sql.toString(), ParameterBinder.of(params), ExpenseDataSource::mapExpense);
   }
 
-  private List<Object> buildWhereParams(ExpenseSearchCriteria criteria, StringBuilder sql) {
-    List<Object> params = new ArrayList<>();
+  private void appendWhere(ExpenseSearchCriteria criteria, StringBuilder sql, List<Object> params) {
+    List<String> conditions = new ArrayList<>();
     if (criteria.hasDateRange()) {
-      sql.append(" AND expense.payment_date >= ? AND expense.payment_date < ?");
+      conditions.add("expense.payment_date >= ?");
+      conditions.add("expense.payment_date < ?");
       params.add(Date.valueOf(criteria.dateFrom()));
       params.add(Date.valueOf(criteria.dateTo()));
     }
     if (criteria.hasExpenseCategory()) {
-      sql.append(" AND category = ?");
+      conditions.add("category = ?");
       params.add(criteria.getExpenseCategory().name());
     }
     if (criteria.hasExpenseAttributeIdentifier()) {
-      sql.append(" AND attribute.id = ?");
+      conditions.add("attribute.id = ?");
       params.add(criteria.getExpenseAttributeIdentifier());
     }
-    return params;
-  }
-
-  private void setParams(PreparedStatement ps, List<Object> params) throws SQLException {
-    for (int i = 0; i < params.size(); i++) {
-      Object param = params.get(i);
-      if (param instanceof Integer intVal) {
-        ps.setInt(i + 1, intVal);
-      } else if (param instanceof String strVal) {
-        ps.setString(i + 1, strVal);
-      } else if (param instanceof Date dateVal) {
-        ps.setDate(i + 1, dateVal);
-      }
+    if (!conditions.isEmpty()) {
+      sql.append(" WHERE ");
+      sql.append(String.join(" AND ", conditions));
     }
   }
 }

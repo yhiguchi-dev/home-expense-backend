@@ -1,76 +1,68 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
-import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 import javax.sql.DataSource;
 
 @ApplicationScoped
 public class IncomeAttributeDataSource implements IncomeAttributeRepository {
 
-  DataSource dataSource;
+  private static final String UNIQUE_VIOLATION = "23505";
+
+  private final JdbcOperator jdbc;
 
   public IncomeAttributeDataSource(DataSource dataSource) {
-    this.dataSource = dataSource;
+    this.jdbc = new JdbcOperator(dataSource);
   }
-
-  private static final String UNIQUE_VIOLATION = "23505";
 
   @Override
   public void register(IncomeAttribute incomeAttribute) {
-    String sql = "INSERT INTO expense.income_attribute(id, name, version) VALUES (?, ?, ?)";
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value());
-      ps.setString(2, incomeAttribute.incomeAttributeName().value());
-      ps.setLong(3, incomeAttribute.version());
-      ps.executeUpdate();
-    } catch (SQLException e) {
-      if (UNIQUE_VIOLATION.equals(e.getSQLState())) {
+    try {
+      jdbc.update(
+          "INSERT INTO expense.income_attribute(id, name, version) VALUES (?, ?, ?)",
+          ps -> {
+            ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value());
+            ps.setString(2, incomeAttribute.incomeAttributeName().value());
+            ps.setLong(3, incomeAttribute.version());
+          });
+    } catch (DataAccessException e) {
+      if (e.getCause() instanceof SQLException sqlEx
+          && UNIQUE_VIOLATION.equals(sqlEx.getSQLState())) {
         throw new IncomeAttributeAlreadyExistsException();
       }
-      throw new DataAccessException(e);
+      throw e;
     }
   }
 
   @Override
   public void update(IncomeAttribute incomeAttribute) {
-    String sql =
-        "UPDATE expense.income_attribute SET name = ?, version = version + 1 WHERE id = ? AND version = ?";
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, incomeAttribute.incomeAttributeName().value());
-      ps.setString(2, incomeAttribute.incomeAttributeIdentifier().value());
-      ps.setLong(3, incomeAttribute.version());
-      int rowCount = ps.executeUpdate();
-      if (rowCount == 0) {
-        throw new ConcurrentUpdateException();
-      }
-    } catch (ConcurrentUpdateException e) {
-      throw e;
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    jdbc.updateWithOptimisticLock(
+        "UPDATE expense.income_attribute SET name = ?, version = version + 1 WHERE id = ? AND version = ?",
+        ps -> {
+          ps.setString(1, incomeAttribute.incomeAttributeName().value());
+          ps.setString(2, incomeAttribute.incomeAttributeIdentifier().value());
+          ps.setLong(3, incomeAttribute.version());
+        });
   }
 
   @Override
   public void delete(IncomeAttribute incomeAttribute) {
-    String sql = "DELETE FROM expense.income_attribute WHERE id = ?";
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value());
-      ps.executeUpdate();
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    jdbc.update(
+        "DELETE FROM expense.income_attribute WHERE id = ?",
+        ps -> ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value()));
   }
 
   @Override
   public Optional<IncomeAttribute> findBy(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    return selectBy(incomeAttributeIdentifier);
+    return jdbc.queryForOptional(
+        "SELECT id, name, version FROM expense.income_attribute WHERE id = ?",
+        ps -> ps.setString(1, incomeAttributeIdentifier.value()),
+        IncomeAttributeDataSource::mapIncomeAttribute);
   }
 
   @Override
@@ -81,32 +73,9 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
           THEN TRUE ELSE FALSE END
         FROM (VALUES (1)) AS t(x)
         """;
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, incomeAttributeName.value());
-      try (ResultSet rs = ps.executeQuery()) {
-        rs.next();
-        return rs.getBoolean(1);
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
-  }
-
-  private Optional<IncomeAttribute> selectBy(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    String sql = "SELECT id, name, version FROM expense.income_attribute WHERE id = ?";
-    try (Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setString(1, incomeAttributeIdentifier.value());
-      try (ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-          return Optional.of(mapIncomeAttribute(rs));
-        }
-        return Optional.empty();
-      }
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    return jdbc.queryForOptional(
+            sql, ps -> ps.setString(1, incomeAttributeName.value()), rs -> rs.getBoolean(1))
+        .orElse(false);
   }
 
   static IncomeAttribute mapIncomeAttribute(ResultSet rs) throws SQLException {

@@ -3,97 +3,76 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
-import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
 import dev.yhiguchi.home_expense.query.expense.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 import javax.sql.DataSource;
 
 @ApplicationScoped
+@Transactional
 public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
 
-  DataSource dataSource;
+  private final JdbcOperator jdbc;
 
   public ExpenseStatisticsDataSource(
       @io.quarkus.agroal.DataSource("readonly") DataSource dataSource) {
-    this.dataSource = dataSource;
+    this.jdbc = new JdbcOperator(dataSource);
   }
 
   @Override
-  @Transactional
   public ExpenseStatistics find(ExpenseStatisticsCriteria criteria) {
-    try (Connection conn = dataSource.getConnection()) {
-      long incomeTotalAmount = selectIncomeTotalAmount(conn, criteria).orElse(0L);
-      List<ExpenseAttributeStatistics> fixedStatistics =
-          selectByCategory(conn, ExpenseCategory.固定費, criteria);
-      List<ExpenseAttributeStatistics> variableStatistics =
-          selectByCategory(conn, ExpenseCategory.変動費, criteria);
-      return new ExpenseStatistics(
-          incomeTotalAmount,
-          new ExpenseStatisticsDetail(fixedStatistics),
-          new ExpenseStatisticsDetail(variableStatistics));
-    } catch (SQLException e) {
-      throw new DataAccessException(e);
-    }
+    long incomeTotalAmount = selectIncomeTotalAmount(criteria).orElse(0L);
+    List<ExpenseAttributeStatistics> fixedStatistics =
+        selectByCategory(ExpenseCategory.固定費, criteria);
+    List<ExpenseAttributeStatistics> variableStatistics =
+        selectByCategory(ExpenseCategory.変動費, criteria);
+    return new ExpenseStatistics(
+        incomeTotalAmount,
+        new ExpenseStatisticsDetail(fixedStatistics),
+        new ExpenseStatisticsDetail(variableStatistics));
   }
 
-  private Optional<Long> selectIncomeTotalAmount(
-      Connection conn, ExpenseStatisticsCriteria criteria) throws SQLException {
+  private java.util.Optional<Long> selectIncomeTotalAmount(ExpenseStatisticsCriteria criteria) {
     String sql =
         """
         SELECT sum(income.amount)
         FROM expense.income
         WHERE income.receive_date >= ? AND income.receive_date < ?
         """;
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setDate(1, Date.valueOf(criteria.dateFrom()));
-      ps.setDate(2, Date.valueOf(criteria.dateTo()));
-      try (ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) {
-          long value = rs.getLong(1);
-          if (rs.wasNull()) {
-            return Optional.empty();
-          }
-          return Optional.of(value);
-        }
-        return Optional.empty();
-      }
-    }
+    return jdbc.queryForOptional(
+        sql,
+        ps -> {
+          ps.setDate(1, Date.valueOf(criteria.dateFrom()));
+          ps.setDate(2, Date.valueOf(criteria.dateTo()));
+        },
+        rs -> rs.getObject(1, Long.class));
   }
 
   private List<ExpenseAttributeStatistics> selectByCategory(
-      Connection conn, ExpenseCategory category, ExpenseStatisticsCriteria criteria)
-      throws SQLException {
-    String sql = getString(category);
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-      ps.setDate(1, Date.valueOf(criteria.dateFrom()));
-      ps.setDate(2, Date.valueOf(criteria.dateTo()));
-      try (ResultSet rs = ps.executeQuery()) {
-        List<ExpenseAttributeStatistics> list = new ArrayList<>();
-        while (rs.next()) {
-          list.add(
-              new ExpenseAttributeStatistics(
-                  new ExpenseAttributeIdentifier(rs.getString("id")),
-                  new ExpenseAttributeName(rs.getString("name")),
-                  rs.getLong("total_amount")));
-        }
-        return list;
-      }
-    }
+      ExpenseCategory category, ExpenseStatisticsCriteria criteria) {
+    return jdbc.queryForList(
+        buildCategorySql(category),
+        ps -> {
+          ps.setDate(1, Date.valueOf(criteria.dateFrom()));
+          ps.setDate(2, Date.valueOf(criteria.dateTo()));
+        },
+        rs ->
+            new ExpenseAttributeStatistics(
+                new ExpenseAttributeIdentifier(rs.getString("id")),
+                new ExpenseAttributeName(rs.getString("name")),
+                rs.getLong("total_amount")));
   }
 
-  private static String getString(ExpenseCategory category) {
+  private static String buildCategorySql(ExpenseCategory category) {
     String junctionTable =
         switch (category) {
           case 固定費 -> "fixed_expense";
           case 変動費 -> "variable_expense";
         };
-    String sql =
-        """
+    return """
         SELECT
           attribute.id,
           attribute.name,
@@ -108,7 +87,6 @@ public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
         GROUP BY attribute.id, attribute.name, attribute.created_at
         ORDER BY attribute.created_at
         """
-            .formatted(junctionTable, junctionTable, junctionTable);
-    return sql;
+        .formatted(junctionTable, junctionTable, junctionTable);
   }
 }
