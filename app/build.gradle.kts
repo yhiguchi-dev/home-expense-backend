@@ -74,9 +74,11 @@ tasks.register("printVersion") {
 
 tasks.register("resolveDependencies") {
   description = "Pre-resolves all resolvable configurations so their artifacts are cached."
-  doLast {
-    configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
-  }
+
+  val resolvable = configurations.matching { it.isCanBeResolved }
+  inputs.files(resolvable.map { it.incoming.files })
+
+  doLast { logger.lifecycle("Resolved {} dependency files", inputs.files.files.size) }
 }
 
 spotless {
