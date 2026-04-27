@@ -8,10 +8,16 @@ repositories {
 }
 
 dependencies {
-  implementation(libs.flyway.database.postgresql)
-  implementation(libs.logback.classic)
-  implementation(libs.logstash.logback.encoder)
-  implementation(libs.postgresql)
+  implementation(libs.flyway.core)
+  implementation(libs.slf4j.api)
+
+  runtimeOnly(libs.flyway.database.postgresql)
+  runtimeOnly(libs.flyway.mysql)
+  runtimeOnly(libs.postgresql)
+  runtimeOnly(libs.mysql.connector.j)
+
+  runtimeOnly(libs.logback.classic)
+  runtimeOnly(libs.logstash.logback.encoder)
 }
 
 application {
@@ -26,9 +32,11 @@ java {
 
 tasks.register("resolveDependencies") {
   description = "Pre-resolves all resolvable configurations so their artifacts are cached."
-  doLast {
-    configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
-  }
+
+  val resolvable = configurations.matching { it.isCanBeResolved }
+  inputs.files(resolvable.map { it.incoming.files })
+
+  doLast { logger.lifecycle("Resolved {} dependency files", inputs.files.files.size) }
 }
 
 spotless {

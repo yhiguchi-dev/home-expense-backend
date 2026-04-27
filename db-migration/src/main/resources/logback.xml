@@ -4,7 +4,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
-    <root level="debug">
+    <root level="${LOG_LEVEL:-info}">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
