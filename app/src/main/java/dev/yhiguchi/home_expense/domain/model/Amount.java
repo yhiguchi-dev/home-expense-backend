@@ -1,6 +1,6 @@
-package dev.yhiguchi.home_expense.domain.model.income;
+package dev.yhiguchi.home_expense.domain.model;
 
-/** 金額 */
+/** 金額（経費・収入で共通） */
 public record Amount(int value) {
   public Amount {
     if (value <= 0) {

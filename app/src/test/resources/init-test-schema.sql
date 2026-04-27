@@ -1,17 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS expense;
 
-CREATE TABLE IF NOT EXISTS expense.expense
-(
-    id           CHAR(36)                               NOT NULL,
-    description  VARCHAR(512)                           NOT NULL,
-    price        INTEGER                                NOT NULL,
-    payment_date DATE                                   NOT NULL,
-    version      BIGINT                                 NOT NULL DEFAULT 1,
-    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT pk_expense PRIMARY KEY (id),
-    CONSTRAINT ck_expense_price_positive CHECK (price > 0)
-);
-
 CREATE TABLE IF NOT EXISTS expense.attribute
 (
     id         CHAR(36)                               NOT NULL,
@@ -23,28 +11,23 @@ CREATE TABLE IF NOT EXISTS expense.attribute
     CONSTRAINT uq_attribute_name_category UNIQUE (name, category)
 );
 
-CREATE TABLE IF NOT EXISTS expense.fixed_expense
+CREATE TABLE IF NOT EXISTS expense.expense
 (
-    expense_id   CHAR(36)                               NOT NULL,
+    id           CHAR(36)                               NOT NULL,
+    description  VARCHAR(512)                           NOT NULL,
+    amount       INTEGER                                NOT NULL,
+    payment_date DATE                                   NOT NULL,
     attribute_id CHAR(36)                               NOT NULL,
+    version      BIGINT                                 NOT NULL DEFAULT 1,
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT pk_fixed_expense PRIMARY KEY (expense_id),
-    FOREIGN KEY (expense_id) REFERENCES expense.expense (id) ON DELETE CASCADE,
-    FOREIGN KEY (attribute_id) REFERENCES expense.attribute (id)
-);
-
-CREATE TABLE IF NOT EXISTS expense.variable_expense
-(
-    expense_id   CHAR(36)                               NOT NULL,
-    attribute_id CHAR(36)                               NOT NULL,
-    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT pk_variable_expense PRIMARY KEY (expense_id),
-    FOREIGN KEY (expense_id) REFERENCES expense.expense (id) ON DELETE CASCADE,
-    FOREIGN KEY (attribute_id) REFERENCES expense.attribute (id)
+    CONSTRAINT pk_expense PRIMARY KEY (id),
+    CONSTRAINT ck_expense_amount_positive CHECK (amount > 0),
+    CONSTRAINT fk_expense_attribute FOREIGN KEY (attribute_id) REFERENCES expense.attribute (id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_attribute_category on expense.attribute(category);
 CREATE INDEX IF NOT EXISTS idx_attribute_name on expense.attribute(name);
+CREATE INDEX IF NOT EXISTS idx_expense_attribute_id ON expense.expense(attribute_id);
 
 CREATE TABLE IF NOT EXISTS expense.income_attribute
 (

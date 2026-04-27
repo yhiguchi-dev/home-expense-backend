@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.domain.model.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.util.Objects;
 import java.util.UUID;
@@ -10,70 +11,49 @@ public class Expense {
 
   Description description;
 
-  Price price;
+  Amount amount;
 
   PaymentDate paymentDate;
 
   ExpenseAttributeIdentifier expenseAttributeIdentifier;
 
-  ExpenseCategory expenseCategory;
-
   public Expense(
       ExpenseIdentifier expenseIdentifier,
       Description description,
-      Price price,
+      Amount amount,
       PaymentDate paymentDate,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      ExpenseCategory expenseCategory) {
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     this.expenseIdentifier = expenseIdentifier;
     this.description = description;
-    this.price = price;
+    this.amount = amount;
     this.paymentDate = paymentDate;
     this.expenseAttributeIdentifier = expenseAttributeIdentifier;
-    this.expenseCategory = expenseCategory;
   }
 
   public static Expense create(
       Description description,
-      Price price,
+      Amount amount,
       PaymentDate paymentDate,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      ExpenseCategory expenseCategory) {
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     ExpenseIdentifier id = new ExpenseIdentifier(UUID.randomUUID().toString());
-    return new Expense(
-        id, description, price, paymentDate, expenseAttributeIdentifier, expenseCategory);
+    return new Expense(id, description, amount, paymentDate, expenseAttributeIdentifier);
   }
 
   public Expense updateWith(
       Description description,
-      Price price,
+      Amount amount,
       PaymentDate paymentDate,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      ExpenseCategory expenseCategory) {
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     return new Expense(
-        this.expenseIdentifier,
-        description,
-        price,
-        paymentDate,
-        expenseAttributeIdentifier,
-        expenseCategory);
+        this.expenseIdentifier, description, amount, paymentDate, expenseAttributeIdentifier);
   }
 
   /** 属性値に変更があるか判定する */
   public boolean hasChanges(Expense other) {
     return !Objects.equals(description, other.description)
-        || !Objects.equals(price, other.price)
+        || !Objects.equals(amount, other.amount)
         || !Objects.equals(paymentDate, other.paymentDate)
-        || !Objects.equals(expenseAttributeIdentifier, other.expenseAttributeIdentifier)
-        || expenseCategory != other.expenseCategory;
-  }
-
-  public boolean isFixed() {
-    return expenseCategory.isFixed();
-  }
-
-  public boolean isVariable() {
-    return expenseCategory.isVariable();
+        || !Objects.equals(expenseAttributeIdentifier, other.expenseAttributeIdentifier);
   }
 
   public ExpenseIdentifier expenseIdentifier() {
@@ -84,8 +64,8 @@ public class Expense {
     return description;
   }
 
-  public Price price() {
-    return price;
+  public Amount amount() {
+    return amount;
   }
 
   public PaymentDate paymentDate() {
@@ -94,10 +74,6 @@ public class Expense {
 
   public ExpenseAttributeIdentifier expenseAttributeIdentifier() {
     return expenseAttributeIdentifier;
-  }
-
-  public ExpenseCategory expenseCategory() {
-    return expenseCategory;
   }
 
   @Override

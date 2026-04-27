@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import java.util.Objects;
 import java.util.UUID;

@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.query.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,9 +7,9 @@ public class ExpenseSearchResult {
 
   Integer totalCount;
 
-  List<Expense> list;
+  List<ExpenseDetail> list;
 
-  public ExpenseSearchResult(Integer totalCount, List<Expense> list) {
+  public ExpenseSearchResult(Integer totalCount, List<ExpenseDetail> list) {
     this.totalCount = totalCount;
     this.list = list;
   }
@@ -23,7 +22,7 @@ public class ExpenseSearchResult {
     return totalCount;
   }
 
-  public List<Expense> list() {
+  public List<ExpenseDetail> list() {
     return list;
   }
 }

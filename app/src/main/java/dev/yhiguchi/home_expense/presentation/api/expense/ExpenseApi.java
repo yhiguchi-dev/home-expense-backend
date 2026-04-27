@@ -4,8 +4,6 @@ import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseDeletionServ
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRegistrationService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseUpdateService;
-import dev.yhiguchi.home_expense.domain.model.Revision;
-import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
@@ -13,6 +11,7 @@ import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
 import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteriaCreator;
+import dev.yhiguchi.home_expense.query.expense.ExpenseDetail;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResult;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResultQuerier;
@@ -113,8 +112,8 @@ public class ExpenseApi implements LinkHeaderCreatable {
   @Path("{id}")
   @RunOnVirtualThread
   public Response get(@PathParam("id") @UuidFormat String id) {
-    Revision<Expense> loaded = expenseRetrievalService.get(new ExpenseIdentifier(id));
-    ExpenseGetResponse response = ExpenseGetResponse.from(loaded.entity());
-    return Response.ok(response).tag(String.valueOf(loaded.version())).build();
+    ExpenseDetail detail = expenseRetrievalService.get(new ExpenseIdentifier(id));
+    ExpenseGetResponse response = ExpenseGetResponse.from(detail);
+    return Response.ok(response).tag(String.valueOf(detail.version())).build();
   }
 }

@@ -14,7 +14,7 @@ class ExpenseAttributeUpdateServiceTest {
   ExpenseAttributeUpdateService sut = new ExpenseAttributeUpdateService(attributeRepository);
 
   @Test
-  void 経費属性を更新する() {
+  void 経費属性の名前を更新する() {
     ExpenseAttribute existing =
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
@@ -24,19 +24,17 @@ class ExpenseAttributeUpdateServiceTest {
 
     sut.update(
         new ExpenseAttributeUpdateCommand(
-            new ExpenseAttributeIdentifier("attr-1"),
-            new ExpenseAttributeName("交通費"),
-            ExpenseCategory.変動費,
-            1L));
+            new ExpenseAttributeIdentifier("attr-1"), new ExpenseAttributeName("交通費"), 1L));
 
     Revision<ExpenseAttribute> updated =
         attributeRepository.findBy(new ExpenseAttributeIdentifier("attr-1")).orElseThrow();
     assertEquals("交通費", updated.entity().expenseAttributeName().value());
+    assertEquals(ExpenseCategory.変動費, updated.entity().expenseCategory());
     assertEquals(2L, updated.version());
   }
 
   @Test
-  void 変更がない場合は更新しない() {
+  void 名前に変更がない場合は更新しない() {
     ExpenseAttribute existing =
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
@@ -46,10 +44,7 @@ class ExpenseAttributeUpdateServiceTest {
 
     sut.update(
         new ExpenseAttributeUpdateCommand(
-            new ExpenseAttributeIdentifier("attr-1"),
-            new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費,
-            1L));
+            new ExpenseAttributeIdentifier("attr-1"), new ExpenseAttributeName("食費"), 1L));
 
     Revision<ExpenseAttribute> result =
         attributeRepository.findBy(new ExpenseAttributeIdentifier("attr-1")).orElseThrow();

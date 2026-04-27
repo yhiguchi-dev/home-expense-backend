@@ -47,7 +47,7 @@ class ExpenseAttributeNameUniquenessTest {
   class 更新時 {
 
     @Test
-    void 名前も分類も変わっていない場合は検査をスキップする() {
+    void 名前が変わっていない場合は検査をスキップする() {
       ExpenseAttribute current =
           new ExpenseAttribute(
               new ExpenseAttributeIdentifier("attr-1"),
@@ -59,10 +59,7 @@ class ExpenseAttributeNameUniquenessTest {
                 throw new AssertionError("検査されるべきでない");
               });
 
-      assertDoesNotThrow(
-          () ->
-              sut.assertUniqueForUpdate(
-                  current, new ExpenseAttributeName("食費"), ExpenseCategory.変動費));
+      assertDoesNotThrow(() -> sut.assertUniqueForUpdate(current, new ExpenseAttributeName("食費")));
     }
 
     @Test
@@ -75,10 +72,7 @@ class ExpenseAttributeNameUniquenessTest {
       ExpenseAttributeNameUniqueness sut =
           new ExpenseAttributeNameUniqueness((name, category) -> false);
 
-      assertDoesNotThrow(
-          () ->
-              sut.assertUniqueForUpdate(
-                  current, new ExpenseAttributeName("交通費"), ExpenseCategory.変動費));
+      assertDoesNotThrow(() -> sut.assertUniqueForUpdate(current, new ExpenseAttributeName("交通費")));
     }
 
     @Test
@@ -93,26 +87,22 @@ class ExpenseAttributeNameUniquenessTest {
 
       assertThrows(
           ExpenseAttributeAlreadyExistsException.class,
-          () ->
-              sut.assertUniqueForUpdate(
-                  current, new ExpenseAttributeName("交通費"), ExpenseCategory.変動費));
+          () -> sut.assertUniqueForUpdate(current, new ExpenseAttributeName("交通費")));
     }
 
     @Test
-    void 分類だけを変更し新しい組合せが他に存在する場合は例外をスローする() {
+    void 検査時には自身のカテゴリで存在チェックする() {
       ExpenseAttribute current =
           new ExpenseAttribute(
               new ExpenseAttributeIdentifier("attr-1"),
               new ExpenseAttributeName("食費"),
               ExpenseCategory.変動費);
       ExpenseAttributeNameUniqueness sut =
-          new ExpenseAttributeNameUniqueness((name, category) -> true);
+          new ExpenseAttributeNameUniqueness((name, category) -> category == ExpenseCategory.変動費);
 
       assertThrows(
           ExpenseAttributeAlreadyExistsException.class,
-          () ->
-              sut.assertUniqueForUpdate(
-                  current, new ExpenseAttributeName("食費"), ExpenseCategory.固定費));
+          () -> sut.assertUniqueForUpdate(current, new ExpenseAttributeName("交通費")));
     }
   }
 }

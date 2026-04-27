@@ -41,7 +41,7 @@ class ExpenseApiTest {
             .contentType(ContentType.JSON)
             .body(
                 """
-                {"description": "ランチ", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "%s"}
+                {"description": "ランチ", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "%s"}
                 """
                     .formatted(attributeId))
             .when()
@@ -66,7 +66,7 @@ class ExpenseApiTest {
         .header("ETag", notNullValue())
         .body("id", equalTo(expenseId))
         .body("description", equalTo("ランチ"))
-        .body("price", equalTo(1000))
+        .body("amount", equalTo(1000))
         .body("payment_date", equalTo("2026-04-10"))
         .body("expense_attribute_id", equalTo(attributeId));
   }
@@ -94,7 +94,7 @@ class ExpenseApiTest {
         .header("If-Match", etag)
         .body(
             """
-            {"description": "ディナー", "price": 3000, "payment_date": "2026-04-10", "attribute_id": "%s"}
+            {"description": "ディナー", "amount": 3000, "payment_date": "2026-04-10", "attribute_id": "%s"}
             """
                 .formatted(attributeId))
         .when()
@@ -108,7 +108,7 @@ class ExpenseApiTest {
         .then()
         .statusCode(200)
         .body("description", equalTo("ディナー"))
-        .body("price", equalTo(3000));
+        .body("amount", equalTo(3000));
   }
 
   @Test
@@ -146,7 +146,7 @@ class ExpenseApiTest {
         .header("If-Match", "\"1\"")
         .body(
             """
-            {"description": "テスト", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000001"}
+            {"description": "テスト", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000001"}
             """)
         .when()
         .put("/v1/expenses/{id}", "00000000-0000-0000-0000-000000000000")
@@ -163,7 +163,7 @@ class ExpenseApiTest {
         .contentType(ContentType.JSON)
         .body(
             """
-            {"description": "テスト", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            {"description": "テスト", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
             """)
         .when()
         .post("/v1/expenses")
@@ -197,7 +197,7 @@ class ExpenseApiTest {
         .contentType(ContentType.JSON)
         .body(
             """
-            {"description": "%s", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            {"description": "%s", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
             """
                 .formatted(longDescription))
         .when()
@@ -215,7 +215,7 @@ class ExpenseApiTest {
         .contentType(ContentType.JSON)
         .body(
             """
-            {"description": "ランチ", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "invalid-uuid"}
+            {"description": "ランチ", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "invalid-uuid"}
             """)
         .when()
         .post("/v1/expenses")
@@ -234,7 +234,7 @@ class ExpenseApiTest {
         .header("If-Match", "\"1\"")
         .body(
             """
-            {"description": "%s", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            {"description": "%s", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
             """
                 .formatted(longDescription))
         .when()
@@ -253,7 +253,7 @@ class ExpenseApiTest {
         .header("If-Match", "\"1\"")
         .body(
             """
-            {"description": "ランチ", "price": 1000, "payment_date": "2026-04-10", "attribute_id": "not-a-valid-uuid!"}
+            {"description": "ランチ", "amount": 1000, "payment_date": "2026-04-10", "attribute_id": "not-a-valid-uuid!"}
             """)
         .when()
         .put("/v1/expenses/{id}", "00000000-0000-0000-0000-000000000000")
@@ -270,7 +270,7 @@ class ExpenseApiTest {
         .contentType(ContentType.JSON)
         .body(
             """
-            {"description": null, "price": null, "payment_date": "", "attribute_id": ""}
+            {"description": null, "amount": null, "payment_date": "", "attribute_id": ""}
             """)
         .when()
         .post("/v1/expenses")

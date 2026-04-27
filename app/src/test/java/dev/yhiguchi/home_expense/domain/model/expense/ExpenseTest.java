@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.domain.model.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -11,53 +12,21 @@ class ExpenseTest {
   ExpenseAttributeIdentifier attributeId = new ExpenseAttributeIdentifier("attr-1");
 
   @Test
-  void 固定費の場合isFixedがtrueを返す() {
-    Expense expense =
-        new Expense(
-            new ExpenseIdentifier("exp-1"),
-            new Description("家賃"),
-            new Price(80000),
-            new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.固定費);
-
-    assertTrue(expense.isFixed());
-    assertFalse(expense.isVariable());
-  }
-
-  @Test
-  void 変動費の場合isVariableがtrueを返す() {
-    Expense expense =
-        new Expense(
-            new ExpenseIdentifier("exp-1"),
-            new Description("食費"),
-            new Price(1000),
-            new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
-
-    assertFalse(expense.isFixed());
-    assertTrue(expense.isVariable());
-  }
-
-  @Test
   void 同一識別子のExpenseはequalsがtrueを返す() {
     Expense expense1 =
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
     Expense expense2 =
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ディナー"),
-            new Price(2000),
+            new Amount(2000),
             new PaymentDate(LocalDate.of(2026, 4, 2)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertEquals(expense1, expense2);
     assertEquals(expense1.hashCode(), expense2.hashCode());
@@ -68,17 +37,15 @@ class ExpenseTest {
     Expense expense =
         Expense.create(
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertNotNull(expense.expenseIdentifier().value());
     assertEquals("ランチ", expense.description().value());
-    assertEquals(1000, expense.price().value());
+    assertEquals(1000, expense.amount().value());
     assertEquals("2026-04-10", expense.paymentDate().asString());
     assertEquals(attributeId, expense.expenseAttributeIdentifier());
-    assertEquals(ExpenseCategory.変動費, expense.expenseCategory());
   }
 
   @Test
@@ -86,17 +53,15 @@ class ExpenseTest {
     Expense expense1 =
         Expense.create(
             new Description("test"),
-            new Price(100),
+            new Amount(100),
             new PaymentDate(LocalDate.of(2026, 1, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
     Expense expense2 =
         Expense.create(
             new Description("test"),
-            new Price(100),
+            new Amount(100),
             new PaymentDate(LocalDate.of(2026, 1, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertNotEquals(expense1.expenseIdentifier(), expense2.expenseIdentifier());
   }
@@ -107,22 +72,20 @@ class ExpenseTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     Expense updated =
         expense.updateWith(
             new Description("ディナー"),
-            new Price(2000),
+            new Amount(2000),
             new PaymentDate(LocalDate.of(2026, 4, 2)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertEquals("exp-1", updated.expenseIdentifier().value());
     assertEquals("ディナー", updated.description().value());
-    assertEquals(2000, updated.price().value());
+    assertEquals(2000, updated.amount().value());
     assertTrue(expense.hasChanges(updated));
   }
 
@@ -132,18 +95,16 @@ class ExpenseTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     Expense updated =
         expense.updateWith(
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertFalse(expense.hasChanges(updated));
   }
@@ -154,18 +115,16 @@ class ExpenseTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     Expense updated =
         expense.updateWith(
             new Description("ディナー"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertTrue(expense.hasChanges(updated));
   }
@@ -176,18 +135,16 @@ class ExpenseTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     Expense updated =
         expense.updateWith(
             new Description("ランチ"),
-            new Price(2000),
+            new Amount(2000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertTrue(expense.hasChanges(updated));
   }
@@ -198,18 +155,16 @@ class ExpenseTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     Expense updated =
         expense.updateWith(
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 2)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     assertTrue(expense.hasChanges(updated));
   }
@@ -220,19 +175,17 @@ class ExpenseTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            attributeId,
-            ExpenseCategory.変動費);
+            attributeId);
 
     ExpenseAttributeIdentifier otherAttributeId = new ExpenseAttributeIdentifier("attr-2");
     Expense updated =
         expense.updateWith(
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            otherAttributeId,
-            ExpenseCategory.変動費);
+            otherAttributeId);
 
     assertTrue(expense.hasChanges(updated));
   }

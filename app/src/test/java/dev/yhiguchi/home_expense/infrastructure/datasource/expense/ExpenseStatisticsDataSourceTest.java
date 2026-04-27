@@ -2,9 +2,9 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
-import dev.yhiguchi.home_expense.domain.model.income.Amount;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.ReceiveDate;
@@ -43,12 +43,6 @@ class ExpenseStatisticsDataSourceTest {
   @BeforeEach
   void setUp() throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.fixed_expense")) {
-        ps.executeUpdate();
-      }
-      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.variable_expense")) {
-        ps.executeUpdate();
-      }
       try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.expense")) {
         ps.executeUpdate();
       }
@@ -119,10 +113,9 @@ class ExpenseStatisticsDataSourceTest {
         new Expense(
             new ExpenseIdentifier(UUID.randomUUID().toString()),
             new Description(description),
-            new Price(price),
+            new Amount(price),
             new PaymentDate(LocalDate.parse(paymentDate)),
-            attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory());
+            attribute.expenseAttributeIdentifier());
     expenseDataSource.register(expense);
   }
 

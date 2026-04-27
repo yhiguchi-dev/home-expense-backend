@@ -35,10 +35,9 @@ public class ExpenseUpdateService {
     Expense updated =
         current.updateWith(
             command.description(),
-            command.price(),
+            command.amount(),
             command.paymentDate(),
-            attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory());
+            attribute.expenseAttributeIdentifier());
     if (current.hasChanges(updated)) {
       expenseRepository.update(new Revision<>(updated, command.version()));
     }

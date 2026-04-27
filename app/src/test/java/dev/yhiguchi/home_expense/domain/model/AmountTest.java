@@ -1,4 +1,4 @@
-package dev.yhiguchi.home_expense.domain.model.income;
+package dev.yhiguchi.home_expense.domain.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 

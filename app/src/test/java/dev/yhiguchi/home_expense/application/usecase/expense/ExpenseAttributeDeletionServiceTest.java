@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
@@ -41,10 +42,9 @@ class ExpenseAttributeDeletionServiceTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費);
+            new ExpenseAttributeIdentifier("attr-1"));
     expenseRepository.register(expense);
 
     assertThrows(

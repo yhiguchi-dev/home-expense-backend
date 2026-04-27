@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute.ExpenseAttributeDataSource;
@@ -35,12 +36,6 @@ class ExpenseSearchResultDataSourceTest {
   @BeforeEach
   void setUp() throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.fixed_expense")) {
-        ps.executeUpdate();
-      }
-      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.variable_expense")) {
-        ps.executeUpdate();
-      }
       try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.expense")) {
         ps.executeUpdate();
       }
@@ -75,7 +70,7 @@ class ExpenseSearchResultDataSourceTest {
     ExpenseSearchResult result = sut.find(criteria);
 
     assertEquals(1, result.totalCount());
-    assertEquals("4月ランチ", result.list().getFirst().description().value());
+    assertEquals("4月ランチ", result.list().getFirst().expense().description().value());
   }
 
   @Test
@@ -90,7 +85,7 @@ class ExpenseSearchResultDataSourceTest {
     ExpenseSearchResult result = sut.find(criteria);
 
     assertEquals(1, result.totalCount());
-    assertEquals("4月家賃", result.list().getFirst().description().value());
+    assertEquals("4月家賃", result.list().getFirst().expense().description().value());
   }
 
   @Test
@@ -142,10 +137,9 @@ class ExpenseSearchResultDataSourceTest {
         new Expense(
             new ExpenseIdentifier(UUID.randomUUID().toString()),
             new Description(description),
-            new Price(price),
+            new Amount(price),
             new PaymentDate(LocalDate.parse(paymentDate)),
-            attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory());
+            attribute.expenseAttributeIdentifier());
     expenseDataSource.register(expense);
   }
 }

@@ -23,13 +23,12 @@ public class ExpenseAttributeNameUniqueness {
     }
   }
 
-  /** 更新時の一意性検査。自分自身と (name, category) が一致する場合はスキップする */
-  public void assertUniqueForUpdate(
-      ExpenseAttribute current, ExpenseAttributeName newName, ExpenseCategory newCategory) {
-    if (current.hasSameName(newName) && current.hasSameCategory(newCategory)) {
+  /** 更新時の一意性検査。category は不変のため自身のカテゴリで判定する。名前未変更ならスキップ。 */
+  public void assertUniqueForUpdate(ExpenseAttribute current, ExpenseAttributeName newName) {
+    if (current.hasSameName(newName)) {
       return;
     }
-    if (existsByName.existsByName(newName, newCategory)) {
+    if (existsByName.existsByName(newName, current.expenseCategory())) {
       throw new ExpenseAttributeAlreadyExistsException();
     }
   }

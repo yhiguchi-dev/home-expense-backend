@@ -15,6 +15,22 @@ import javax.sql.DataSource;
 @Transactional
 public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
 
+  private static final String SELECT_BY_CATEGORY =
+      """
+      SELECT
+        attribute.id,
+        attribute.name,
+        sum(expense.expense.amount) AS total_amount
+      FROM expense.expense
+      INNER JOIN expense.attribute
+        ON expense.attribute_id = attribute.id
+      WHERE attribute.category = ?
+        AND expense.payment_date >= ?
+        AND expense.payment_date < ?
+      GROUP BY attribute.id, attribute.name, attribute.created_at
+      ORDER BY attribute.created_at
+      """;
+
   private final JdbcOperator jdbc;
 
   public ExpenseStatisticsDataSource(
@@ -54,39 +70,16 @@ public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
   private List<ExpenseAttributeStatistics> selectByCategory(
       ExpenseCategory category, ExpenseStatisticsCriteria criteria) {
     return jdbc.queryForList(
-        buildCategorySql(category),
+        SELECT_BY_CATEGORY,
         ps -> {
-          ps.setDate(1, Date.valueOf(criteria.dateFrom()));
-          ps.setDate(2, Date.valueOf(criteria.dateTo()));
+          ps.setString(1, category.name());
+          ps.setDate(2, Date.valueOf(criteria.dateFrom()));
+          ps.setDate(3, Date.valueOf(criteria.dateTo()));
         },
         rs ->
             new ExpenseAttributeStatistics(
                 new ExpenseAttributeIdentifier(rs.getString("id")),
                 new ExpenseAttributeName(rs.getString("name")),
                 rs.getLong("total_amount")));
-  }
-
-  private static String buildCategorySql(ExpenseCategory category) {
-    String junctionTable =
-        switch (category) {
-          case 固定費 -> "fixed_expense";
-          case 変動費 -> "variable_expense";
-        };
-    return """
-        SELECT
-          attribute.id,
-          attribute.name,
-          sum(expense.expense.price) AS total_amount
-        FROM expense.expense
-        LEFT JOIN %s
-          ON expense.id = %s.expense_id
-        LEFT JOIN attribute
-          ON attribute.id = %s.attribute_id
-        WHERE attribute.id IS NOT NULL
-        AND expense.payment_date >= ? AND expense.payment_date < ?
-        GROUP BY attribute.id, attribute.name, attribute.created_at
-        ORDER BY attribute.created_at
-        """
-        .formatted(junctionTable, junctionTable, junctionTable);
   }
 }

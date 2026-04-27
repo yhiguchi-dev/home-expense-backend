@@ -27,10 +27,8 @@ public class ExpenseAttributeUpdateService {
             .findBy(command.expenseAttributeIdentifier())
             .orElseThrow(ExpenseAttributeNotFoundException::new);
     ExpenseAttribute current = loaded.entity();
-    expenseAttributeNameUniqueness.assertUniqueForUpdate(
-        current, command.expenseAttributeName(), command.expenseCategory());
-    ExpenseAttribute updated =
-        current.updateWith(command.expenseAttributeName(), command.expenseCategory());
+    expenseAttributeNameUniqueness.assertUniqueForUpdate(current, command.expenseAttributeName());
+    ExpenseAttribute updated = current.updateWith(command.expenseAttributeName());
     if (current.hasChanges(updated)) {
       expenseAttributeRepository.update(new Revision<>(updated, command.version()));
     }

@@ -30,10 +30,9 @@ public class ExpenseRegistrationService {
     Expense expense =
         Expense.create(
             command.description(),
-            command.price(),
+            command.amount(),
             command.paymentDate(),
-            attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory());
+            attribute.expenseAttributeIdentifier());
     expenseRepository.register(expense);
     return expense.expenseIdentifier();
   }

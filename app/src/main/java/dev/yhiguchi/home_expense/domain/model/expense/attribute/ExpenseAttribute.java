@@ -26,16 +26,15 @@ public class ExpenseAttribute {
     return new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
   }
 
-  public ExpenseAttribute updateWith(
-      ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
+  /** 名前のみ更新する。category は登録後に変更不可。 */
+  public ExpenseAttribute updateWith(ExpenseAttributeName expenseAttributeName) {
     return new ExpenseAttribute(
-        this.expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+        this.expenseAttributeIdentifier, expenseAttributeName, this.expenseCategory);
   }
 
   /** 属性値に変更があるか判定する */
   public boolean hasChanges(ExpenseAttribute other) {
-    return !Objects.equals(expenseAttributeName, other.expenseAttributeName)
-        || expenseCategory != other.expenseCategory;
+    return !Objects.equals(expenseAttributeName, other.expenseAttributeName);
   }
 
   /** 指定した名前が現在の名前と同一か判定する */
@@ -43,8 +42,12 @@ public class ExpenseAttribute {
     return Objects.equals(this.expenseAttributeName, expenseAttributeName);
   }
 
-  public boolean hasSameCategory(ExpenseCategory expenseCategory) {
-    return this.expenseCategory == expenseCategory;
+  public boolean isFixed() {
+    return expenseCategory.isFixed();
+  }
+
+  public boolean isVariable() {
+    return expenseCategory.isVariable();
   }
 
   public ExpenseAttributeIdentifier expenseAttributeIdentifier() {

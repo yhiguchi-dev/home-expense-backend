@@ -1,14 +1,26 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
+import dev.yhiguchi.home_expense.domain.model.expense.Description;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
+import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
+import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.PaymentDate;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
+import dev.yhiguchi.home_expense.query.expense.ExpenseDetail;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResult;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
@@ -30,7 +42,7 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
     if (totalCount == 0) {
       return new ExpenseSearchResult();
     }
-    List<Expense> list = selectBy(criteria);
+    List<ExpenseDetail> list = selectBy(criteria);
     return new ExpenseSearchResult(totalCount, list);
   }
 
@@ -40,13 +52,8 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
             """
             SELECT COUNT(*)
             FROM expense.expense
-            LEFT JOIN fixed_expense
-              ON expense.id = fixed_expense.expense_id
-            LEFT JOIN variable_expense
-              ON expense.id = variable_expense.expense_id
-            LEFT JOIN attribute
-              ON attribute.id = fixed_expense.attribute_id
-                OR attribute.id = variable_expense.attribute_id
+            INNER JOIN expense.attribute
+              ON expense.attribute_id = attribute.id
             """);
     List<Object> params = new ArrayList<>();
     appendWhere(criteria, sql, params);
@@ -54,26 +61,22 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
         .orElse(0);
   }
 
-  private List<Expense> selectBy(ExpenseSearchCriteria criteria) {
+  private List<ExpenseDetail> selectBy(ExpenseSearchCriteria criteria) {
     StringBuilder sql =
         new StringBuilder(
             """
             SELECT
               expense.id,
               expense.description,
-              expense.price,
+              expense.amount,
               expense.payment_date,
-              attribute.id AS attribute_id,
-              attribute.category,
-              attribute.name AS attribute_name
+              expense.version,
+              attribute.id   AS attribute_id,
+              attribute.name AS attribute_name,
+              attribute.category
             FROM expense.expense
-            LEFT JOIN fixed_expense
-              ON expense.id = fixed_expense.expense_id
-            LEFT JOIN variable_expense
-              ON expense.id = variable_expense.expense_id
-            LEFT JOIN attribute
-              ON attribute.id = fixed_expense.attribute_id
-                OR attribute.id = variable_expense.attribute_id
+            INNER JOIN expense.attribute
+              ON expense.attribute_id = attribute.id
             """);
     List<Object> params = new ArrayList<>();
     appendWhere(criteria, sql, params);
@@ -82,7 +85,7 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
     params.add(criteria.pagination().offset());
     params.add(criteria.pagination().perPage());
     return jdbc.queryForList(
-        sql.toString(), ParameterBinder.of(params), ExpenseDataSource::mapExpense);
+        sql.toString(), ParameterBinder.of(params), ExpenseSearchResultDataSource::mapDetail);
   }
 
   private void appendWhere(ExpenseSearchCriteria criteria, StringBuilder sql, List<Object> params) {
@@ -94,7 +97,7 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
       params.add(Date.valueOf(criteria.dateTo()));
     }
     if (criteria.hasExpenseCategory()) {
-      conditions.add("category = ?");
+      conditions.add("attribute.category = ?");
       params.add(criteria.getExpenseCategory().name());
     }
     if (criteria.hasExpenseAttributeIdentifier()) {
@@ -105,5 +108,21 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
       sql.append(" WHERE ");
       sql.append(String.join(" AND ", conditions));
     }
+  }
+
+  static ExpenseDetail mapDetail(ResultSet rs) throws SQLException {
+    Expense expense =
+        new Expense(
+            new ExpenseIdentifier(rs.getString("id")),
+            new Description(rs.getString("description")),
+            new Amount(rs.getInt("amount")),
+            new PaymentDate(rs.getObject("payment_date", LocalDate.class)),
+            new ExpenseAttributeIdentifier(rs.getString("attribute_id")));
+    ExpenseAttribute attribute =
+        new ExpenseAttribute(
+            new ExpenseAttributeIdentifier(rs.getString("attribute_id")),
+            new ExpenseAttributeName(rs.getString("attribute_name")),
+            ExpenseCategory.valueOf(rs.getString("category")));
+    return new ExpenseDetail(expense, attribute, rs.getLong("version"));
   }
 }

@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
@@ -31,10 +32,9 @@ class ExpenseUpdateServiceTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費);
+            new ExpenseAttributeIdentifier("attr-1"));
     expenseRepository.register(existing);
     attributeRepository.register(attribute);
 
@@ -42,7 +42,7 @@ class ExpenseUpdateServiceTest {
         new ExpenseUpdateCommand(
             new ExpenseIdentifier("exp-1"),
             new Description("ディナー"),
-            new Price(2000),
+            new Amount(2000),
             new PaymentDate(LocalDate.of(2026, 4, 2)),
             new ExpenseAttributeIdentifier("attr-1"),
             1L));
@@ -50,7 +50,7 @@ class ExpenseUpdateServiceTest {
     Revision<Expense> updated =
         expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
     assertEquals("ディナー", updated.entity().description().value());
-    assertEquals(2000, updated.entity().price().value());
+    assertEquals(2000, updated.entity().amount().value());
     assertEquals(2L, updated.version());
   }
 
@@ -60,10 +60,9 @@ class ExpenseUpdateServiceTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費);
+            new ExpenseAttributeIdentifier("attr-1"));
     expenseRepository.register(existing);
     attributeRepository.register(attribute);
 
@@ -71,7 +70,7 @@ class ExpenseUpdateServiceTest {
         new ExpenseUpdateCommand(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             new ExpenseAttributeIdentifier("attr-1"),
             1L));
@@ -93,7 +92,7 @@ class ExpenseUpdateServiceTest {
                 new ExpenseUpdateCommand(
                     new ExpenseIdentifier("not-exist"),
                     new Description("ランチ"),
-                    new Price(1000),
+                    new Amount(1000),
                     new PaymentDate(LocalDate.of(2026, 4, 1)),
                     new ExpenseAttributeIdentifier("attr-1"),
                     1L)));
@@ -105,10 +104,9 @@ class ExpenseUpdateServiceTest {
         new Expense(
             new ExpenseIdentifier("exp-1"),
             new Description("ランチ"),
-            new Price(1000),
+            new Amount(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
-            new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費);
+            new ExpenseAttributeIdentifier("attr-1"));
     expenseRepository.register(existing);
 
     assertThrows(
@@ -118,7 +116,7 @@ class ExpenseUpdateServiceTest {
                 new ExpenseUpdateCommand(
                     new ExpenseIdentifier("exp-1"),
                     new Description("ディナー"),
-                    new Price(2000),
+                    new Amount(2000),
                     new PaymentDate(LocalDate.of(2026, 4, 2)),
                     new ExpenseAttributeIdentifier("not-exist"),
                     1L)));

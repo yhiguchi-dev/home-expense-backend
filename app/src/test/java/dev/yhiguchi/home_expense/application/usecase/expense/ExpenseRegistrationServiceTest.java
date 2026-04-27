@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
@@ -32,7 +33,7 @@ class ExpenseRegistrationServiceTest {
         sut.register(
             new ExpenseRegistrationCommand(
                 new Description("ランチ"),
-                new Price(1000),
+                new Amount(1000),
                 new PaymentDate(LocalDate.of(2026, 4, 10)),
                 new ExpenseAttributeIdentifier("attr-1")));
 
@@ -40,9 +41,8 @@ class ExpenseRegistrationServiceTest {
     assertEquals(1, expenseRepository.all().size());
     Expense registered = expenseRepository.all().getFirst();
     assertEquals("ランチ", registered.description().value());
-    assertEquals(1000, registered.price().value());
+    assertEquals(1000, registered.amount().value());
     assertEquals(new ExpenseAttributeIdentifier("attr-1"), registered.expenseAttributeIdentifier());
-    assertEquals(ExpenseCategory.変動費, registered.expenseCategory());
   }
 
   @Test
@@ -53,7 +53,7 @@ class ExpenseRegistrationServiceTest {
             sut.register(
                 new ExpenseRegistrationCommand(
                     new Description("ランチ"),
-                    new Price(1000),
+                    new Amount(1000),
                     new PaymentDate(LocalDate.of(2026, 4, 10)),
                     new ExpenseAttributeIdentifier("not-exist"))));
   }

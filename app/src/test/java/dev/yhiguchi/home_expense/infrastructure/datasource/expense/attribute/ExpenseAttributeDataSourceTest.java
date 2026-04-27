@@ -26,12 +26,6 @@ class ExpenseAttributeDataSourceTest {
   @BeforeEach
   void setUp() throws SQLException {
     try (Connection conn = dataSource.getConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.fixed_expense")) {
-        ps.executeUpdate();
-      }
-      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.variable_expense")) {
-        ps.executeUpdate();
-      }
       try (PreparedStatement ps = conn.prepareStatement("DELETE FROM expense.expense")) {
         ps.executeUpdate();
       }
