@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
@@ -15,7 +16,7 @@ public class ExpenseAttributeRetrievalService {
     this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
-  public ExpenseAttribute get(ExpenseAttributeIdentifier expenseIdentifier) {
+  public Revision<ExpenseAttribute> get(ExpenseAttributeIdentifier expenseIdentifier) {
     return expenseAttributeRepository
         .findBy(expenseIdentifier)
         .orElseThrow(ExpenseAttributeNotFoundException::new);

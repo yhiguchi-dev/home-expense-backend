@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
@@ -21,22 +22,24 @@ public class IncomeUpdateService {
   }
 
   public void update(IncomeUpdateCommand command) {
-    Income income =
+    Revision<Income> loaded =
         incomeRepository
             .findBy(command.incomeIdentifier())
             .orElseThrow(IncomeNotFoundException::new);
     IncomeAttribute attribute =
         incomeAttributeRepository
             .findBy(command.incomeAttributeIdentifier())
+            .map(Revision::entity)
             .orElseThrow(IncomeAttributeNotFoundException::new);
+    Income current = loaded.entity();
     Income updated =
-        income.updateWith(
+        current.updateWith(
             command.description(),
             command.amount(),
             command.receiveDate(),
             attribute.incomeAttributeIdentifier());
-    if (income.hasChanges(updated)) {
-      incomeRepository.update(updated.withVersion(command.version()));
+    if (current.hasChanges(updated)) {
+      incomeRepository.update(new Revision<>(updated, command.version()));
     }
   }
 }

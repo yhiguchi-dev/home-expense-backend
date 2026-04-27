@@ -111,8 +111,7 @@ class IncomeSearchResultDataSourceTest {
             new Description(description),
             new Amount(amount),
             new ReceiveDate(LocalDate.parse(receiveDate)),
-            attribute.incomeAttributeIdentifier(),
-            1L);
+            attribute.incomeAttributeIdentifier());
     incomeDataSource.register(income);
   }
 }

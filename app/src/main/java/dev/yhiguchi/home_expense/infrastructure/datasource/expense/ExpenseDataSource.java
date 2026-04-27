@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
@@ -13,6 +14,8 @@ import javax.sql.DataSource;
 
 @ApplicationScoped
 public class ExpenseDataSource implements ExpenseRepository {
+
+  private static final long INITIAL_VERSION = 1L;
 
   private final JdbcOperator jdbc;
 
@@ -29,7 +32,7 @@ public class ExpenseDataSource implements ExpenseRepository {
           ps.setString(2, expense.description().value());
           ps.setInt(3, expense.price().value());
           ps.setDate(4, Date.valueOf(expense.paymentDate().asString()));
-          ps.setLong(5, expense.version());
+          ps.setLong(5, INITIAL_VERSION);
         });
     if (expense.isFixed()) {
       jdbc.update(
@@ -50,7 +53,7 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   @Override
-  public Optional<Expense> findBy(ExpenseIdentifier expenseIdentifier) {
+  public Optional<Revision<Expense>> findBy(ExpenseIdentifier expenseIdentifier) {
     String sql =
         """
         SELECT
@@ -72,7 +75,9 @@ public class ExpenseDataSource implements ExpenseRepository {
         WHERE expense.id = ?
         """;
     return jdbc.queryForOptional(
-        sql, ps -> ps.setString(1, expenseIdentifier.value()), ExpenseDataSource::mapExpense);
+        sql,
+        ps -> ps.setString(1, expenseIdentifier.value()),
+        ExpenseDataSource::mapRevisionExpense);
   }
 
   @Override
@@ -98,7 +103,8 @@ public class ExpenseDataSource implements ExpenseRepository {
   }
 
   @Override
-  public void update(Expense expense) {
+  public void update(Revision<Expense> versioned) {
+    Expense expense = versioned.entity();
     jdbc.updateWithOptimisticLock(
         """
         UPDATE expense.expense
@@ -110,7 +116,7 @@ public class ExpenseDataSource implements ExpenseRepository {
           ps.setInt(2, expense.price().value());
           ps.setDate(3, Date.valueOf(expense.paymentDate().asString()));
           ps.setString(4, expense.expenseIdentifier().value());
-          ps.setLong(5, expense.version());
+          ps.setLong(5, versioned.version());
         });
     jdbc.update(
         "DELETE FROM expense.fixed_expense WHERE expense_id = ?",
@@ -150,7 +156,10 @@ public class ExpenseDataSource implements ExpenseRepository {
         new Price(rs.getInt("price")),
         new PaymentDate(rs.getObject("payment_date", LocalDate.class)),
         new ExpenseAttributeIdentifier(rs.getString("attribute_id")),
-        ExpenseCategory.valueOf(rs.getString("category")),
-        rs.getLong("version"));
+        ExpenseCategory.valueOf(rs.getString("category")));
+  }
+
+  static Revision<Expense> mapRevisionExpense(ResultSet rs) throws SQLException {
+    return new Revision<>(mapExpense(rs), rs.getLong("version"));
   }
 }

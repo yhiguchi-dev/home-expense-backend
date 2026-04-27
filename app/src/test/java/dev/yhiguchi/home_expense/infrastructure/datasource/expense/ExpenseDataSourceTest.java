@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
@@ -50,13 +51,15 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("4月家賃", 80000, "2026-04-01", attribute);
     sut.register(expense);
 
-    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertEquals(expense.expenseIdentifier(), result.expenseIdentifier());
-    assertEquals("4月家賃", result.description().value());
-    assertEquals(80000, result.price().value());
-    assertTrue(result.isFixed());
-    assertFalse(result.isVariable());
-    assertEquals(attribute.expenseAttributeIdentifier(), result.expenseAttributeIdentifier());
+    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    assertEquals(expense.expenseIdentifier(), result.entity().expenseIdentifier());
+    assertEquals("4月家賃", result.entity().description().value());
+    assertEquals(80000, result.entity().price().value());
+    assertTrue(result.entity().isFixed());
+    assertFalse(result.entity().isVariable());
+    assertEquals(
+        attribute.expenseAttributeIdentifier(), result.entity().expenseAttributeIdentifier());
+    assertEquals(1L, result.version());
   }
 
   @Test
@@ -65,9 +68,9 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("ランチ", 1000, "2026-04-10", attribute);
     sut.register(expense);
 
-    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertTrue(result.isVariable());
-    assertFalse(result.isFixed());
+    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    assertTrue(result.entity().isVariable());
+    assertFalse(result.entity().isFixed());
   }
 
   @Test
@@ -96,21 +99,21 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("ランチ", 1000, "2026-04-10", attribute);
     sut.register(expense);
 
-    Expense fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    Revision<Expense> fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     Expense updated =
         new Expense(
-            fetched.expenseIdentifier(),
+            fetched.entity().expenseIdentifier(),
             new Description("ディナー"),
             new Price(3000),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
             attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory(),
-            fetched.version());
-    sut.update(updated);
+            attribute.expenseCategory());
+    sut.update(new Revision<>(updated, fetched.version()));
 
-    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertEquals("ディナー", result.description().value());
-    assertEquals(3000, result.price().value());
+    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    assertEquals("ディナー", result.entity().description().value());
+    assertEquals(3000, result.entity().price().value());
+    assertEquals(2L, result.version());
   }
 
   @Test
@@ -119,23 +122,22 @@ class ExpenseDataSourceTest {
     ExpenseAttribute varAttr = registerAttribute("雑費", ExpenseCategory.変動費);
     Expense expense = createExpense("保険", 5000, "2026-04-01", fixedAttr);
     sut.register(expense);
-    assertTrue(sut.findBy(expense.expenseIdentifier()).orElseThrow().isFixed());
+    assertTrue(sut.findBy(expense.expenseIdentifier()).orElseThrow().entity().isFixed());
 
-    Expense fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    Revision<Expense> fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
     Expense updated =
         new Expense(
-            fetched.expenseIdentifier(),
-            fetched.description(),
-            fetched.price(),
+            fetched.entity().expenseIdentifier(),
+            fetched.entity().description(),
+            fetched.entity().price(),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             varAttr.expenseAttributeIdentifier(),
-            varAttr.expenseCategory(),
-            fetched.version());
-    sut.update(updated);
+            varAttr.expenseCategory());
+    sut.update(new Revision<>(updated, fetched.version()));
 
-    Expense result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertTrue(result.isVariable());
-    assertFalse(result.isFixed());
+    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    assertTrue(result.entity().isVariable());
+    assertFalse(result.entity().isFixed());
   }
 
   @Test
@@ -144,16 +146,15 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("朝食", 500, "2026-04-10", attribute);
     sut.register(expense);
 
-    Expense stale =
+    Expense modified =
         new Expense(
             expense.expenseIdentifier(),
             new Description("朝食更新"),
             new Price(600),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
             attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory(),
-            999L);
-    assertThrows(ConcurrentUpdateException.class, () -> sut.update(stale));
+            attribute.expenseCategory());
+    assertThrows(ConcurrentUpdateException.class, () -> sut.update(new Revision<>(modified, 999L)));
   }
 
   @Test
@@ -190,7 +191,6 @@ class ExpenseDataSourceTest {
         new Price(price),
         new PaymentDate(LocalDate.parse(paymentDate)),
         attribute.expenseAttributeIdentifier(),
-        attribute.expenseCategory(),
-        1L);
+        attribute.expenseCategory());
   }
 }

@@ -20,14 +20,12 @@ class IncomeAttributeRegistrationServiceTest {
     assertEquals(1, attributeRepository.all().size());
     IncomeAttribute registered = attributeRepository.all().getFirst();
     assertEquals("給与", registered.incomeAttributeName().value());
-    assertEquals(1L, registered.version());
   }
 
   @Test
   void 同名の収入属性が存在する場合は例外をスローする() {
     IncomeAttribute existing =
-        new IncomeAttribute(
-            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
+        new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
     attributeRepository.register(existing);
 
     assertThrows(

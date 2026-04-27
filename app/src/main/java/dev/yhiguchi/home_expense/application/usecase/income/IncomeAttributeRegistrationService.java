@@ -18,7 +18,7 @@ public class IncomeAttributeRegistrationService {
   }
 
   public IncomeAttributeIdentifier register(IncomeAttributeName incomeAttributeName) {
-    incomeAttributeNameUniqueness.assertUnique(incomeAttributeName);
+    incomeAttributeNameUniqueness.assertUniqueForRegistration(incomeAttributeName);
     IncomeAttribute incomeAttribute = IncomeAttribute.create(incomeAttributeName);
     incomeAttributeRepository.register(incomeAttribute);
     return incomeAttribute.incomeAttributeIdentifier();

@@ -13,21 +13,17 @@ public class Income {
 
   IncomeAttributeIdentifier incomeAttributeIdentifier;
 
-  long version;
-
   public Income(
       IncomeIdentifier incomeIdentifier,
       Description description,
       Amount amount,
       ReceiveDate receiveDate,
-      IncomeAttributeIdentifier incomeAttributeIdentifier,
-      long version) {
+      IncomeAttributeIdentifier incomeAttributeIdentifier) {
     this.incomeIdentifier = incomeIdentifier;
     this.description = description;
     this.amount = amount;
     this.receiveDate = receiveDate;
     this.incomeAttributeIdentifier = incomeAttributeIdentifier;
-    this.version = version;
   }
 
   public static Income create(
@@ -36,7 +32,7 @@ public class Income {
       ReceiveDate receiveDate,
       IncomeAttributeIdentifier incomeAttributeIdentifier) {
     IncomeIdentifier id = new IncomeIdentifier(UUID.randomUUID().toString());
-    return new Income(id, description, amount, receiveDate, incomeAttributeIdentifier, 1L);
+    return new Income(id, description, amount, receiveDate, incomeAttributeIdentifier);
   }
 
   public Income updateWith(
@@ -45,23 +41,7 @@ public class Income {
       ReceiveDate receiveDate,
       IncomeAttributeIdentifier incomeAttributeIdentifier) {
     return new Income(
-        this.incomeIdentifier,
-        description,
-        amount,
-        receiveDate,
-        incomeAttributeIdentifier,
-        this.version);
-  }
-
-  /** 指定したバージョンを持つIncomeを返す */
-  public Income withVersion(long version) {
-    return new Income(
-        this.incomeIdentifier,
-        this.description,
-        this.amount,
-        this.receiveDate,
-        this.incomeAttributeIdentifier,
-        version);
+        this.incomeIdentifier, description, amount, receiveDate, incomeAttributeIdentifier);
   }
 
   /** 属性値に変更があるか判定する */
@@ -90,10 +70,6 @@ public class Income {
 
   public IncomeAttributeIdentifier incomeAttributeIdentifier() {
     return incomeAttributeIdentifier;
-  }
-
-  public long version() {
-    return version;
   }
 
   @Override

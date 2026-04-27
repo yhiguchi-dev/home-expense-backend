@@ -42,7 +42,7 @@ public class IncomeAttributeSearchResultDataSource implements IncomeAttributeSea
 
   private List<IncomeAttribute> selectBy(IncomeAttributeSearchCriteria criteria) {
     String sql =
-        "SELECT id, name, version FROM expense.income_attribute ORDER BY income_attribute.created_at OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
+        "SELECT id, name FROM expense.income_attribute ORDER BY income_attribute.created_at OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
     return jdbc.queryForList(
         sql,
         ps -> {

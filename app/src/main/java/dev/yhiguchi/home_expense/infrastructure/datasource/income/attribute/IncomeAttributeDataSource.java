@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
@@ -13,6 +14,7 @@ import javax.sql.DataSource;
 public class IncomeAttributeDataSource implements IncomeAttributeRepository {
 
   private static final String UNIQUE_VIOLATION = "23505";
+  private static final long INITIAL_VERSION = 1L;
 
   private final JdbcOperator jdbc;
 
@@ -28,7 +30,7 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
           ps -> {
             ps.setString(1, incomeAttribute.incomeAttributeIdentifier().value());
             ps.setString(2, incomeAttribute.incomeAttributeName().value());
-            ps.setLong(3, incomeAttribute.version());
+            ps.setLong(3, INITIAL_VERSION);
           });
     } catch (DataAccessException e) {
       if (e.getCause() instanceof SQLException sqlEx
@@ -40,13 +42,14 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   }
 
   @Override
-  public void update(IncomeAttribute incomeAttribute) {
+  public void update(Revision<IncomeAttribute> versioned) {
+    IncomeAttribute incomeAttribute = versioned.entity();
     jdbc.updateWithOptimisticLock(
         "UPDATE expense.income_attribute SET name = ?, version = version + 1 WHERE id = ? AND version = ?",
         ps -> {
           ps.setString(1, incomeAttribute.incomeAttributeName().value());
           ps.setString(2, incomeAttribute.incomeAttributeIdentifier().value());
-          ps.setLong(3, incomeAttribute.version());
+          ps.setLong(3, versioned.version());
         });
   }
 
@@ -58,11 +61,12 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   }
 
   @Override
-  public Optional<IncomeAttribute> findBy(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+  public Optional<Revision<IncomeAttribute>> findBy(
+      IncomeAttributeIdentifier incomeAttributeIdentifier) {
     return jdbc.queryForOptional(
         "SELECT id, name, version FROM expense.income_attribute WHERE id = ?",
         ps -> ps.setString(1, incomeAttributeIdentifier.value()),
-        IncomeAttributeDataSource::mapIncomeAttribute);
+        IncomeAttributeDataSource::mapRevisionIncomeAttribute);
   }
 
   @Override
@@ -81,7 +85,10 @@ public class IncomeAttributeDataSource implements IncomeAttributeRepository {
   static IncomeAttribute mapIncomeAttribute(ResultSet rs) throws SQLException {
     return new IncomeAttribute(
         new IncomeAttributeIdentifier(rs.getString("id")),
-        new IncomeAttributeName(rs.getString("name")),
-        rs.getLong("version"));
+        new IncomeAttributeName(rs.getString("name")));
+  }
+
+  static Revision<IncomeAttribute> mapRevisionIncomeAttribute(ResultSet rs) throws SQLException {
+    return new Revision<>(mapIncomeAttribute(rs), rs.getLong("version"));
   }
 }

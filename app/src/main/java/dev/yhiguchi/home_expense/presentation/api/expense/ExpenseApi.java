@@ -4,6 +4,7 @@ import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseDeletionServ
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRegistrationService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseUpdateService;
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
@@ -112,8 +113,8 @@ public class ExpenseApi implements LinkHeaderCreatable {
   @Path("{id}")
   @RunOnVirtualThread
   public Response get(@PathParam("id") @UuidFormat String id) {
-    Expense expense = expenseRetrievalService.get(new ExpenseIdentifier(id));
-    ExpenseGetResponse response = ExpenseGetResponse.from(expense);
-    return Response.ok(response).tag(String.valueOf(expense.version())).build();
+    Revision<Expense> loaded = expenseRetrievalService.get(new ExpenseIdentifier(id));
+    ExpenseGetResponse response = ExpenseGetResponse.from(loaded.entity());
+    return Response.ok(response).tag(String.valueOf(loaded.version())).build();
   }
 }

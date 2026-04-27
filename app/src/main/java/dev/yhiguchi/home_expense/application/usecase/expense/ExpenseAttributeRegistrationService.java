@@ -19,7 +19,8 @@ public class ExpenseAttributeRegistrationService {
   }
 
   public ExpenseAttributeIdentifier register(ExpenseAttributeRegistrationCommand command) {
-    expenseAttributeNameUniqueness.assertUnique(command.expenseAttributeName());
+    expenseAttributeNameUniqueness.assertUniqueForRegistration(
+        command.expenseAttributeName(), command.expenseCategory());
     ExpenseAttribute expenseAttribute =
         ExpenseAttribute.create(command.expenseAttributeName(), command.expenseCategory());
     expenseAttributeRepository.register(expenseAttribute);

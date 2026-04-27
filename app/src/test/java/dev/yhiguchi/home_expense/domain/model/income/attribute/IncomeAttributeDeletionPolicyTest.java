@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 class IncomeAttributeDeletionPolicyTest {
 
   IncomeAttribute attribute =
-      new IncomeAttribute(
-          new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
+      new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
 
   @Test
   void 収入が存在しない場合は削除可能() {

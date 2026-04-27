@@ -21,8 +21,7 @@ class IncomeDeletionServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            new IncomeAttributeIdentifier("attr-1"),
-            1L);
+            new IncomeAttributeIdentifier("attr-1"));
     incomeRepository.register(existing);
 
     sut.delete(new IncomeIdentifier("inc-1"));

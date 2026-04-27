@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
@@ -24,6 +25,7 @@ public class IncomeRegistrationService {
     IncomeAttribute attribute =
         incomeAttributeRepository
             .findBy(command.incomeAttributeIdentifier())
+            .map(Revision::entity)
             .orElseThrow(IncomeAttributeNotFoundException::new);
     Income income =
         Income.create(

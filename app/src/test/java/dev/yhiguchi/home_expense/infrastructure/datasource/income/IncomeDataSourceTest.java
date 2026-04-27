@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
@@ -44,11 +45,13 @@ class IncomeDataSourceTest {
     Income income = createIncome("4月給与", 300000, "2026-04-25", attribute);
     sut.register(income);
 
-    Income result = sut.findBy(income.incomeIdentifier()).orElseThrow();
-    assertEquals(income.incomeIdentifier(), result.incomeIdentifier());
-    assertEquals("4月給与", result.description().value());
-    assertEquals(300000, result.amount().value());
-    assertEquals(attribute.incomeAttributeIdentifier(), result.incomeAttributeIdentifier());
+    Revision<Income> result = sut.findBy(income.incomeIdentifier()).orElseThrow();
+    assertEquals(income.incomeIdentifier(), result.entity().incomeIdentifier());
+    assertEquals("4月給与", result.entity().description().value());
+    assertEquals(300000, result.entity().amount().value());
+    assertEquals(
+        attribute.incomeAttributeIdentifier(), result.entity().incomeAttributeIdentifier());
+    assertEquals(1L, result.version());
   }
 
   @Test
@@ -77,20 +80,20 @@ class IncomeDataSourceTest {
     Income income = createIncome("4月給与", 300000, "2026-04-25", attribute);
     sut.register(income);
 
-    Income fetched = sut.findBy(income.incomeIdentifier()).orElseThrow();
+    Revision<Income> fetched = sut.findBy(income.incomeIdentifier()).orElseThrow();
     Income updated =
         new Income(
-            fetched.incomeIdentifier(),
+            fetched.entity().incomeIdentifier(),
             new Description("4月給与（修正）"),
             new Amount(350000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute.incomeAttributeIdentifier(),
-            fetched.version());
-    sut.update(updated);
+            attribute.incomeAttributeIdentifier());
+    sut.update(new Revision<>(updated, fetched.version()));
 
-    Income result = sut.findBy(income.incomeIdentifier()).orElseThrow();
-    assertEquals("4月給与（修正）", result.description().value());
-    assertEquals(350000, result.amount().value());
+    Revision<Income> result = sut.findBy(income.incomeIdentifier()).orElseThrow();
+    assertEquals("4月給与（修正）", result.entity().description().value());
+    assertEquals(350000, result.entity().amount().value());
+    assertEquals(2L, result.version());
   }
 
   @Test
@@ -99,15 +102,14 @@ class IncomeDataSourceTest {
     Income income = createIncome("4月給与", 300000, "2026-04-25", attribute);
     sut.register(income);
 
-    Income stale =
+    Income modified =
         new Income(
             income.incomeIdentifier(),
             new Description("更新"),
             new Amount(310000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attribute.incomeAttributeIdentifier(),
-            999L);
-    assertThrows(ConcurrentUpdateException.class, () -> sut.update(stale));
+            attribute.incomeAttributeIdentifier());
+    assertThrows(ConcurrentUpdateException.class, () -> sut.update(new Revision<>(modified, 999L)));
   }
 
   @Test
@@ -133,7 +135,6 @@ class IncomeDataSourceTest {
         new Description(description),
         new Amount(amount),
         new ReceiveDate(LocalDate.parse(receiveDate)),
-        attribute.incomeAttributeIdentifier(),
-        1L);
+        attribute.incomeAttributeIdentifier());
   }
 }

@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeDeletionPolicy;
@@ -27,6 +28,7 @@ public class IncomeAttributeDeletionService {
     IncomeAttribute attribute =
         incomeAttributeRepository
             .findBy(incomeAttributeIdentifier)
+            .map(Revision::entity)
             .orElseThrow(IncomeAttributeNotFoundException::new);
     incomeAttributeDeletionPolicy.assertDeletable(attribute);
     incomeAttributeRepository.delete(attribute);

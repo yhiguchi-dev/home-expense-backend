@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import io.quarkus.test.junit.QuarkusTest;
@@ -38,9 +39,12 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("給与");
     sut.register(attribute);
 
-    IncomeAttribute result = sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
-    assertEquals(attribute.incomeAttributeIdentifier(), result.incomeAttributeIdentifier());
-    assertEquals("給与", result.incomeAttributeName().value());
+    Revision<IncomeAttribute> result =
+        sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
+    assertEquals(
+        attribute.incomeAttributeIdentifier(), result.entity().incomeAttributeIdentifier());
+    assertEquals("給与", result.entity().incomeAttributeName().value());
+    assertEquals(1L, result.version());
   }
 
   @Test
@@ -68,16 +72,17 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("副業");
     sut.register(attribute);
 
-    IncomeAttribute fetched = sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
+    Revision<IncomeAttribute> fetched =
+        sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
     IncomeAttribute updated =
         new IncomeAttribute(
-            fetched.incomeAttributeIdentifier(),
-            new IncomeAttributeName("副業収入"),
-            fetched.version());
-    sut.update(updated);
+            fetched.entity().incomeAttributeIdentifier(), new IncomeAttributeName("副業収入"));
+    sut.update(new Revision<>(updated, fetched.version()));
 
-    IncomeAttribute result = sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
-    assertEquals("副業収入", result.incomeAttributeName().value());
+    Revision<IncomeAttribute> result =
+        sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
+    assertEquals("副業収入", result.entity().incomeAttributeName().value());
+    assertEquals(2L, result.version());
   }
 
   @Test
@@ -85,10 +90,9 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("配当");
     sut.register(attribute);
 
-    IncomeAttribute staleVersion =
-        new IncomeAttribute(
-            attribute.incomeAttributeIdentifier(), new IncomeAttributeName("配当更新"), 999L);
-    assertThrows(ConcurrentUpdateException.class, () -> sut.update(staleVersion));
+    IncomeAttribute modified =
+        new IncomeAttribute(attribute.incomeAttributeIdentifier(), new IncomeAttributeName("配当更新"));
+    assertThrows(ConcurrentUpdateException.class, () -> sut.update(new Revision<>(modified, 999L)));
   }
 
   @Test

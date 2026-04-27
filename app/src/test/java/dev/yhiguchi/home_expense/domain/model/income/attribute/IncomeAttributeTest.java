@@ -7,12 +7,11 @@ import org.junit.jupiter.api.Test;
 class IncomeAttributeTest {
 
   @Test
-  void createでUUIDが生成されversion1のIncomeAttributeが作成される() {
+  void createでUUIDが生成されたIncomeAttributeが作成される() {
     IncomeAttribute attribute = IncomeAttribute.create(new IncomeAttributeName("給与"));
 
     assertNotNull(attribute.incomeAttributeIdentifier().value());
     assertEquals("給与", attribute.incomeAttributeName().value());
-    assertEquals(1L, attribute.version());
   }
 
   @Test
@@ -26,22 +25,19 @@ class IncomeAttributeTest {
   @Test
   void updateWithで新しい値を持つIncomeAttributeを返す() {
     IncomeAttribute attribute =
-        new IncomeAttribute(
-            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 2L);
+        new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
 
     IncomeAttribute updated = attribute.updateWith(new IncomeAttributeName("賞与"));
 
     assertEquals("attr-1", updated.incomeAttributeIdentifier().value());
     assertEquals("賞与", updated.incomeAttributeName().value());
-    assertEquals(2L, updated.version());
     assertTrue(attribute.hasChanges(updated));
   }
 
   @Test
   void updateWithで同じ値の場合はhasChangesがfalseを返す() {
     IncomeAttribute attribute =
-        new IncomeAttribute(
-            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
+        new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
 
     IncomeAttribute updated = attribute.updateWith(new IncomeAttributeName("給与"));
 

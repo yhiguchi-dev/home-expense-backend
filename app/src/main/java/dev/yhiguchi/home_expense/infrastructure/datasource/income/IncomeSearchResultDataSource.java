@@ -58,7 +58,6 @@ public class IncomeSearchResultDataSource implements IncomeSearchResultQuerier {
               income.description,
               income.amount,
               income.receive_date,
-              income.version,
               income_attribute.id AS attribute_id,
               income_attribute.name AS attribute_name
             FROM expense.income

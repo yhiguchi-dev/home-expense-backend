@@ -122,8 +122,7 @@ class ExpenseStatisticsDataSourceTest {
             new Price(price),
             new PaymentDate(LocalDate.parse(paymentDate)),
             attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory(),
-            1L);
+            attribute.expenseCategory());
     expenseDataSource.register(expense);
   }
 
@@ -141,8 +140,7 @@ class ExpenseStatisticsDataSourceTest {
             new dev.yhiguchi.home_expense.domain.model.income.Description(description),
             new Amount(amount),
             new ReceiveDate(LocalDate.parse(receiveDate)),
-            attribute.incomeAttributeIdentifier(),
-            1L);
+            attribute.incomeAttributeIdentifier());
     incomeDataSource.register(income);
   }
 }

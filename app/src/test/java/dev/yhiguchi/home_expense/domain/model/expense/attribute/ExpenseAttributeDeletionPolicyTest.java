@@ -11,8 +11,7 @@ class ExpenseAttributeDeletionPolicyTest {
       new ExpenseAttribute(
           new ExpenseAttributeIdentifier("attr-1"),
           new ExpenseAttributeName("食費"),
-          ExpenseCategory.変動費,
-          1L);
+          ExpenseCategory.変動費);
 
   @Test
   void 経費が存在しない場合は削除可能() {

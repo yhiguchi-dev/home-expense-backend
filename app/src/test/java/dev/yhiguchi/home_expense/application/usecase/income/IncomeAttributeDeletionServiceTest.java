@@ -20,8 +20,7 @@ class IncomeAttributeDeletionServiceTest {
       new IncomeAttributeDeletionService(attributeRepository, incomeRepository);
 
   IncomeAttribute attribute =
-      new IncomeAttribute(
-          new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
+      new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
 
   @Test
   void 収入属性を削除する() {
@@ -41,8 +40,7 @@ class IncomeAttributeDeletionServiceTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            new IncomeAttributeIdentifier("attr-1"),
-            1L);
+            new IncomeAttributeIdentifier("attr-1"));
     incomeRepository.register(income);
 
     assertThrows(

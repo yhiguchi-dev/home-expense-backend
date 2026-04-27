@@ -11,7 +11,7 @@ class IncomeTest {
   IncomeAttributeIdentifier attributeId = new IncomeAttributeIdentifier("attr-1");
 
   @Test
-  void createでUUIDが生成されversion1のIncomeが作成される() {
+  void createでUUIDが生成されたIncomeが作成される() {
     Income income =
         Income.create(
             new Description("4月給与"),
@@ -24,7 +24,6 @@ class IncomeTest {
     assertEquals(300000, income.amount().value());
     assertEquals("2026-04-25", income.receiveDate().asString());
     assertEquals(attributeId, income.incomeAttributeIdentifier());
-    assertEquals(1L, income.version());
   }
 
   @Test
@@ -53,8 +52,7 @@ class IncomeTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attributeId,
-            3L);
+            attributeId);
 
     Income updated =
         income.updateWith(
@@ -66,7 +64,6 @@ class IncomeTest {
     assertEquals("inc-1", updated.incomeIdentifier().value());
     assertEquals("5月給与", updated.description().value());
     assertEquals(310000, updated.amount().value());
-    assertEquals(3L, updated.version());
     assertTrue(income.hasChanges(updated));
   }
 
@@ -78,8 +75,7 @@ class IncomeTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attributeId,
-            1L);
+            attributeId);
 
     Income updated =
         income.updateWith(
@@ -99,8 +95,7 @@ class IncomeTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attributeId,
-            1L);
+            attributeId);
 
     Income updated =
         income.updateWith(
@@ -120,8 +115,7 @@ class IncomeTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attributeId,
-            1L);
+            attributeId);
 
     Income updated =
         income.updateWith(
@@ -141,8 +135,7 @@ class IncomeTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attributeId,
-            1L);
+            attributeId);
 
     Income updated =
         income.updateWith(
@@ -162,8 +155,7 @@ class IncomeTest {
             new Description("4月給与"),
             new Amount(300000),
             new ReceiveDate(LocalDate.of(2026, 4, 25)),
-            attributeId,
-            1L);
+            attributeId);
 
     IncomeAttributeIdentifier otherAttributeId = new IncomeAttributeIdentifier("attr-2");
     Income updated =

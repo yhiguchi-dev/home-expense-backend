@@ -4,6 +4,7 @@ import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeDel
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeRegistrationService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeUpdateService;
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
@@ -115,9 +116,9 @@ public class ExpenseAttributeApi implements LinkHeaderCreatable {
   @Path("{id}")
   @RunOnVirtualThread
   public Response get(@PathParam("id") @UuidFormat String id) {
-    ExpenseAttribute expenseAttribute =
+    Revision<ExpenseAttribute> loaded =
         expenseAttributeRetrievalService.get(new ExpenseAttributeIdentifier(id));
-    ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(expenseAttribute);
-    return Response.ok(response).tag(String.valueOf(expenseAttribute.version())).build();
+    ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(loaded.entity());
+    return Response.ok(response).tag(String.valueOf(loaded.version())).build();
   }
 }

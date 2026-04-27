@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseRepository;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -23,6 +24,7 @@ public class ExpenseAttributeDeletionService {
     ExpenseAttribute attribute =
         expenseAttributeRepository
             .findBy(expenseAttributeIdentifier)
+            .map(Revision::entity)
             .orElseThrow(ExpenseAttributeNotFoundException::new);
     expenseAttributeDeletionPolicy.assertDeletable(attribute);
     expenseAttributeRepository.delete(attribute);

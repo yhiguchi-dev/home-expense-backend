@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
@@ -21,23 +22,25 @@ public class ExpenseUpdateService {
   }
 
   public void update(ExpenseUpdateCommand command) {
-    Expense expense =
+    Revision<Expense> loaded =
         expenseRepository
             .findBy(command.expenseIdentifier())
             .orElseThrow(ExpenseNotFoundException::new);
     ExpenseAttribute attribute =
         expenseAttributeRepository
             .findBy(command.expenseAttributeIdentifier())
+            .map(Revision::entity)
             .orElseThrow(ExpenseAttributeNotFoundException::new);
+    Expense current = loaded.entity();
     Expense updated =
-        expense.updateWith(
+        current.updateWith(
             command.description(),
             command.price(),
             command.paymentDate(),
             attribute.expenseAttributeIdentifier(),
             attribute.expenseCategory());
-    if (expense.hasChanges(updated)) {
-      expenseRepository.update(updated.withVersion(command.version()));
+    if (current.hasChanges(updated)) {
+      expenseRepository.update(new Revision<>(updated, command.version()));
     }
   }
 }

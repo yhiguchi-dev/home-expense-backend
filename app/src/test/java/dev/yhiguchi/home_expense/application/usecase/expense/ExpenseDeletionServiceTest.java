@@ -22,8 +22,7 @@ class ExpenseDeletionServiceTest {
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     expenseRepository.register(existing);
 
     sut.delete(new ExpenseIdentifier("exp-1"));

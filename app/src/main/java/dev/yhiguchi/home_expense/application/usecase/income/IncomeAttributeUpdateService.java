@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNameUniqueness;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
@@ -21,16 +22,15 @@ public class IncomeAttributeUpdateService {
   }
 
   public void update(IncomeAttributeUpdateCommand command) {
-    IncomeAttribute attribute =
+    Revision<IncomeAttribute> loaded =
         incomeAttributeRepository
             .findBy(command.incomeAttributeIdentifier())
             .orElseThrow(IncomeAttributeNotFoundException::new);
-    if (!attribute.hasSameName(command.incomeAttributeName())) {
-      incomeAttributeNameUniqueness.assertUnique(command.incomeAttributeName());
-    }
-    IncomeAttribute updated = attribute.updateWith(command.incomeAttributeName());
-    if (attribute.hasChanges(updated)) {
-      incomeAttributeRepository.update(updated.withVersion(command.version()));
+    IncomeAttribute current = loaded.entity();
+    incomeAttributeNameUniqueness.assertUniqueForUpdate(current, command.incomeAttributeName());
+    IncomeAttribute updated = current.updateWith(command.incomeAttributeName());
+    if (current.hasChanges(updated)) {
+      incomeAttributeRepository.update(new Revision<>(updated, command.version()));
     }
   }
 }

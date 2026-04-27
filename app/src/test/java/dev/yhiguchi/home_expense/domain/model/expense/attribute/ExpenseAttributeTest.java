@@ -8,14 +8,13 @@ import org.junit.jupiter.api.Test;
 class ExpenseAttributeTest {
 
   @Test
-  void createでUUIDが生成されversion1のExpenseAttributeが作成される() {
+  void createでUUIDが生成されたExpenseAttributeが作成される() {
     ExpenseAttribute attribute =
         ExpenseAttribute.create(new ExpenseAttributeName("食費"), ExpenseCategory.変動費);
 
     assertNotNull(attribute.expenseAttributeIdentifier().value());
     assertEquals("食費", attribute.expenseAttributeName().value());
     assertEquals(ExpenseCategory.変動費, attribute.expenseCategory());
-    assertEquals(1L, attribute.version());
   }
 
   @Test
@@ -35,15 +34,13 @@ class ExpenseAttributeTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費,
-            2L);
+            ExpenseCategory.変動費);
 
     ExpenseAttribute updated =
         attribute.updateWith(new ExpenseAttributeName("交通費"), ExpenseCategory.変動費);
 
     assertEquals("attr-1", updated.expenseAttributeIdentifier().value());
     assertEquals("交通費", updated.expenseAttributeName().value());
-    assertEquals(2L, updated.version());
     assertTrue(attribute.hasChanges(updated));
   }
 
@@ -53,8 +50,7 @@ class ExpenseAttributeTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
 
     ExpenseAttribute updated =
         attribute.updateWith(new ExpenseAttributeName("食費"), ExpenseCategory.変動費);

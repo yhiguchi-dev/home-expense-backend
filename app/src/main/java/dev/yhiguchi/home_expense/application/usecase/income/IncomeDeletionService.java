@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeNotFoundException;
@@ -19,7 +20,10 @@ public class IncomeDeletionService {
 
   public void delete(IncomeIdentifier incomeIdentifier) {
     Income income =
-        incomeRepository.findBy(incomeIdentifier).orElseThrow(IncomeNotFoundException::new);
+        incomeRepository
+            .findBy(incomeIdentifier)
+            .map(Revision::entity)
+            .orElseThrow(IncomeNotFoundException::new);
     incomeRepository.delete(income);
   }
 }

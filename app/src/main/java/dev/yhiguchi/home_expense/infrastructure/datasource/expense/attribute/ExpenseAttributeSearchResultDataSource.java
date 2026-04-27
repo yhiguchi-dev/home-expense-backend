@@ -42,8 +42,7 @@ public class ExpenseAttributeSearchResultDataSource implements ExpenseAttributeS
   }
 
   private List<ExpenseAttribute> selectBy(ExpenseAttributeSearchCriteria criteria) {
-    StringBuilder sql =
-        new StringBuilder("SELECT id, category, name, version FROM expense.attribute");
+    StringBuilder sql = new StringBuilder("SELECT id, category, name FROM expense.attribute");
     List<Object> params = new ArrayList<>();
     appendCategoryFilter(criteria, sql, params);
     sql.append(" ORDER BY attribute.created_at OFFSET ? ROWS FETCH FIRST ? ROWS ONLY");

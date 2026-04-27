@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
@@ -14,6 +15,7 @@ import javax.sql.DataSource;
 public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
 
   private static final String UNIQUE_VIOLATION = "23505";
+  private static final long INITIAL_VERSION = 1L;
 
   private final JdbcOperator jdbc;
 
@@ -30,7 +32,7 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
             ps.setString(1, expenseAttribute.expenseAttributeIdentifier().value());
             ps.setString(2, expenseAttribute.expenseCategory().name());
             ps.setString(3, expenseAttribute.expenseAttributeName().value());
-            ps.setLong(4, expenseAttribute.version());
+            ps.setLong(4, INITIAL_VERSION);
           });
     } catch (DataAccessException e) {
       if (e.getCause() instanceof SQLException sqlEx
@@ -42,35 +44,44 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
   }
 
   @Override
-  public Optional<ExpenseAttribute> findBy(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+  public Optional<Revision<ExpenseAttribute>> findBy(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     return jdbc.queryForOptional(
         "SELECT id, category, name, version FROM expense.attribute WHERE id = ?",
         ps -> ps.setString(1, expenseAttributeIdentifier.value()),
-        ExpenseAttributeDataSource::mapExpenseAttribute);
+        ExpenseAttributeDataSource::mapRevisionExpenseAttribute);
   }
 
   @Override
-  public boolean existsByName(ExpenseAttributeName expenseAttributeName) {
+  public boolean existsByName(
+      ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
     String sql =
         """
-        SELECT CASE WHEN EXISTS(SELECT 1 FROM expense.attribute WHERE name = ?)
+        SELECT CASE WHEN EXISTS(
+            SELECT 1 FROM expense.attribute WHERE name = ? AND category = ?)
           THEN TRUE ELSE FALSE END
         FROM (VALUES (1)) AS t(x)
         """;
     return jdbc.queryForOptional(
-            sql, ps -> ps.setString(1, expenseAttributeName.value()), rs -> rs.getBoolean(1))
+            sql,
+            ps -> {
+              ps.setString(1, expenseAttributeName.value());
+              ps.setString(2, expenseCategory.name());
+            },
+            rs -> rs.getBoolean(1))
         .orElse(false);
   }
 
   @Override
-  public void update(ExpenseAttribute expenseAttribute) {
+  public void update(Revision<ExpenseAttribute> versioned) {
+    ExpenseAttribute expenseAttribute = versioned.entity();
     jdbc.updateWithOptimisticLock(
         "UPDATE expense.attribute SET category = ?, name = ?, version = version + 1 WHERE id = ? AND version = ?",
         ps -> {
           ps.setString(1, expenseAttribute.expenseCategory().name());
           ps.setString(2, expenseAttribute.expenseAttributeName().value());
           ps.setString(3, expenseAttribute.expenseAttributeIdentifier().value());
-          ps.setLong(4, expenseAttribute.version());
+          ps.setLong(4, versioned.version());
         });
   }
 
@@ -85,7 +96,10 @@ public class ExpenseAttributeDataSource implements ExpenseAttributeRepository {
     return new ExpenseAttribute(
         new ExpenseAttributeIdentifier(rs.getString("id")),
         new ExpenseAttributeName(rs.getString("name")),
-        ExpenseCategory.valueOf(rs.getString("category")),
-        rs.getLong("version"));
+        ExpenseCategory.valueOf(rs.getString("category")));
+  }
+
+  static Revision<ExpenseAttribute> mapRevisionExpenseAttribute(ResultSet rs) throws SQLException {
+    return new Revision<>(mapExpenseAttribute(rs), rs.getLong("version"));
   }
 }

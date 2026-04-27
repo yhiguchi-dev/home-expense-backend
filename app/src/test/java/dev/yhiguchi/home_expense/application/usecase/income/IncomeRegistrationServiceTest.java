@@ -22,8 +22,7 @@ class IncomeRegistrationServiceTest {
   @Test
   void 収入を作成して登録する() {
     IncomeAttribute attribute =
-        new IncomeAttribute(
-            new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L);
+        new IncomeAttribute(new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"));
     attributeRepository.register(attribute);
 
     IncomeIdentifier result =
@@ -40,7 +39,6 @@ class IncomeRegistrationServiceTest {
     assertEquals("4月給与", registered.description().value());
     assertEquals(300000, registered.amount().value());
     assertEquals(new IncomeAttributeIdentifier("attr-1"), registered.incomeAttributeIdentifier());
-    assertEquals(1L, registered.version());
   }
 
   @Test

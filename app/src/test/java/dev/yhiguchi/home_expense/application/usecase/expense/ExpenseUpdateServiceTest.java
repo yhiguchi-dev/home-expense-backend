@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
@@ -22,8 +23,7 @@ class ExpenseUpdateServiceTest {
       new ExpenseAttribute(
           new ExpenseAttributeIdentifier("attr-1"),
           new ExpenseAttributeName("食費"),
-          ExpenseCategory.変動費,
-          1L);
+          ExpenseCategory.変動費);
 
   @Test
   void 経費を更新する() {
@@ -34,8 +34,7 @@ class ExpenseUpdateServiceTest {
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     expenseRepository.register(existing);
     attributeRepository.register(attribute);
 
@@ -48,10 +47,11 @@ class ExpenseUpdateServiceTest {
             new ExpenseAttributeIdentifier("attr-1"),
             1L));
 
-    Expense updated = expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
-    assertEquals("ディナー", updated.description().value());
-    assertEquals(2000, updated.price().value());
-    assertEquals(1L, updated.version());
+    Revision<Expense> updated =
+        expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
+    assertEquals("ディナー", updated.entity().description().value());
+    assertEquals(2000, updated.entity().price().value());
+    assertEquals(2L, updated.version());
   }
 
   @Test
@@ -63,8 +63,7 @@ class ExpenseUpdateServiceTest {
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     expenseRepository.register(existing);
     attributeRepository.register(attribute);
 
@@ -77,8 +76,10 @@ class ExpenseUpdateServiceTest {
             new ExpenseAttributeIdentifier("attr-1"),
             1L));
 
-    Expense result = expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
-    assertSame(existing, result);
+    Revision<Expense> result =
+        expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
+    assertSame(existing, result.entity());
+    assertEquals(1L, result.version());
   }
 
   @Test
@@ -107,8 +108,7 @@ class ExpenseUpdateServiceTest {
             new Price(1000),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             new ExpenseAttributeIdentifier("attr-1"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     expenseRepository.register(existing);
 
     assertThrows(

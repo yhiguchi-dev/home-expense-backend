@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
@@ -13,6 +14,8 @@ import javax.sql.DataSource;
 
 @ApplicationScoped
 public class IncomeDataSource implements IncomeRepository {
+
+  private static final long INITIAL_VERSION = 1L;
 
   private final JdbcOperator jdbc;
 
@@ -30,12 +33,13 @@ public class IncomeDataSource implements IncomeRepository {
           ps.setString(3, income.description().value());
           ps.setInt(4, income.amount().value());
           ps.setDate(5, Date.valueOf(income.receiveDate().asString()));
-          ps.setLong(6, income.version());
+          ps.setLong(6, INITIAL_VERSION);
         });
   }
 
   @Override
-  public void update(Income income) {
+  public void update(Revision<Income> versioned) {
+    Income income = versioned.entity();
     jdbc.updateWithOptimisticLock(
         """
         UPDATE expense.income
@@ -48,7 +52,7 @@ public class IncomeDataSource implements IncomeRepository {
           ps.setInt(3, income.amount().value());
           ps.setDate(4, Date.valueOf(income.receiveDate().asString()));
           ps.setString(5, income.incomeIdentifier().value());
-          ps.setLong(6, income.version());
+          ps.setLong(6, versioned.version());
         });
   }
 
@@ -60,7 +64,7 @@ public class IncomeDataSource implements IncomeRepository {
   }
 
   @Override
-  public Optional<Income> findBy(IncomeIdentifier incomeIdentifier) {
+  public Optional<Revision<Income>> findBy(IncomeIdentifier incomeIdentifier) {
     return jdbc.queryForOptional(
         """
         SELECT id, attribute_id, description, amount, receive_date, version
@@ -68,7 +72,7 @@ public class IncomeDataSource implements IncomeRepository {
         WHERE id = ?
         """,
         ps -> ps.setString(1, incomeIdentifier.value()),
-        IncomeDataSource::mapIncome);
+        IncomeDataSource::mapRevisionIncome);
   }
 
   @Override
@@ -90,7 +94,10 @@ public class IncomeDataSource implements IncomeRepository {
         new Description(rs.getString("description")),
         new Amount(rs.getInt("amount")),
         new ReceiveDate(rs.getObject("receive_date", LocalDate.class)),
-        new IncomeAttributeIdentifier(rs.getString("attribute_id")),
-        rs.getLong("version"));
+        new IncomeAttributeIdentifier(rs.getString("attribute_id")));
+  }
+
+  static Revision<Income> mapRevisionIncome(ResultSet rs) throws SQLException {
+    return new Revision<>(mapIncome(rs), rs.getLong("version"));
   }
 }

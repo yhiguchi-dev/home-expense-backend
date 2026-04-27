@@ -1,5 +1,6 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeNotFoundException;
@@ -15,7 +16,7 @@ public class IncomeRetrievalService {
     this.incomeRepository = incomeRepository;
   }
 
-  public Income get(IncomeIdentifier incomeIdentifier) {
+  public Revision<Income> get(IncomeIdentifier incomeIdentifier) {
     return incomeRepository.findBy(incomeIdentifier).orElseThrow(IncomeNotFoundException::new);
   }
 }

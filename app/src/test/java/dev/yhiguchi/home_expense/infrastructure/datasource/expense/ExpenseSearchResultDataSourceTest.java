@@ -145,8 +145,7 @@ class ExpenseSearchResultDataSourceTest {
             new Price(price),
             new PaymentDate(LocalDate.parse(paymentDate)),
             attribute.expenseAttributeIdentifier(),
-            attribute.expenseCategory(),
-            1L);
+            attribute.expenseCategory());
     expenseDataSource.register(expense);
   }
 }

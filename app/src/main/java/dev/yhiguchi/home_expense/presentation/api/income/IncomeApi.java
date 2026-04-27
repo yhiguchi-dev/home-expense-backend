@@ -4,6 +4,7 @@ import dev.yhiguchi.home_expense.application.usecase.income.IncomeDeletionServic
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeRegistrationService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeUpdateService;
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
@@ -107,8 +108,8 @@ public class IncomeApi implements LinkHeaderCreatable {
   @Path("{id}")
   @RunOnVirtualThread
   public Response get(@PathParam("id") @UuidFormat String id) {
-    Income income = incomeRetrievalService.get(new IncomeIdentifier(id));
-    IncomeGetResponse response = IncomeGetResponse.from(income);
-    return Response.ok(response).tag(String.valueOf(income.version())).build();
+    Revision<Income> loaded = incomeRetrievalService.get(new IncomeIdentifier(id));
+    IncomeGetResponse response = IncomeGetResponse.from(loaded.entity());
+    return Response.ok(response).tag(String.valueOf(loaded.version())).build();
   }
 }

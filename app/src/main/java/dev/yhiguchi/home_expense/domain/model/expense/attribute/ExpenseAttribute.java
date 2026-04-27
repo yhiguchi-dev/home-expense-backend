@@ -9,37 +9,27 @@ public class ExpenseAttribute {
   ExpenseAttributeIdentifier expenseAttributeIdentifier;
   ExpenseAttributeName expenseAttributeName;
   ExpenseCategory expenseCategory;
-  long version;
 
   public ExpenseAttribute(
       ExpenseAttributeIdentifier expenseAttributeIdentifier,
       ExpenseAttributeName expenseAttributeName,
-      ExpenseCategory expenseCategory,
-      long version) {
+      ExpenseCategory expenseCategory) {
     this.expenseAttributeIdentifier = expenseAttributeIdentifier;
     this.expenseAttributeName = expenseAttributeName;
     this.expenseCategory = expenseCategory;
-    this.version = version;
   }
 
   public static ExpenseAttribute create(
       ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
         new ExpenseAttributeIdentifier(UUID.randomUUID().toString());
-    return new ExpenseAttribute(
-        expenseAttributeIdentifier, expenseAttributeName, expenseCategory, 1L);
+    return new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
   }
 
   public ExpenseAttribute updateWith(
       ExpenseAttributeName expenseAttributeName, ExpenseCategory expenseCategory) {
     return new ExpenseAttribute(
-        this.expenseAttributeIdentifier, expenseAttributeName, expenseCategory, this.version);
-  }
-
-  /** 指定したバージョンを持つExpenseAttributeを返す */
-  public ExpenseAttribute withVersion(long version) {
-    return new ExpenseAttribute(
-        this.expenseAttributeIdentifier, this.expenseAttributeName, this.expenseCategory, version);
+        this.expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
   }
 
   /** 属性値に変更があるか判定する */
@@ -53,6 +43,10 @@ public class ExpenseAttribute {
     return Objects.equals(this.expenseAttributeName, expenseAttributeName);
   }
 
+  public boolean hasSameCategory(ExpenseCategory expenseCategory) {
+    return this.expenseCategory == expenseCategory;
+  }
+
   public ExpenseAttributeIdentifier expenseAttributeIdentifier() {
     return expenseAttributeIdentifier;
   }
@@ -63,10 +57,6 @@ public class ExpenseAttribute {
 
   public ExpenseCategory expenseCategory() {
     return expenseCategory;
-  }
-
-  public long version() {
-    return version;
   }
 
   @Override

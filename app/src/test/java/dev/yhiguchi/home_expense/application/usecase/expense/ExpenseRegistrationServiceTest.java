@@ -25,8 +25,7 @@ class ExpenseRegistrationServiceTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     attributeRepository.register(attribute);
 
     ExpenseIdentifier result =
@@ -44,7 +43,6 @@ class ExpenseRegistrationServiceTest {
     assertEquals(1000, registered.price().value());
     assertEquals(new ExpenseAttributeIdentifier("attr-1"), registered.expenseAttributeIdentifier());
     assertEquals(ExpenseCategory.変動費, registered.expenseCategory());
-    assertEquals(1L, registered.version());
   }
 
   @Test

@@ -63,7 +63,6 @@ public class ExpenseSearchResultDataSource implements ExpenseSearchResultQuerier
               expense.description,
               expense.price,
               expense.payment_date,
-              expense.version,
               attribute.id AS attribute_id,
               attribute.category,
               attribute.name AS attribute_name

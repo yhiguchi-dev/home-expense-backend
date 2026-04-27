@@ -18,23 +18,19 @@ public class Expense {
 
   ExpenseCategory expenseCategory;
 
-  long version;
-
   public Expense(
       ExpenseIdentifier expenseIdentifier,
       Description description,
       Price price,
       PaymentDate paymentDate,
       ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      ExpenseCategory expenseCategory,
-      long version) {
+      ExpenseCategory expenseCategory) {
     this.expenseIdentifier = expenseIdentifier;
     this.description = description;
     this.price = price;
     this.paymentDate = paymentDate;
     this.expenseAttributeIdentifier = expenseAttributeIdentifier;
     this.expenseCategory = expenseCategory;
-    this.version = version;
   }
 
   public static Expense create(
@@ -45,7 +41,7 @@ public class Expense {
       ExpenseCategory expenseCategory) {
     ExpenseIdentifier id = new ExpenseIdentifier(UUID.randomUUID().toString());
     return new Expense(
-        id, description, price, paymentDate, expenseAttributeIdentifier, expenseCategory, 1L);
+        id, description, price, paymentDate, expenseAttributeIdentifier, expenseCategory);
   }
 
   public Expense updateWith(
@@ -60,20 +56,7 @@ public class Expense {
         price,
         paymentDate,
         expenseAttributeIdentifier,
-        expenseCategory,
-        this.version);
-  }
-
-  /** 指定したバージョンを持つExpenseを返す */
-  public Expense withVersion(long version) {
-    return new Expense(
-        this.expenseIdentifier,
-        this.description,
-        this.price,
-        this.paymentDate,
-        this.expenseAttributeIdentifier,
-        this.expenseCategory,
-        version);
+        expenseCategory);
   }
 
   /** 属性値に変更があるか判定する */
@@ -115,10 +98,6 @@ public class Expense {
 
   public ExpenseCategory expenseCategory() {
     return expenseCategory;
-  }
-
-  public long version() {
-    return version;
   }
 
   @Override

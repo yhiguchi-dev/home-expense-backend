@@ -9,30 +9,21 @@ public class IncomeAttribute {
 
   IncomeAttributeName incomeAttributeName;
 
-  long version;
-
   public IncomeAttribute(
       IncomeAttributeIdentifier incomeAttributeIdentifier,
-      IncomeAttributeName incomeAttributeName,
-      long version) {
+      IncomeAttributeName incomeAttributeName) {
     this.incomeAttributeIdentifier = incomeAttributeIdentifier;
     this.incomeAttributeName = incomeAttributeName;
-    this.version = version;
   }
 
   public static IncomeAttribute create(IncomeAttributeName incomeAttributeName) {
     IncomeAttributeIdentifier incomeAttributeIdentifier =
         new IncomeAttributeIdentifier(UUID.randomUUID().toString());
-    return new IncomeAttribute(incomeAttributeIdentifier, incomeAttributeName, 1L);
+    return new IncomeAttribute(incomeAttributeIdentifier, incomeAttributeName);
   }
 
   public IncomeAttribute updateWith(IncomeAttributeName incomeAttributeName) {
-    return new IncomeAttribute(this.incomeAttributeIdentifier, incomeAttributeName, this.version);
-  }
-
-  /** 指定したバージョンを持つIncomeAttributeを返す */
-  public IncomeAttribute withVersion(long version) {
-    return new IncomeAttribute(this.incomeAttributeIdentifier, this.incomeAttributeName, version);
+    return new IncomeAttribute(this.incomeAttributeIdentifier, incomeAttributeName);
   }
 
   /** 属性値に変更があるか判定する */
@@ -51,10 +42,6 @@ public class IncomeAttribute {
 
   public IncomeAttributeName incomeAttributeName() {
     return incomeAttributeName;
-  }
-
-  public long version() {
-    return version;
   }
 
   @Override

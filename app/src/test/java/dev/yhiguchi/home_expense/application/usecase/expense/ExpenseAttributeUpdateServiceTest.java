@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryExpenseAttributeRepository;
@@ -18,8 +19,7 @@ class ExpenseAttributeUpdateServiceTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     attributeRepository.register(existing);
 
     sut.update(
@@ -29,10 +29,10 @@ class ExpenseAttributeUpdateServiceTest {
             ExpenseCategory.変動費,
             1L));
 
-    ExpenseAttribute updated =
+    Revision<ExpenseAttribute> updated =
         attributeRepository.findBy(new ExpenseAttributeIdentifier("attr-1")).orElseThrow();
-    assertEquals("交通費", updated.expenseAttributeName().value());
-    assertEquals(1L, updated.version());
+    assertEquals("交通費", updated.entity().expenseAttributeName().value());
+    assertEquals(2L, updated.version());
   }
 
   @Test
@@ -41,8 +41,7 @@ class ExpenseAttributeUpdateServiceTest {
         new ExpenseAttribute(
             new ExpenseAttributeIdentifier("attr-1"),
             new ExpenseAttributeName("食費"),
-            ExpenseCategory.変動費,
-            1L);
+            ExpenseCategory.変動費);
     attributeRepository.register(existing);
 
     sut.update(
@@ -52,8 +51,9 @@ class ExpenseAttributeUpdateServiceTest {
             ExpenseCategory.変動費,
             1L));
 
-    ExpenseAttribute result =
+    Revision<ExpenseAttribute> result =
         attributeRepository.findBy(new ExpenseAttributeIdentifier("attr-1")).orElseThrow();
-    assertSame(existing, result);
+    assertSame(existing, result.entity());
+    assertEquals(1L, result.version());
   }
 }

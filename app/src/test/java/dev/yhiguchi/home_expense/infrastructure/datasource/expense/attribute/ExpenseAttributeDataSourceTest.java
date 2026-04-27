@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
@@ -45,10 +46,13 @@ class ExpenseAttributeDataSourceTest {
     ExpenseAttribute attribute = createAttribute("テスト食費", ExpenseCategory.変動費);
     sut.register(attribute);
 
-    ExpenseAttribute result = sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
-    assertEquals(attribute.expenseAttributeIdentifier(), result.expenseAttributeIdentifier());
-    assertEquals(attribute.expenseAttributeName(), result.expenseAttributeName());
-    assertEquals(attribute.expenseCategory(), result.expenseCategory());
+    Revision<ExpenseAttribute> result =
+        sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
+    assertEquals(
+        attribute.expenseAttributeIdentifier(), result.entity().expenseAttributeIdentifier());
+    assertEquals(attribute.expenseAttributeName(), result.entity().expenseAttributeName());
+    assertEquals(attribute.expenseCategory(), result.entity().expenseCategory());
+    assertEquals(1L, result.version());
   }
 
   @Test
@@ -59,16 +63,24 @@ class ExpenseAttributeDataSourceTest {
   }
 
   @Test
-  void 名前で存在確認できる() {
+  void 名前と分類の組合せで存在確認できる() {
     ExpenseAttribute attribute = createAttribute("家賃", ExpenseCategory.固定費);
     sut.register(attribute);
 
-    assertTrue(sut.existsByName(new ExpenseAttributeName("家賃")));
+    assertTrue(sut.existsByName(new ExpenseAttributeName("家賃"), ExpenseCategory.固定費));
   }
 
   @Test
   void 存在しない名前の場合falseを返す() {
-    assertFalse(sut.existsByName(new ExpenseAttributeName("存在しない")));
+    assertFalse(sut.existsByName(new ExpenseAttributeName("存在しない"), ExpenseCategory.固定費));
+  }
+
+  @Test
+  void 同名でも分類が異なる場合はfalseを返す() {
+    ExpenseAttribute attribute = createAttribute("家賃", ExpenseCategory.固定費);
+    sut.register(attribute);
+
+    assertFalse(sut.existsByName(new ExpenseAttributeName("家賃"), ExpenseCategory.変動費));
   }
 
   @Test
@@ -76,18 +88,20 @@ class ExpenseAttributeDataSourceTest {
     ExpenseAttribute attribute = createAttribute("光熱費", ExpenseCategory.固定費);
     sut.register(attribute);
 
-    ExpenseAttribute fetched = sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
+    Revision<ExpenseAttribute> fetched =
+        sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
     ExpenseAttribute updated =
         new ExpenseAttribute(
-            fetched.expenseAttributeIdentifier(),
+            fetched.entity().expenseAttributeIdentifier(),
             new ExpenseAttributeName("水道光熱費"),
-            ExpenseCategory.変動費,
-            fetched.version());
-    sut.update(updated);
+            ExpenseCategory.変動費);
+    sut.update(new Revision<>(updated, fetched.version()));
 
-    ExpenseAttribute result = sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
-    assertEquals("水道光熱費", result.expenseAttributeName().value());
-    assertEquals(ExpenseCategory.変動費, result.expenseCategory());
+    Revision<ExpenseAttribute> result =
+        sut.findBy(attribute.expenseAttributeIdentifier()).orElseThrow();
+    assertEquals("水道光熱費", result.entity().expenseAttributeName().value());
+    assertEquals(ExpenseCategory.変動費, result.entity().expenseCategory());
+    assertEquals(2L, result.version());
   }
 
   @Test
@@ -95,13 +109,12 @@ class ExpenseAttributeDataSourceTest {
     ExpenseAttribute attribute = createAttribute("通信費", ExpenseCategory.固定費);
     sut.register(attribute);
 
-    ExpenseAttribute staleVersion =
+    ExpenseAttribute modified =
         new ExpenseAttribute(
             attribute.expenseAttributeIdentifier(),
             new ExpenseAttributeName("通信費更新"),
-            ExpenseCategory.固定費,
-            999L);
-    assertThrows(ConcurrentUpdateException.class, () -> sut.update(staleVersion));
+            ExpenseCategory.固定費);
+    assertThrows(ConcurrentUpdateException.class, () -> sut.update(new Revision<>(modified, 999L)));
   }
 
   @Test
