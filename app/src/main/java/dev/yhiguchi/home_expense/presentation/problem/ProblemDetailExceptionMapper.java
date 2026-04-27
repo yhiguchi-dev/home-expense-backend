@@ -10,6 +10,8 @@ import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNo
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import dev.yhiguchi.home_expense.presentation.validation.payload.PreconditionRequired;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Context;
@@ -114,10 +116,16 @@ public class ProblemDetailExceptionMapper {
 
   private RestResponse<ProblemDetail> toResponse(int statusCode, String title, String detail) {
     URI instance = uriInfo.getRequestUri();
-    ProblemDetail problemDetail = ProblemDetail.of(statusCode, title, detail, instance);
+    ProblemDetail problemDetail =
+        ProblemDetail.of(statusCode, title, detail, instance, currentTraceId());
     return RestResponse.ResponseBuilder.create(
             RestResponse.Status.fromStatusCode(statusCode), problemDetail)
         .header("Content-Type", PROBLEM_JSON)
         .build();
+  }
+
+  private static String currentTraceId() {
+    SpanContext ctx = Span.current().getSpanContext();
+    return ctx.isValid() ? ctx.getTraceId() : null;
   }
 }
