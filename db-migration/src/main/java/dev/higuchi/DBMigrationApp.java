@@ -27,7 +27,8 @@ public class DBMigrationApp {
     }
 
     try {
-      Flyway flyway = Flyway.configure().loadDefaultConfigurationFiles().loggers("slf4j").load();
+      Flyway flyway =
+          Flyway.configure().loadDefaultConfigurationFiles().envVars().loggers("slf4j").load();
       for (String cmd : commands) {
         execute(flyway, cmd);
       }
