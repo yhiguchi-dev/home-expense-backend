@@ -5,7 +5,7 @@
 set -euo pipefail
 
 postgres_container_name="${POSTGRES_CONTAINER_NAME:-my_postgres}"
-postgres_version="${POSTGRES_VERSION:-16.13}"
+postgres_version="${POSTGRES_VERSION:-18.3}"
 postgres_admin_user="${POSTGRES_ADMIN_USER:-postgres}"
 postgres_admin_password="${POSTGRES_ADMIN_PASSWORD:-password}"
 postgres_admin_db_name="${POSTGRES_ADMIN_DB_NAME:-postgres}"

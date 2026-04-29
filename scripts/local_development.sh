@@ -8,6 +8,7 @@ postgres_admin_user=postgres
 db_user=expense
 db_password=password
 db_name=expense
+db_schema=expense
 
 cd "$(dirname "$0")"/..
 
@@ -21,6 +22,8 @@ echo "CREATE DATABASE :db_name OWNER :db_user;" | container exec -i "${postgres_
 
 echo "GRANT ALL PRIVILEGES ON DATABASE :db_name TO :db_user;" | container exec -i "${postgres_container_name}" psql -U "${postgres_admin_user}" -v db_user="${db_user}" -v db_name="${db_name}"
 
+echo "CREATE SCHEMA IF NOT EXISTS :schema AUTHORIZATION :owner;" | container exec -i "${postgres_container_name}" psql -U "${db_user}" -d "${db_name}" -v schema="${db_schema}" -v owner="${db_user}"
+
 db_host=$(container inspect "${postgres_container_name}" | jq -r --arg name "${postgres_container_name}" '.[] | select(.configuration.id == $name) | .networks[] | select(.hostname == $name) | .ipv4Address' | sed 's/\/.*//')
 echo "Database Host: ${db_host}"
 
@@ -30,4 +33,5 @@ echo "Database setup completed."
 echo "  Host: ${db_host}"
 echo "  Port: 5432"
 echo "  Database: ${db_name}"
+echo "  Schema: ${db_schema}"
 echo "  User: ${db_user}"
