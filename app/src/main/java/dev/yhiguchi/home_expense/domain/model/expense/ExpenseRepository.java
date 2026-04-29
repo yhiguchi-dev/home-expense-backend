@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.domain.model.expense;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.util.Optional;
 
@@ -9,11 +8,15 @@ public interface ExpenseRepository {
 
   void register(Expense expense);
 
-  Optional<Revision<Expense>> findBy(ExpenseIdentifier expenseIdentifier);
+  Optional<Expense> find(ExpenseIdentifier expenseIdentifier);
+
+  default Expense get(ExpenseIdentifier expenseIdentifier) {
+    return find(expenseIdentifier).orElseThrow(ExpenseNotFoundException::new);
+  }
 
   boolean existsByAttributeIdentifier(ExpenseAttributeIdentifier expenseAttributeIdentifier);
 
-  void update(Revision<Expense> expense);
+  void update(Expense expense, long expectedVersion);
 
   void delete(Expense expense);
 }

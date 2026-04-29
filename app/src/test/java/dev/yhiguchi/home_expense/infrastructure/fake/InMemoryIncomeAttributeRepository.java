@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.infrastructure.fake;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import java.util.LinkedHashMap;
@@ -12,23 +11,25 @@ public class InMemoryIncomeAttributeRepository implements IncomeAttributeReposit
 
   private static final long INITIAL_VERSION = 1L;
 
-  private final Map<String, Revision<IncomeAttribute>> store = new LinkedHashMap<>();
+  private record Stored(IncomeAttribute entity, long version) {}
+
+  private final Map<String, Stored> store = new LinkedHashMap<>();
 
   @Override
   public void register(IncomeAttribute incomeAttribute) {
     store.put(
         incomeAttribute.incomeAttributeIdentifier().value(),
-        new Revision<>(incomeAttribute, INITIAL_VERSION));
+        new Stored(incomeAttribute, INITIAL_VERSION));
   }
 
   @Override
-  public void update(Revision<IncomeAttribute> versioned) {
-    String key = versioned.entity().incomeAttributeIdentifier().value();
-    Revision<IncomeAttribute> current = store.get(key);
-    if (current == null || current.version() != versioned.version()) {
+  public void update(IncomeAttribute incomeAttribute, long expectedVersion) {
+    String key = incomeAttribute.incomeAttributeIdentifier().value();
+    Stored current = store.get(key);
+    if (current == null || current.version() != expectedVersion) {
       throw new ConcurrentUpdateException();
     }
-    store.put(key, new Revision<>(versioned.entity(), current.version() + 1));
+    store.put(key, new Stored(incomeAttribute, current.version() + 1));
   }
 
   @Override
@@ -37,9 +38,8 @@ public class InMemoryIncomeAttributeRepository implements IncomeAttributeReposit
   }
 
   @Override
-  public Optional<Revision<IncomeAttribute>> findBy(
-      IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    return Optional.ofNullable(store.get(incomeAttributeIdentifier.value()));
+  public Optional<IncomeAttribute> find(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    return Optional.ofNullable(store.get(incomeAttributeIdentifier.value())).map(Stored::entity);
   }
 
   @Override
@@ -49,6 +49,15 @@ public class InMemoryIncomeAttributeRepository implements IncomeAttributeReposit
   }
 
   public List<IncomeAttribute> all() {
-    return store.values().stream().map(Revision::entity).toList();
+    return store.values().stream().map(Stored::entity).toList();
+  }
+
+  /** テスト用: 現在保持している version を取得 */
+  public long versionOf(IncomeAttributeIdentifier id) {
+    Stored s = store.get(id.value());
+    if (s == null) {
+      throw new IllegalStateException("not found: " + id.value());
+    }
+    return s.version();
   }
 }

@@ -1,18 +1,14 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ReadOnly;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
 import dev.yhiguchi.home_expense.query.expense.*;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
-import java.sql.Date;
 import java.util.List;
-import javax.sql.DataSource;
 
 @ApplicationScoped
-@Transactional
 public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
 
   private static final String SELECT_BY_CATEGORY =
@@ -33,13 +29,12 @@ public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
 
   private final JdbcOperator jdbc;
 
-  public ExpenseStatisticsDataSource(
-      @io.quarkus.agroal.DataSource("readonly") DataSource dataSource) {
-    this.jdbc = new JdbcOperator(dataSource);
+  public ExpenseStatisticsDataSource(@ReadOnly JdbcOperator jdbc) {
+    this.jdbc = jdbc;
   }
 
   @Override
-  public ExpenseStatistics find(ExpenseStatisticsCriteria criteria) {
+  public ExpenseStatistics search(ExpenseStatisticsCriteria criteria) {
     long incomeTotalAmount = selectIncomeTotalAmount(criteria).orElse(0L);
     List<ExpenseAttributeStatistics> fixedStatistics =
         selectByCategory(ExpenseCategory.固定費, criteria);
@@ -60,10 +55,7 @@ public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
         """;
     return jdbc.queryForOptional(
         sql,
-        ps -> {
-          ps.setDate(1, Date.valueOf(criteria.dateFrom()));
-          ps.setDate(2, Date.valueOf(criteria.dateTo()));
-        },
+        ParameterBinder.of(criteria.dateFrom(), criteria.dateTo()),
         rs -> rs.getObject(1, Long.class));
   }
 
@@ -71,15 +63,9 @@ public class ExpenseStatisticsDataSource implements ExpenseStatisticsQuerier {
       ExpenseCategory category, ExpenseStatisticsCriteria criteria) {
     return jdbc.queryForList(
         SELECT_BY_CATEGORY,
-        ps -> {
-          ps.setString(1, category.name());
-          ps.setDate(2, Date.valueOf(criteria.dateFrom()));
-          ps.setDate(3, Date.valueOf(criteria.dateTo()));
-        },
+        ParameterBinder.of(category.name(), criteria.dateFrom(), criteria.dateTo()),
         rs ->
             new ExpenseAttributeStatistics(
-                new ExpenseAttributeIdentifier(rs.getString("id")),
-                new ExpenseAttributeName(rs.getString("name")),
-                rs.getLong("total_amount")));
+                rs.getString("id"), rs.getString("name"), rs.getLong("total_amount")));
   }
 }

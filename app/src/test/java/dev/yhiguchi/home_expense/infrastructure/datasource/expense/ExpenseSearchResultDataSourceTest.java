@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
@@ -53,7 +54,7 @@ class ExpenseSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     ExpenseSearchCriteria criteria = noFilterCriteria(pagination);
-    ExpenseSearchResult result = sut.find(criteria);
+    ExpenseSearchResult result = sut.search(criteria);
 
     assertEquals(2, result.totalCount());
     assertEquals(2, result.list().size());
@@ -67,10 +68,10 @@ class ExpenseSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     ExpenseSearchCriteria criteria = yearMonthCriteria(pagination, 2026, 4);
-    ExpenseSearchResult result = sut.find(criteria);
+    ExpenseSearchResult result = sut.search(criteria);
 
     assertEquals(1, result.totalCount());
-    assertEquals("4月ランチ", result.list().getFirst().expense().description().value());
+    assertEquals("4月ランチ", result.list().getFirst().description());
   }
 
   @Test
@@ -82,10 +83,10 @@ class ExpenseSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     ExpenseSearchCriteria criteria = categoryCriteria(pagination, ExpenseCategory.固定費);
-    ExpenseSearchResult result = sut.find(criteria);
+    ExpenseSearchResult result = sut.search(criteria);
 
     assertEquals(1, result.totalCount());
-    assertEquals("4月家賃", result.list().getFirst().expense().description().value());
+    assertEquals("4月家賃", result.list().getFirst().description());
   }
 
   @Test
@@ -97,7 +98,7 @@ class ExpenseSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(2));
     ExpenseSearchCriteria criteria = noFilterCriteria(pagination);
-    ExpenseSearchResult result = sut.find(criteria);
+    ExpenseSearchResult result = sut.search(criteria);
 
     assertEquals(5, result.totalCount());
     assertEquals(2, result.list().size());
@@ -107,7 +108,7 @@ class ExpenseSearchResultDataSourceTest {
   void データが存在しない場合は空の結果が返る() {
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     ExpenseSearchCriteria criteria = noFilterCriteria(pagination);
-    ExpenseSearchResult result = sut.find(criteria);
+    ExpenseSearchResult result = sut.search(criteria);
 
     assertEquals(0, result.totalCount());
     assertTrue(result.list().isEmpty());
@@ -122,7 +123,7 @@ class ExpenseSearchResultDataSourceTest {
   }
 
   private ExpenseSearchCriteria categoryCriteria(Pagination pagination, ExpenseCategory category) {
-    return new ExpenseSearchCriteria(pagination, null, null, category, null);
+    return new ExpenseSearchCriteria(pagination, null, null, category.name(), null);
   }
 
   private ExpenseAttribute registerAttribute(String name, ExpenseCategory category) {

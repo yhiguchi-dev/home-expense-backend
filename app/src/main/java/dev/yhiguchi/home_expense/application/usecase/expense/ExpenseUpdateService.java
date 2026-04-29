@@ -1,9 +1,7 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -22,16 +20,9 @@ public class ExpenseUpdateService {
   }
 
   public void update(ExpenseUpdateCommand command) {
-    Revision<Expense> loaded =
-        expenseRepository
-            .findBy(command.expenseIdentifier())
-            .orElseThrow(ExpenseNotFoundException::new);
+    Expense current = expenseRepository.get(command.expenseIdentifier());
     ExpenseAttribute attribute =
-        expenseAttributeRepository
-            .findBy(command.expenseAttributeIdentifier())
-            .map(Revision::entity)
-            .orElseThrow(ExpenseAttributeNotFoundException::new);
-    Expense current = loaded.entity();
+        expenseAttributeRepository.get(command.expenseAttributeIdentifier());
     Expense updated =
         current.updateWith(
             command.description(),
@@ -39,7 +30,7 @@ public class ExpenseUpdateService {
             command.paymentDate(),
             attribute.expenseAttributeIdentifier());
     if (current.hasChanges(updated)) {
-      expenseRepository.update(new Revision<>(updated, command.version()));
+      expenseRepository.update(updated, command.version());
     }
   }
 }

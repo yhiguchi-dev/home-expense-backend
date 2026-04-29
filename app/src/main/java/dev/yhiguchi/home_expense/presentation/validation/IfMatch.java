@@ -13,7 +13,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 @NotNull(payload = PreconditionRequired.class, message = "If-Matchヘッダーは必須です")
-@Pattern(regexp = "^\"\\d+\"$", message = "If-Matchヘッダーの形式が不正です")
+@Pattern(regexp = "^\"\\d{1,18}\"$", message = "If-Matchヘッダーの形式が不正です")
 @Constraint(validatedBy = {})
 @Target(PARAMETER)
 @Retention(RUNTIME)

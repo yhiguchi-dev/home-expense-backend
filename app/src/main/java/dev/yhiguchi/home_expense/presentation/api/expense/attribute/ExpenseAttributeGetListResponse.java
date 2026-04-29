@@ -7,11 +7,12 @@ import java.util.List;
 public record ExpenseAttributeGetListResponse(
     @JsonProperty("expense_attributes") List<ExpenseAttributeGetResponse> list) {
 
-  ExpenseAttributeGetListResponse(ExpenseAttributeSearchResult searchResult) {
-    this(searchResult.list().stream().map(ExpenseAttributeGetResponse::from).toList());
-  }
-
-  ExpenseAttributeGetListResponse() {
-    this(List.of());
+  public static ExpenseAttributeGetListResponse from(
+      ExpenseAttributeSearchResult searchResult, int page) {
+    if (page > searchResult.totalCount()) {
+      return new ExpenseAttributeGetListResponse(List.of());
+    }
+    return new ExpenseAttributeGetListResponse(
+        searchResult.list().stream().map(ExpenseAttributeGetResponse::from).toList());
   }
 }

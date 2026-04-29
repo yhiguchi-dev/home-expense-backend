@@ -1,9 +1,7 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNameUniqueness;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -22,15 +20,11 @@ public class ExpenseAttributeUpdateService {
   }
 
   public void update(ExpenseAttributeUpdateCommand command) {
-    Revision<ExpenseAttribute> loaded =
-        expenseAttributeRepository
-            .findBy(command.expenseAttributeIdentifier())
-            .orElseThrow(ExpenseAttributeNotFoundException::new);
-    ExpenseAttribute current = loaded.entity();
+    ExpenseAttribute current = expenseAttributeRepository.get(command.expenseAttributeIdentifier());
     expenseAttributeNameUniqueness.assertUniqueForUpdate(current, command.expenseAttributeName());
     ExpenseAttribute updated = current.updateWith(command.expenseAttributeName());
     if (current.hasChanges(updated)) {
-      expenseAttributeRepository.update(new Revision<>(updated, command.version()));
+      expenseAttributeRepository.update(updated, command.version());
     }
   }
 }

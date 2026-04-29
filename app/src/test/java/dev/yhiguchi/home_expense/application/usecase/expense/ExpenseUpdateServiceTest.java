@@ -2,8 +2,8 @@ package dev.yhiguchi.home_expense.application.usecase.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.Amount;
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
@@ -47,11 +47,10 @@ class ExpenseUpdateServiceTest {
             new ExpenseAttributeIdentifier("attr-1"),
             1L));
 
-    Revision<Expense> updated =
-        expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
-    assertEquals("ディナー", updated.entity().description().value());
-    assertEquals(2000, updated.entity().amount().value());
-    assertEquals(2L, updated.version());
+    Expense updated = expenseRepository.find(new ExpenseIdentifier("exp-1")).orElseThrow();
+    assertEquals("ディナー", updated.description().value());
+    assertEquals(2000, updated.amount().value());
+    assertEquals(2L, expenseRepository.versionOf(new ExpenseIdentifier("exp-1")));
   }
 
   @Test
@@ -75,10 +74,9 @@ class ExpenseUpdateServiceTest {
             new ExpenseAttributeIdentifier("attr-1"),
             1L));
 
-    Revision<Expense> result =
-        expenseRepository.findBy(new ExpenseIdentifier("exp-1")).orElseThrow();
-    assertSame(existing, result.entity());
-    assertEquals(1L, result.version());
+    Expense result = expenseRepository.find(new ExpenseIdentifier("exp-1")).orElseThrow();
+    assertSame(existing, result);
+    assertEquals(1L, expenseRepository.versionOf(new ExpenseIdentifier("exp-1")));
   }
 
   @Test

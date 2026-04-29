@@ -2,7 +2,6 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
 import io.quarkus.test.junit.QuarkusTest;
@@ -17,6 +16,8 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 class IncomeAttributeDataSourceTest {
+
+  private static final long INITIAL_VERSION = 1L;
 
   @Inject IncomeAttributeDataSource sut;
 
@@ -39,19 +40,16 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("給与");
     sut.register(attribute);
 
-    Revision<IncomeAttribute> result =
-        sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
-    assertEquals(
-        attribute.incomeAttributeIdentifier(), result.entity().incomeAttributeIdentifier());
-    assertEquals("給与", result.entity().incomeAttributeName().value());
-    assertEquals(1L, result.version());
+    IncomeAttribute result = sut.find(attribute.incomeAttributeIdentifier()).orElseThrow();
+    assertEquals(attribute.incomeAttributeIdentifier(), result.incomeAttributeIdentifier());
+    assertEquals("給与", result.incomeAttributeName().value());
   }
 
   @Test
   void 存在しないIDで取得すると空のOptionalを返す() {
     IncomeAttributeIdentifier unknownId =
         new IncomeAttributeIdentifier(UUID.randomUUID().toString());
-    assertTrue(sut.findBy(unknownId).isEmpty());
+    assertTrue(sut.find(unknownId).isEmpty());
   }
 
   @Test
@@ -72,17 +70,13 @@ class IncomeAttributeDataSourceTest {
     IncomeAttribute attribute = createAttribute("副業");
     sut.register(attribute);
 
-    Revision<IncomeAttribute> fetched =
-        sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
+    IncomeAttribute fetched = sut.find(attribute.incomeAttributeIdentifier()).orElseThrow();
     IncomeAttribute updated =
-        new IncomeAttribute(
-            fetched.entity().incomeAttributeIdentifier(), new IncomeAttributeName("副業収入"));
-    sut.update(new Revision<>(updated, fetched.version()));
+        new IncomeAttribute(fetched.incomeAttributeIdentifier(), new IncomeAttributeName("副業収入"));
+    sut.update(updated, INITIAL_VERSION);
 
-    Revision<IncomeAttribute> result =
-        sut.findBy(attribute.incomeAttributeIdentifier()).orElseThrow();
-    assertEquals("副業収入", result.entity().incomeAttributeName().value());
-    assertEquals(2L, result.version());
+    IncomeAttribute result = sut.find(attribute.incomeAttributeIdentifier()).orElseThrow();
+    assertEquals("副業収入", result.incomeAttributeName().value());
   }
 
   @Test
@@ -92,7 +86,7 @@ class IncomeAttributeDataSourceTest {
 
     IncomeAttribute modified =
         new IncomeAttribute(attribute.incomeAttributeIdentifier(), new IncomeAttributeName("配当更新"));
-    assertThrows(ConcurrentUpdateException.class, () -> sut.update(new Revision<>(modified, 999L)));
+    assertThrows(ConcurrentUpdateException.class, () -> sut.update(modified, 999L));
   }
 
   @Test
@@ -101,7 +95,7 @@ class IncomeAttributeDataSourceTest {
     sut.register(attribute);
 
     sut.delete(attribute);
-    assertTrue(sut.findBy(attribute.incomeAttributeIdentifier()).isEmpty());
+    assertTrue(sut.find(attribute.incomeAttributeIdentifier()).isEmpty());
   }
 
   private IncomeAttribute createAttribute(String name) {

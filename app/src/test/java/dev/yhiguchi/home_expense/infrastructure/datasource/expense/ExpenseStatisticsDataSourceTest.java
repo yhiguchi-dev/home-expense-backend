@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
@@ -70,7 +71,7 @@ class ExpenseStatisticsDataSourceTest {
     registerIncome("4月給与", 300000, "2026-04-25", incomeAttr);
 
     ExpenseStatisticsCriteria criteria = new ExpenseStatisticsCriteria(2026, 4);
-    ExpenseStatistics result = sut.find(criteria);
+    ExpenseStatistics result = sut.search(criteria);
 
     assertEquals(300000L, result.incomeTotalAmount());
     assertEquals(80000L, result.fixedDetail().totalAmount());
@@ -82,7 +83,7 @@ class ExpenseStatisticsDataSourceTest {
   @Test
   void 対象期間にデータがない場合はゼロが返る() {
     ExpenseStatisticsCriteria criteria = new ExpenseStatisticsCriteria(2025, 1);
-    ExpenseStatistics result = sut.find(criteria);
+    ExpenseStatistics result = sut.search(criteria);
 
     assertEquals(0L, result.incomeTotalAmount());
     assertTrue(result.fixedDetail().list().isEmpty());
@@ -96,7 +97,7 @@ class ExpenseStatisticsDataSourceTest {
     registerExpense("5月ランチ", 1200, "2026-05-10", attr);
 
     ExpenseStatisticsCriteria criteria = new ExpenseStatisticsCriteria(2026, 4);
-    ExpenseStatistics result = sut.find(criteria);
+    ExpenseStatistics result = sut.search(criteria);
 
     assertEquals(1000L, result.variableDetail().totalAmount());
   }
@@ -130,7 +131,7 @@ class ExpenseStatisticsDataSourceTest {
     Income income =
         new Income(
             new IncomeIdentifier(UUID.randomUUID().toString()),
-            new dev.yhiguchi.home_expense.domain.model.income.Description(description),
+            new dev.yhiguchi.home_expense.domain.model.Description(description),
             new Amount(amount),
             new ReceiveDate(LocalDate.parse(receiveDate)),
             attribute.incomeAttributeIdentifier());

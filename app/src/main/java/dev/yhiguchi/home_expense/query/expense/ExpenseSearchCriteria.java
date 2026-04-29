@@ -1,7 +1,5 @@
 package dev.yhiguchi.home_expense.query.expense;
 
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import dev.yhiguchi.home_expense.query.Pagination;
 import java.time.LocalDate;
 import java.time.Year;
@@ -12,15 +10,15 @@ public class ExpenseSearchCriteria {
   Pagination pagination;
   Integer year;
   Integer month;
-  ExpenseCategory expenseCategory;
-  ExpenseAttributeIdentifier expenseAttributeIdentifier;
+  String expenseCategory;
+  String expenseAttributeIdentifier;
 
   public ExpenseSearchCriteria(
       Pagination pagination,
       Integer year,
       Integer month,
-      ExpenseCategory expenseCategory,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+      String expenseCategory,
+      String expenseAttributeIdentifier) {
     this.pagination = pagination;
     this.year = year;
     this.month = month;
@@ -29,14 +27,8 @@ public class ExpenseSearchCriteria {
   }
 
   public ExpenseSearchCriteria(
-      Pagination pagination,
-      Integer year,
-      Integer month,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    this.pagination = pagination;
-    this.year = year;
-    this.month = month;
-    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
+      Pagination pagination, Integer year, Integer month, String expenseAttributeIdentifier) {
+    this(pagination, year, month, null, expenseAttributeIdentifier);
   }
 
   public Pagination pagination() {
@@ -65,7 +57,7 @@ public class ExpenseSearchCriteria {
     return Objects.nonNull(expenseCategory);
   }
 
-  public ExpenseCategory getExpenseCategory() {
+  public String expenseCategory() {
     return expenseCategory;
   }
 
@@ -73,7 +65,7 @@ public class ExpenseSearchCriteria {
     return Objects.nonNull(expenseAttributeIdentifier);
   }
 
-  public String getExpenseAttributeIdentifier() {
-    return expenseAttributeIdentifier.value();
+  public String expenseAttributeIdentifier() {
+    return expenseAttributeIdentifier;
   }
 }

@@ -14,9 +14,10 @@ public class ExpenseAttribute {
       ExpenseAttributeIdentifier expenseAttributeIdentifier,
       ExpenseAttributeName expenseAttributeName,
       ExpenseCategory expenseCategory) {
-    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
-    this.expenseAttributeName = expenseAttributeName;
-    this.expenseCategory = expenseCategory;
+    this.expenseAttributeIdentifier =
+        Objects.requireNonNull(expenseAttributeIdentifier, "経費属性識別子は必須です");
+    this.expenseAttributeName = Objects.requireNonNull(expenseAttributeName, "経費属性名は必須です");
+    this.expenseCategory = Objects.requireNonNull(expenseCategory, "経費分類は必須です");
   }
 
   public static ExpenseAttribute create(
@@ -26,18 +27,15 @@ public class ExpenseAttribute {
     return new ExpenseAttribute(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
   }
 
-  /** 名前のみ更新する。category は登録後に変更不可。 */
   public ExpenseAttribute updateWith(ExpenseAttributeName expenseAttributeName) {
     return new ExpenseAttribute(
         this.expenseAttributeIdentifier, expenseAttributeName, this.expenseCategory);
   }
 
-  /** 属性値に変更があるか判定する */
   public boolean hasChanges(ExpenseAttribute other) {
     return !Objects.equals(expenseAttributeName, other.expenseAttributeName);
   }
 
-  /** 指定した名前が現在の名前と同一か判定する */
   public boolean hasSameName(ExpenseAttributeName expenseAttributeName) {
     return Objects.equals(this.expenseAttributeName, expenseAttributeName);
   }

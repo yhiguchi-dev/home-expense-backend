@@ -210,6 +210,23 @@ class ExpenseApiTest {
   }
 
   @Test
+  void POST_amountが上限を超える場合バリデーションエラー() {
+    given()
+        .contentType(ContentType.JSON)
+        .body(
+            """
+            {"description": "ランチ", "amount": 1000000001, "payment_date": "2026-04-10", "attribute_id": "00000000-0000-0000-0000-000000000000"}
+            """)
+        .when()
+        .post("/v1/expenses")
+        .then()
+        .statusCode(400)
+        .contentType("application/problem+json")
+        .body("status", equalTo(400))
+        .body("detail", containsString("amountは1,000,000,000以下で入力してください"));
+  }
+
+  @Test
   void POST_attribute_idがUUID形式でない場合バリデーションエラー() {
     given()
         .contentType(ContentType.JSON)

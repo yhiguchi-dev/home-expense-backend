@@ -2,13 +2,14 @@ package dev.yhiguchi.home_expense.presentation.api.expense;
 
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseDeletionService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRegistrationService;
-import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseUpdateService;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
 import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
+import dev.yhiguchi.home_expense.presentation.validation.PageNumber;
+import dev.yhiguchi.home_expense.presentation.validation.PerPageSize;
 import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.expense.ExpenseCriteriaCreator;
 import dev.yhiguchi.home_expense.query.expense.ExpenseDetail;
@@ -29,22 +30,19 @@ import java.net.URI;
 @Path("/v1/expenses")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ExpenseApi implements LinkHeaderCreatable {
+public class ExpenseApi {
 
   ExpenseRegistrationService expenseRegistrationService;
-  ExpenseRetrievalService expenseRetrievalService;
   ExpenseSearchResultQuerier expenseSearchResultQuerier;
   ExpenseUpdateService expenseUpdateService;
   ExpenseDeletionService expenseDeletionService;
 
   public ExpenseApi(
       ExpenseRegistrationService expenseRegistrationService,
-      ExpenseRetrievalService expenseRetrievalService,
       ExpenseSearchResultQuerier expenseSearchResultQuerier,
       ExpenseUpdateService expenseUpdateService,
       ExpenseDeletionService expenseDeletionService) {
     this.expenseRegistrationService = expenseRegistrationService;
-    this.expenseRetrievalService = expenseRetrievalService;
     this.expenseSearchResultQuerier = expenseSearchResultQuerier;
     this.expenseUpdateService = expenseUpdateService;
     this.expenseDeletionService = expenseDeletionService;
@@ -80,14 +78,9 @@ public class ExpenseApi implements LinkHeaderCreatable {
   @GET
   @RunOnVirtualThread
   public Response get(
-      @QueryParam("page") @DefaultValue("1") @Min(value = 1, message = "pageは1以上を指定してください")
-          Integer page,
-      @QueryParam("per_page")
-          @DefaultValue("20")
-          @Min(value = 1, message = "per_pageは1以上を指定してください")
-          @Max(value = 100, message = "per_pageは100以下を指定してください")
-          Integer perPage,
-      @QueryParam("year") @Min(value = 1, message = "yearは1以上を指定してください") Integer year,
+      @QueryParam("page") @DefaultValue("1") @PageNumber Integer page,
+      @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
+      @QueryParam("year") @Min(value = 1, message = "yearは{value}以上を指定してください") Integer year,
       @QueryParam("month")
           @Min(value = 1, message = "monthは1〜12を指定してください")
           @Max(value = 12, message = "monthは1〜12を指定してください")
@@ -97,22 +90,21 @@ public class ExpenseApi implements LinkHeaderCreatable {
       @Context UriInfo uriInfo) {
     ExpenseSearchCriteria criteria =
         ExpenseCriteriaCreator.create(page, perPage, year, month, category, attributeId);
-    ExpenseSearchResult expenseSearchResult = expenseSearchResultQuerier.find(criteria);
-    ExpenseGetListResponse response =
-        page <= expenseSearchResult.totalCount()
-            ? new ExpenseGetListResponse(expenseSearchResult)
-            : new ExpenseGetListResponse();
-    Response.ResponseBuilder responseBuilder = Response.ok(response);
-    responseBuilder.header(
-        "Link", create(uriInfo, criteria.pagination(), expenseSearchResult.totalCount()));
-    return responseBuilder.build();
+    ExpenseSearchResult expenseSearchResult = expenseSearchResultQuerier.search(criteria);
+    ExpenseGetListResponse response = ExpenseGetListResponse.from(expenseSearchResult, page);
+    return Response.ok(response)
+        .header(
+            "Link",
+            LinkHeaderCreatable.create(
+                uriInfo, criteria.pagination(), expenseSearchResult.totalCount()))
+        .build();
   }
 
   @GET
   @Path("{id}")
   @RunOnVirtualThread
   public Response get(@PathParam("id") @UuidFormat String id) {
-    ExpenseDetail detail = expenseRetrievalService.get(new ExpenseIdentifier(id));
+    ExpenseDetail detail = expenseSearchResultQuerier.get(new ExpenseIdentifier(id));
     ExpenseGetResponse response = ExpenseGetResponse.from(detail);
     return Response.ok(response).tag(String.valueOf(detail.version())).build();
   }

@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -108,6 +109,24 @@ public class ProblemDetailExceptionMapper {
   public RestResponse<ProblemDetail> mapDataAccessException(DataAccessException e) {
     LOG.error("データアクセスエラー", e);
     return toResponse(Response.Status.INTERNAL_SERVER_ERROR, "データアクセスエラーが発生しました");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<ProblemDetail> mapIllegalArgumentException(IllegalArgumentException e) {
+    LOG.error("ドメイン不変条件違反がAPI境界を越えて到達しました（入力検証漏れの可能性）", e);
+    return toResponse(Response.Status.INTERNAL_SERVER_ERROR, "サーバ内部エラーが発生しました");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<ProblemDetail> mapNullPointerException(NullPointerException e) {
+    LOG.error("必須値の欠落がAPI境界を越えて到達しました（入力検証漏れの可能性）", e);
+    return toResponse(Response.Status.INTERNAL_SERVER_ERROR, "サーバ内部エラーが発生しました");
+  }
+
+  @ServerExceptionMapper
+  public RestResponse<ProblemDetail> mapNoSuchElementException(NoSuchElementException e) {
+    LOG.error("ドメイン語彙外の値がAPI境界を越えて到達しました（入力検証漏れの可能性）", e);
+    return toResponse(Response.Status.INTERNAL_SERVER_ERROR, "サーバ内部エラーが発生しました");
   }
 
   private RestResponse<ProblemDetail> toResponse(Response.Status status, String detail) {

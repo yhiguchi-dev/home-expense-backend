@@ -1,6 +1,7 @@
 package dev.yhiguchi.home_expense.domain.model.expense;
 
 import dev.yhiguchi.home_expense.domain.model.Amount;
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
 import java.util.Objects;
 import java.util.UUID;
@@ -23,11 +24,12 @@ public class Expense {
       Amount amount,
       PaymentDate paymentDate,
       ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    this.expenseIdentifier = expenseIdentifier;
-    this.description = description;
-    this.amount = amount;
-    this.paymentDate = paymentDate;
-    this.expenseAttributeIdentifier = expenseAttributeIdentifier;
+    this.expenseIdentifier = Objects.requireNonNull(expenseIdentifier, "経費識別子は必須です");
+    this.description = Objects.requireNonNull(description, "説明は必須です");
+    this.amount = Objects.requireNonNull(amount, "金額は必須です");
+    this.paymentDate = Objects.requireNonNull(paymentDate, "支払日は必須です");
+    this.expenseAttributeIdentifier =
+        Objects.requireNonNull(expenseAttributeIdentifier, "経費属性識別子は必須です");
   }
 
   public static Expense create(
@@ -48,7 +50,6 @@ public class Expense {
         this.expenseIdentifier, description, amount, paymentDate, expenseAttributeIdentifier);
   }
 
-  /** 属性値に変更があるか判定する */
   public boolean hasChanges(Expense other) {
     return !Objects.equals(description, other.description)
         || !Objects.equals(amount, other.amount)

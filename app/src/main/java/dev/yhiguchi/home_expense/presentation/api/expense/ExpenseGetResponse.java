@@ -13,11 +13,11 @@ public record ExpenseGetResponse(
 
   static ExpenseGetResponse from(ExpenseDetail detail) {
     return new ExpenseGetResponse(
-        detail.expense().expenseIdentifier().value(),
-        detail.expense().description().value(),
-        detail.expense().amount().value(),
-        detail.expense().paymentDate().asString(),
-        detail.expense().expenseAttributeIdentifier().value(),
-        detail.attribute().expenseCategory().name());
+        detail.id(),
+        detail.description(),
+        detail.amount(),
+        detail.paymentDate().toString(),
+        detail.attributeId(),
+        detail.category());
   }
 }

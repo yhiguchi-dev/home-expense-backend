@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record IncomeAttributePostRequest(
     @NotBlank(message = "nameは必須入力です")
-        @Size(max = 512, message = "nameは512文字以内で入力してください")
+        @Size(max = IncomeAttributeName.MAX_LENGTH, message = "nameは{max}文字以内で入力してください")
         @JsonProperty("name")
         String name) {
 

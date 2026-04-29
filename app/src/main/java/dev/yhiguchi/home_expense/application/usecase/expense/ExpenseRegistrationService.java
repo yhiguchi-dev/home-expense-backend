@@ -1,9 +1,7 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -23,10 +21,7 @@ public class ExpenseRegistrationService {
 
   public ExpenseIdentifier register(ExpenseRegistrationCommand command) {
     ExpenseAttribute attribute =
-        expenseAttributeRepository
-            .findBy(command.expenseAttributeIdentifier())
-            .map(Revision::entity)
-            .orElseThrow(ExpenseAttributeNotFoundException::new);
+        expenseAttributeRepository.get(command.expenseAttributeIdentifier());
     Expense expense =
         Expense.create(
             command.description(),

@@ -3,7 +3,7 @@ package dev.yhiguchi.home_expense.presentation.api.income;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeUpdateCommand;
 import dev.yhiguchi.home_expense.domain.model.Amount;
-import dev.yhiguchi.home_expense.domain.model.income.Description;
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.ReceiveDate;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
@@ -13,11 +13,14 @@ import java.time.LocalDate;
 
 public record IncomePutRequest(
     @NotBlank(message = "descriptionは必須入力です")
-        @Size(max = 512, message = "descriptionは512文字以内で入力してください")
+        @Size(max = Description.MAX_LENGTH, message = "descriptionは{max}文字以内で入力してください")
         @JsonProperty("description")
         String description,
     @NotNull(message = "amountは必須入力です")
         @Positive(message = "amountは正の値でなければなりません")
+        @Max(
+            value = Amount.MAX_VALUE,
+            message = "amountは${formatter.format('%,d', value)}以下で入力してください")
         @JsonProperty("amount")
         Integer amount,
     @NotBlank(message = "receive_dateは必須入力です")

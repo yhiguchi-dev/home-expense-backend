@@ -2,8 +2,8 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.Amount;
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeAttributeRepository;
@@ -41,10 +41,10 @@ class IncomeUpdateServiceTest {
             new IncomeAttributeIdentifier("attr-1"),
             1L));
 
-    Revision<Income> updated = incomeRepository.findBy(new IncomeIdentifier("inc-1")).orElseThrow();
-    assertEquals("5月給与", updated.entity().description().value());
-    assertEquals(310000, updated.entity().amount().value());
-    assertEquals(2L, updated.version());
+    Income updated = incomeRepository.find(new IncomeIdentifier("inc-1")).orElseThrow();
+    assertEquals("5月給与", updated.description().value());
+    assertEquals(310000, updated.amount().value());
+    assertEquals(2L, incomeRepository.versionOf(new IncomeIdentifier("inc-1")));
   }
 
   @Test
@@ -68,9 +68,9 @@ class IncomeUpdateServiceTest {
             new IncomeAttributeIdentifier("attr-1"),
             1L));
 
-    Revision<Income> result = incomeRepository.findBy(new IncomeIdentifier("inc-1")).orElseThrow();
-    assertSame(existing, result.entity());
-    assertEquals(1L, result.version());
+    Income result = incomeRepository.find(new IncomeIdentifier("inc-1")).orElseThrow();
+    assertSame(existing, result);
+    assertEquals(1L, incomeRepository.versionOf(new IncomeIdentifier("inc-1")));
   }
 
   @Test

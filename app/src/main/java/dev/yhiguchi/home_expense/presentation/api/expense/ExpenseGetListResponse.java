@@ -6,11 +6,11 @@ import java.util.List;
 
 public record ExpenseGetListResponse(@JsonProperty("expenses") List<ExpenseGetResponse> list) {
 
-  ExpenseGetListResponse(ExpenseSearchResult searchResult) {
-    this(searchResult.list().stream().map(ExpenseGetResponse::from).toList());
-  }
-
-  ExpenseGetListResponse() {
-    this(List.of());
+  public static ExpenseGetListResponse from(ExpenseSearchResult searchResult, int page) {
+    if (page > searchResult.totalCount()) {
+      return new ExpenseGetListResponse(List.of());
+    }
+    return new ExpenseGetListResponse(
+        searchResult.list().stream().map(ExpenseGetResponse::from).toList());
   }
 }

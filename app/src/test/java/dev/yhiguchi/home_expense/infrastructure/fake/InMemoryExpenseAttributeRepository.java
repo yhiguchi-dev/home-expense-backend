@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.infrastructure.fake;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
@@ -13,19 +12,20 @@ public class InMemoryExpenseAttributeRepository implements ExpenseAttributeRepos
 
   private static final long INITIAL_VERSION = 1L;
 
-  private final Map<String, Revision<ExpenseAttribute>> store = new LinkedHashMap<>();
+  private record Stored(ExpenseAttribute entity, long version) {}
+
+  private final Map<String, Stored> store = new LinkedHashMap<>();
 
   @Override
   public void register(ExpenseAttribute expenseAttribute) {
     store.put(
         expenseAttribute.expenseAttributeIdentifier().value(),
-        new Revision<>(expenseAttribute, INITIAL_VERSION));
+        new Stored(expenseAttribute, INITIAL_VERSION));
   }
 
   @Override
-  public Optional<Revision<ExpenseAttribute>> findBy(
-      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    return Optional.ofNullable(store.get(expenseAttributeIdentifier.value()));
+  public Optional<ExpenseAttribute> find(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    return Optional.ofNullable(store.get(expenseAttributeIdentifier.value())).map(Stored::entity);
   }
 
   @Override
@@ -39,13 +39,13 @@ public class InMemoryExpenseAttributeRepository implements ExpenseAttributeRepos
   }
 
   @Override
-  public void update(Revision<ExpenseAttribute> versioned) {
-    String key = versioned.entity().expenseAttributeIdentifier().value();
-    Revision<ExpenseAttribute> current = store.get(key);
-    if (current == null || current.version() != versioned.version()) {
+  public void update(ExpenseAttribute expenseAttribute, long expectedVersion) {
+    String key = expenseAttribute.expenseAttributeIdentifier().value();
+    Stored current = store.get(key);
+    if (current == null || current.version() != expectedVersion) {
       throw new ConcurrentUpdateException();
     }
-    store.put(key, new Revision<>(versioned.entity(), current.version() + 1));
+    store.put(key, new Stored(expenseAttribute, current.version() + 1));
   }
 
   @Override
@@ -54,6 +54,15 @@ public class InMemoryExpenseAttributeRepository implements ExpenseAttributeRepos
   }
 
   public List<ExpenseAttribute> all() {
-    return store.values().stream().map(Revision::entity).toList();
+    return store.values().stream().map(Stored::entity).toList();
+  }
+
+  /** テスト用: 現在保持している version を取得 */
+  public long versionOf(ExpenseAttributeIdentifier id) {
+    Stored s = store.get(id.value());
+    if (s == null) {
+      throw new IllegalStateException("not found: " + id.value());
+    }
+    return s.version();
   }
 }

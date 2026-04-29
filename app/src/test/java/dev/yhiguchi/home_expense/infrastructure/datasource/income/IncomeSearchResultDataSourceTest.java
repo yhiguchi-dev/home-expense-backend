@@ -2,6 +2,7 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
@@ -53,7 +54,7 @@ class IncomeSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, null);
-    IncomeSearchResult result = sut.find(criteria);
+    IncomeSearchResult result = sut.search(criteria);
 
     assertEquals(2, result.totalCount());
     assertEquals(2, result.list().size());
@@ -67,10 +68,10 @@ class IncomeSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, 2026);
-    IncomeSearchResult result = sut.find(criteria);
+    IncomeSearchResult result = sut.search(criteria);
 
     assertEquals(1, result.totalCount());
-    assertEquals("2026年給与", result.list().getFirst().description().value());
+    assertEquals("2026年給与", result.list().getFirst().description());
   }
 
   @Test
@@ -82,7 +83,7 @@ class IncomeSearchResultDataSourceTest {
 
     Pagination pagination = new Pagination(new Page(1), new PerPage(2));
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, null);
-    IncomeSearchResult result = sut.find(criteria);
+    IncomeSearchResult result = sut.search(criteria);
 
     assertEquals(5, result.totalCount());
     assertEquals(2, result.list().size());
@@ -92,7 +93,7 @@ class IncomeSearchResultDataSourceTest {
   void データが存在しない場合は空の結果が返る() {
     Pagination pagination = new Pagination(new Page(1), new PerPage(10));
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, null);
-    IncomeSearchResult result = sut.find(criteria);
+    IncomeSearchResult result = sut.search(criteria);
 
     assertEquals(0, result.totalCount());
     assertTrue(result.list().isEmpty());

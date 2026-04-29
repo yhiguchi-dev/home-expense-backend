@@ -1,9 +1,7 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.Expense;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.expense.ExpenseRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -19,11 +17,7 @@ public class ExpenseDeletionService {
   }
 
   public void delete(ExpenseIdentifier expenseIdentifier) {
-    Expense expense =
-        expenseRepository
-            .findBy(expenseIdentifier)
-            .map(Revision::entity)
-            .orElseThrow(ExpenseNotFoundException::new);
+    Expense expense = expenseRepository.get(expenseIdentifier);
     expenseRepository.delete(expense);
   }
 }

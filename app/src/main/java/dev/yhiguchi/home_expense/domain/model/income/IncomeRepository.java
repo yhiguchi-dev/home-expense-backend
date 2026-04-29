@@ -1,6 +1,5 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import java.util.Optional;
 
@@ -9,11 +8,15 @@ public interface IncomeRepository {
 
   void register(Income income);
 
-  void update(Revision<Income> income);
+  Optional<Income> find(IncomeIdentifier incomeIdentifier);
 
-  void delete(Income income);
-
-  Optional<Revision<Income>> findBy(IncomeIdentifier incomeIdentifier);
+  default Income get(IncomeIdentifier incomeIdentifier) {
+    return find(incomeIdentifier).orElseThrow(IncomeNotFoundException::new);
+  }
 
   boolean existsByAttributeIdentifier(IncomeAttributeIdentifier incomeAttributeIdentifier);
+
+  void update(Income income, long expectedVersion);
+
+  void delete(Income income);
 }

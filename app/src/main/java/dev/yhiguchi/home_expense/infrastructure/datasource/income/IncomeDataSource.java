@@ -1,17 +1,16 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income;
 
 import dev.yhiguchi.home_expense.domain.model.Amount;
-import dev.yhiguchi.home_expense.domain.model.Revision;
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
-import javax.sql.DataSource;
 
 @ApplicationScoped
 public class IncomeDataSource implements IncomeRepository {
@@ -20,60 +19,57 @@ public class IncomeDataSource implements IncomeRepository {
 
   private final JdbcOperator jdbc;
 
-  public IncomeDataSource(DataSource dataSource) {
-    this.jdbc = new JdbcOperator(dataSource);
+  public IncomeDataSource(JdbcOperator jdbc) {
+    this.jdbc = jdbc;
   }
 
   @Override
   public void register(Income income) {
     jdbc.update(
         "INSERT INTO expense.income(id, attribute_id, description, amount, receive_date, version) VALUES (?, ?, ?, ?, ?, ?)",
-        ps -> {
-          ps.setString(1, income.incomeIdentifier().value());
-          ps.setString(2, income.incomeAttributeIdentifier().value());
-          ps.setString(3, income.description().value());
-          ps.setInt(4, income.amount().value());
-          ps.setDate(5, Date.valueOf(income.receiveDate().asString()));
-          ps.setLong(6, INITIAL_VERSION);
-        });
+        ParameterBinder.of(
+            income.incomeIdentifier().value(),
+            income.incomeAttributeIdentifier().value(),
+            income.description().value(),
+            income.amount().value(),
+            income.receiveDate().value(),
+            INITIAL_VERSION));
   }
 
   @Override
-  public void update(Revision<Income> versioned) {
-    Income income = versioned.entity();
+  public void update(Income income, long expectedVersion) {
     jdbc.updateWithOptimisticLock(
         """
         UPDATE expense.income
         SET attribute_id = ?, description = ?, amount = ?, receive_date = ?, version = version + 1
         WHERE id = ? AND version = ?
         """,
-        ps -> {
-          ps.setString(1, income.incomeAttributeIdentifier().value());
-          ps.setString(2, income.description().value());
-          ps.setInt(3, income.amount().value());
-          ps.setDate(4, Date.valueOf(income.receiveDate().asString()));
-          ps.setString(5, income.incomeIdentifier().value());
-          ps.setLong(6, versioned.version());
-        });
+        ParameterBinder.of(
+            income.incomeAttributeIdentifier().value(),
+            income.description().value(),
+            income.amount().value(),
+            income.receiveDate().value(),
+            income.incomeIdentifier().value(),
+            expectedVersion));
   }
 
   @Override
   public void delete(Income income) {
     jdbc.update(
         "DELETE FROM expense.income WHERE income.id = ?",
-        ps -> ps.setString(1, income.incomeIdentifier().value()));
+        ParameterBinder.of(income.incomeIdentifier().value()));
   }
 
   @Override
-  public Optional<Revision<Income>> findBy(IncomeIdentifier incomeIdentifier) {
+  public Optional<Income> find(IncomeIdentifier incomeIdentifier) {
     return jdbc.queryForOptional(
         """
-        SELECT id, attribute_id, description, amount, receive_date, version
+        SELECT id, attribute_id, description, amount, receive_date
         FROM expense.income
         WHERE id = ?
         """,
-        ps -> ps.setString(1, incomeIdentifier.value()),
-        IncomeDataSource::mapRevisionIncome);
+        ParameterBinder.of(incomeIdentifier.value()),
+        IncomeDataSource::mapIncome);
   }
 
   @Override
@@ -85,7 +81,7 @@ public class IncomeDataSource implements IncomeRepository {
         FROM (VALUES (1)) AS t(x)
         """;
     return jdbc.queryForOptional(
-            sql, ps -> ps.setString(1, incomeAttributeIdentifier.value()), rs -> rs.getBoolean(1))
+            sql, ParameterBinder.of(incomeAttributeIdentifier.value()), rs -> rs.getBoolean(1))
         .orElse(false);
   }
 
@@ -96,9 +92,5 @@ public class IncomeDataSource implements IncomeRepository {
         new Amount(rs.getInt("amount")),
         new ReceiveDate(rs.getObject("receive_date", LocalDate.class)),
         new IncomeAttributeIdentifier(rs.getString("attribute_id")));
-  }
-
-  static Revision<Income> mapRevisionIncome(ResultSet rs) throws SQLException {
-    return new Revision<>(mapIncome(rs), rs.getLong("version"));
   }
 }

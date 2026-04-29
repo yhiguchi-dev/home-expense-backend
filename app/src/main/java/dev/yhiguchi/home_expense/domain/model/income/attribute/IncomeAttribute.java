@@ -12,8 +12,9 @@ public class IncomeAttribute {
   public IncomeAttribute(
       IncomeAttributeIdentifier incomeAttributeIdentifier,
       IncomeAttributeName incomeAttributeName) {
-    this.incomeAttributeIdentifier = incomeAttributeIdentifier;
-    this.incomeAttributeName = incomeAttributeName;
+    this.incomeAttributeIdentifier =
+        Objects.requireNonNull(incomeAttributeIdentifier, "収入属性識別子は必須です");
+    this.incomeAttributeName = Objects.requireNonNull(incomeAttributeName, "収入属性名は必須です");
   }
 
   public static IncomeAttribute create(IncomeAttributeName incomeAttributeName) {
@@ -26,12 +27,10 @@ public class IncomeAttribute {
     return new IncomeAttribute(this.incomeAttributeIdentifier, incomeAttributeName);
   }
 
-  /** 属性値に変更があるか判定する */
   public boolean hasChanges(IncomeAttribute other) {
     return !Objects.equals(incomeAttributeName, other.incomeAttributeName);
   }
 
-  /** 指定した名前が現在の名前と同一か判定する */
   public boolean hasSameName(IncomeAttributeName incomeAttributeName) {
     return Objects.equals(this.incomeAttributeName, incomeAttributeName);
   }

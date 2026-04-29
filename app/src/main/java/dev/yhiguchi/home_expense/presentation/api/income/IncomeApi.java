@@ -2,24 +2,23 @@ package dev.yhiguchi.home_expense.presentation.api.income;
 
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeDeletionService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeRegistrationService;
-import dev.yhiguchi.home_expense.application.usecase.income.IncomeRetrievalService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeUpdateService;
-import dev.yhiguchi.home_expense.domain.model.Revision;
-import dev.yhiguchi.home_expense.domain.model.income.Income;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeIdentifier;
 import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
+import dev.yhiguchi.home_expense.presentation.validation.PageNumber;
+import dev.yhiguchi.home_expense.presentation.validation.PerPageSize;
 import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
 import dev.yhiguchi.home_expense.query.PerPage;
+import dev.yhiguchi.home_expense.query.income.IncomeDetail;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResultQuerier;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -31,24 +30,21 @@ import java.net.URI;
 @Path("/v1/incomes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class IncomeApi implements LinkHeaderCreatable {
+public class IncomeApi {
 
   IncomeRegistrationService incomeRegistrationService;
   IncomeUpdateService incomeUpdateService;
   IncomeDeletionService incomeDeletionService;
-  IncomeRetrievalService incomeRetrievalService;
   IncomeSearchResultQuerier incomeSearchResultQuerier;
 
   public IncomeApi(
       IncomeRegistrationService incomeRegistrationService,
       IncomeUpdateService incomeUpdateService,
       IncomeDeletionService incomeDeletionService,
-      IncomeRetrievalService incomeRetrievalService,
       IncomeSearchResultQuerier incomeSearchResultQuerier) {
     this.incomeRegistrationService = incomeRegistrationService;
     this.incomeUpdateService = incomeUpdateService;
     this.incomeDeletionService = incomeDeletionService;
-    this.incomeRetrievalService = incomeRetrievalService;
     this.incomeSearchResultQuerier = incomeSearchResultQuerier;
   }
 
@@ -82,34 +78,28 @@ public class IncomeApi implements LinkHeaderCreatable {
   @GET
   @RunOnVirtualThread
   public Response get(
-      @QueryParam("page") @DefaultValue("1") @Min(value = 1, message = "pageは1以上を指定してください")
-          Integer page,
-      @QueryParam("per_page")
-          @DefaultValue("20")
-          @Min(value = 1, message = "per_pageは1以上を指定してください")
-          @Max(value = 100, message = "per_pageは100以下を指定してください")
-          Integer perPage,
-      @QueryParam("year") @Min(value = 1, message = "yearは1以上を指定してください") Integer year,
+      @QueryParam("page") @DefaultValue("1") @PageNumber Integer page,
+      @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
+      @QueryParam("year") @Min(value = 1, message = "yearは{value}以上を指定してください") Integer year,
       @Context UriInfo uriInfo) {
     Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, year);
-    IncomeSearchResult incomeSearchResult = incomeSearchResultQuerier.find(criteria);
-    IncomeGetListResponse response =
-        page <= incomeSearchResult.totalCount()
-            ? new IncomeGetListResponse(incomeSearchResult)
-            : new IncomeGetListResponse();
-    Response.ResponseBuilder responseBuilder = Response.ok(response);
-    responseBuilder.header(
-        "Link", create(uriInfo, criteria.pagination(), incomeSearchResult.totalCount()));
-    return responseBuilder.build();
+    IncomeSearchResult incomeSearchResult = incomeSearchResultQuerier.search(criteria);
+    IncomeGetListResponse response = IncomeGetListResponse.from(incomeSearchResult, page);
+    return Response.ok(response)
+        .header(
+            "Link",
+            LinkHeaderCreatable.create(
+                uriInfo, criteria.pagination(), incomeSearchResult.totalCount()))
+        .build();
   }
 
   @GET
   @Path("{id}")
   @RunOnVirtualThread
   public Response get(@PathParam("id") @UuidFormat String id) {
-    Revision<Income> loaded = incomeRetrievalService.get(new IncomeIdentifier(id));
-    IncomeGetResponse response = IncomeGetResponse.from(loaded.entity());
-    return Response.ok(response).tag(String.valueOf(loaded.version())).build();
+    IncomeDetail detail = incomeSearchResultQuerier.get(new IncomeIdentifier(id));
+    IncomeGetResponse response = IncomeGetResponse.from(detail);
+    return Response.ok(response).tag(String.valueOf(detail.version())).build();
   }
 }

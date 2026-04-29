@@ -7,11 +7,12 @@ import java.util.List;
 public record IncomeAttributeGetListResponse(
     @JsonProperty("income_attributes") List<IncomeAttributeGetResponse> list) {
 
-  IncomeAttributeGetListResponse(IncomeAttributeSearchResult searchResult) {
-    this(searchResult.list().stream().map(IncomeAttributeGetResponse::from).toList());
-  }
-
-  IncomeAttributeGetListResponse() {
-    this(List.of());
+  public static IncomeAttributeGetListResponse from(
+      IncomeAttributeSearchResult searchResult, int page) {
+    if (page > searchResult.totalCount()) {
+      return new IncomeAttributeGetListResponse(List.of());
+    }
+    return new IncomeAttributeGetListResponse(
+        searchResult.list().stream().map(IncomeAttributeGetResponse::from).toList());
   }
 }

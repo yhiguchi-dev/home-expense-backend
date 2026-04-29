@@ -2,8 +2,8 @@ package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.Amount;
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 class ExpenseDataSourceTest {
+
+  private static final long INITIAL_VERSION = 1L;
 
   @Inject ExpenseDataSource sut;
 
@@ -46,19 +48,17 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("4月家賃", 80000, "2026-04-01", attribute);
     sut.register(expense);
 
-    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertEquals(expense.expenseIdentifier(), result.entity().expenseIdentifier());
-    assertEquals("4月家賃", result.entity().description().value());
-    assertEquals(80000, result.entity().amount().value());
-    assertEquals(
-        attribute.expenseAttributeIdentifier(), result.entity().expenseAttributeIdentifier());
-    assertEquals(1L, result.version());
+    Expense result = sut.find(expense.expenseIdentifier()).orElseThrow();
+    assertEquals(expense.expenseIdentifier(), result.expenseIdentifier());
+    assertEquals("4月家賃", result.description().value());
+    assertEquals(80000, result.amount().value());
+    assertEquals(attribute.expenseAttributeIdentifier(), result.expenseAttributeIdentifier());
   }
 
   @Test
   void 存在しないIDで取得すると空のOptionalを返す() {
     ExpenseIdentifier unknownId = new ExpenseIdentifier(UUID.randomUUID().toString());
-    assertTrue(sut.findBy(unknownId).isEmpty());
+    assertTrue(sut.find(unknownId).isEmpty());
   }
 
   @Test
@@ -81,20 +81,19 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("ランチ", 1000, "2026-04-10", attribute);
     sut.register(expense);
 
-    Revision<Expense> fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    Expense fetched = sut.find(expense.expenseIdentifier()).orElseThrow();
     Expense updated =
         new Expense(
-            fetched.entity().expenseIdentifier(),
+            fetched.expenseIdentifier(),
             new Description("ディナー"),
             new Amount(3000),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
             attribute.expenseAttributeIdentifier());
-    sut.update(new Revision<>(updated, fetched.version()));
+    sut.update(updated, INITIAL_VERSION);
 
-    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertEquals("ディナー", result.entity().description().value());
-    assertEquals(3000, result.entity().amount().value());
-    assertEquals(2L, result.version());
+    Expense result = sut.find(expense.expenseIdentifier()).orElseThrow();
+    assertEquals("ディナー", result.description().value());
+    assertEquals(3000, result.amount().value());
   }
 
   @Test
@@ -104,19 +103,18 @@ class ExpenseDataSourceTest {
     Expense expense = createExpense("保険", 5000, "2026-04-01", fixedAttr);
     sut.register(expense);
 
-    Revision<Expense> fetched = sut.findBy(expense.expenseIdentifier()).orElseThrow();
+    Expense fetched = sut.find(expense.expenseIdentifier()).orElseThrow();
     Expense updated =
         new Expense(
-            fetched.entity().expenseIdentifier(),
-            fetched.entity().description(),
-            fetched.entity().amount(),
+            fetched.expenseIdentifier(),
+            fetched.description(),
+            fetched.amount(),
             new PaymentDate(LocalDate.of(2026, 4, 1)),
             varAttr.expenseAttributeIdentifier());
-    sut.update(new Revision<>(updated, fetched.version()));
+    sut.update(updated, INITIAL_VERSION);
 
-    Revision<Expense> result = sut.findBy(expense.expenseIdentifier()).orElseThrow();
-    assertEquals(
-        varAttr.expenseAttributeIdentifier(), result.entity().expenseAttributeIdentifier());
+    Expense result = sut.find(expense.expenseIdentifier()).orElseThrow();
+    assertEquals(varAttr.expenseAttributeIdentifier(), result.expenseAttributeIdentifier());
   }
 
   @Test
@@ -132,7 +130,7 @@ class ExpenseDataSourceTest {
             new Amount(600),
             new PaymentDate(LocalDate.of(2026, 4, 10)),
             attribute.expenseAttributeIdentifier());
-    assertThrows(ConcurrentUpdateException.class, () -> sut.update(new Revision<>(modified, 999L)));
+    assertThrows(ConcurrentUpdateException.class, () -> sut.update(modified, 999L));
   }
 
   @Test
@@ -142,7 +140,7 @@ class ExpenseDataSourceTest {
     sut.register(expense);
 
     sut.delete(expense);
-    assertTrue(sut.findBy(expense.expenseIdentifier()).isEmpty());
+    assertTrue(sut.find(expense.expenseIdentifier()).isEmpty());
   }
 
   private ExpenseAttribute registerAttribute(String name, ExpenseCategory category) {

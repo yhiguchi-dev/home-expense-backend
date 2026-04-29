@@ -1,11 +1,9 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeDeletionPolicy;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeNotFoundException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -25,11 +23,7 @@ public class IncomeAttributeDeletionService {
   }
 
   public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    IncomeAttribute attribute =
-        incomeAttributeRepository
-            .findBy(incomeAttributeIdentifier)
-            .map(Revision::entity)
-            .orElseThrow(IncomeAttributeNotFoundException::new);
+    IncomeAttribute attribute = incomeAttributeRepository.get(incomeAttributeIdentifier);
     incomeAttributeDeletionPolicy.assertDeletable(attribute);
     incomeAttributeRepository.delete(attribute);
   }

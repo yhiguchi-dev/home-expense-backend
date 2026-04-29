@@ -2,7 +2,6 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import dev.yhiguchi.home_expense.domain.model.Revision;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.fake.InMemoryIncomeAttributeRepository;
 import org.junit.jupiter.api.Test;
@@ -22,10 +21,10 @@ class IncomeAttributeUpdateServiceTest {
         new IncomeAttributeUpdateCommand(
             new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("賞与"), 1L));
 
-    Revision<IncomeAttribute> updated =
-        attributeRepository.findBy(new IncomeAttributeIdentifier("attr-1")).orElseThrow();
-    assertEquals("賞与", updated.entity().incomeAttributeName().value());
-    assertEquals(2L, updated.version());
+    IncomeAttribute updated =
+        attributeRepository.find(new IncomeAttributeIdentifier("attr-1")).orElseThrow();
+    assertEquals("賞与", updated.incomeAttributeName().value());
+    assertEquals(2L, attributeRepository.versionOf(new IncomeAttributeIdentifier("attr-1")));
   }
 
   @Test
@@ -38,9 +37,9 @@ class IncomeAttributeUpdateServiceTest {
         new IncomeAttributeUpdateCommand(
             new IncomeAttributeIdentifier("attr-1"), new IncomeAttributeName("給与"), 1L));
 
-    Revision<IncomeAttribute> result =
-        attributeRepository.findBy(new IncomeAttributeIdentifier("attr-1")).orElseThrow();
-    assertSame(existing, result.entity());
-    assertEquals(1L, result.version());
+    IncomeAttribute result =
+        attributeRepository.find(new IncomeAttributeIdentifier("attr-1")).orElseThrow();
+    assertSame(existing, result);
+    assertEquals(1L, attributeRepository.versionOf(new IncomeAttributeIdentifier("attr-1")));
   }
 }

@@ -1,35 +1,44 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute;
 
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.infrastructure.datasource.ReadOnly;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
 import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeDetail;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResult;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResultQuerier;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import javax.sql.DataSource;
+import java.util.Optional;
 
 @ApplicationScoped
-@Transactional
 public class IncomeAttributeSearchResultDataSource implements IncomeAttributeSearchResultQuerier {
 
   private final JdbcOperator jdbc;
 
-  public IncomeAttributeSearchResultDataSource(
-      @io.quarkus.agroal.DataSource("readonly") DataSource dataSource) {
-    this.jdbc = new JdbcOperator(dataSource);
+  public IncomeAttributeSearchResultDataSource(@ReadOnly JdbcOperator jdbc) {
+    this.jdbc = jdbc;
   }
 
   @Override
-  public IncomeAttributeSearchResult find(IncomeAttributeSearchCriteria criteria) {
+  public IncomeAttributeSearchResult search(IncomeAttributeSearchCriteria criteria) {
     int count = selectCount();
     if (count == 0) {
-      return new IncomeAttributeSearchResult();
+      return IncomeAttributeSearchResult.empty();
     }
-    List<IncomeAttribute> list = selectBy(criteria);
+    List<IncomeAttributeDetail> list = selectBy(criteria);
     return new IncomeAttributeSearchResult(count, list);
+  }
+
+  @Override
+  public Optional<IncomeAttributeDetail> find(IncomeAttributeIdentifier id) {
+    return jdbc.queryForOptional(
+        "SELECT id, name, version FROM expense.income_attribute WHERE id = ?",
+        ParameterBinder.of(id.value()),
+        IncomeAttributeSearchResultDataSource::mapDetail);
   }
 
   private int selectCount() {
@@ -40,15 +49,17 @@ public class IncomeAttributeSearchResultDataSource implements IncomeAttributeSea
         .orElse(0);
   }
 
-  private List<IncomeAttribute> selectBy(IncomeAttributeSearchCriteria criteria) {
+  private List<IncomeAttributeDetail> selectBy(IncomeAttributeSearchCriteria criteria) {
     String sql =
-        "SELECT id, name FROM expense.income_attribute ORDER BY income_attribute.created_at OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
+        "SELECT id, name, version FROM expense.income_attribute ORDER BY income_attribute.created_at OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
     return jdbc.queryForList(
         sql,
-        ps -> {
-          ps.setInt(1, criteria.offset());
-          ps.setInt(2, criteria.perPage());
-        },
-        IncomeAttributeDataSource::mapIncomeAttribute);
+        ParameterBinder.of(criteria.offset(), criteria.perPage()),
+        IncomeAttributeSearchResultDataSource::mapDetail);
+  }
+
+  static IncomeAttributeDetail mapDetail(ResultSet rs) throws SQLException {
+    return new IncomeAttributeDetail(
+        rs.getString("id"), rs.getString("name"), rs.getLong("version"));
   }
 }

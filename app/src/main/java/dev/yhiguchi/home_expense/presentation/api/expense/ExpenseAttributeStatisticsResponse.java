@@ -10,8 +10,6 @@ public record ExpenseAttributeStatisticsResponse(
 
   static ExpenseAttributeStatisticsResponse from(ExpenseAttributeStatistics statistics) {
     return new ExpenseAttributeStatisticsResponse(
-        statistics.expenseAttributeIdentifier().value(),
-        statistics.expenseAttributeName().value(),
-        statistics.totalAmount());
+        statistics.attributeId(), statistics.attributeName(), statistics.totalAmount());
   }
 }

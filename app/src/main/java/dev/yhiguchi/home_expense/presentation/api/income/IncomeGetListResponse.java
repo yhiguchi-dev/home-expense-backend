@@ -6,11 +6,11 @@ import java.util.List;
 
 public record IncomeGetListResponse(@JsonProperty("incomes") List<IncomeGetResponse> list) {
 
-  IncomeGetListResponse(IncomeSearchResult searchResult) {
-    this(searchResult.list().stream().map(IncomeGetResponse::from).toList());
-  }
-
-  IncomeGetListResponse() {
-    this(List.of());
+  public static IncomeGetListResponse from(IncomeSearchResult searchResult, int page) {
+    if (page > searchResult.totalCount()) {
+      return new IncomeGetListResponse(List.of());
+    }
+    return new IncomeGetListResponse(
+        searchResult.list().stream().map(IncomeGetResponse::from).toList());
   }
 }

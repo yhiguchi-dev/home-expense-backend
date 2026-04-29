@@ -24,13 +24,13 @@ public class ExpenseStatisticsApi {
   @GET
   @RunOnVirtualThread
   public Response get(
-      @QueryParam("year") @Min(value = 1, message = "yearは1以上を指定してください") int year,
+      @QueryParam("year") @Min(value = 1, message = "yearは{value}以上を指定してください") int year,
       @QueryParam("month")
           @Min(value = 1, message = "monthは1〜12を指定してください")
           @Max(value = 12, message = "monthは1〜12を指定してください")
           int month) {
     ExpenseStatisticsCriteria criteria = new ExpenseStatisticsCriteria(year, month);
-    ExpenseStatistics statistics = expenseStatisticsQuerier.find(criteria);
+    ExpenseStatistics statistics = expenseStatisticsQuerier.search(criteria);
     ExpenseGetStatisticsResponse response = new ExpenseGetStatisticsResponse(statistics);
     return Response.ok(response).build();
   }

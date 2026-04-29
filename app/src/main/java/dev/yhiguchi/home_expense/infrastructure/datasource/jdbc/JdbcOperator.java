@@ -1,7 +1,6 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.jdbc;
 
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
-import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,9 +13,11 @@ import javax.sql.DataSource;
 public class JdbcOperator {
 
   private final DataSource dataSource;
+  private final SqlExceptionTranslator translator;
 
-  public JdbcOperator(DataSource dataSource) {
+  public JdbcOperator(DataSource dataSource, SqlExceptionTranslator translator) {
     this.dataSource = dataSource;
+    this.translator = translator;
   }
 
   public <T> Optional<T> queryForOptional(String sql, ParameterBinder binder, RowMapper<T> mapper) {
@@ -27,7 +28,7 @@ public class JdbcOperator {
         return rs.next() ? Optional.ofNullable(mapper.map(rs)) : Optional.empty();
       }
     } catch (SQLException e) {
-      throw new DataAccessException(e);
+      throw translator.translate(e);
     }
   }
 
@@ -43,7 +44,7 @@ public class JdbcOperator {
         return list;
       }
     } catch (SQLException e) {
-      throw new DataAccessException(e);
+      throw translator.translate(e);
     }
   }
 
@@ -53,7 +54,7 @@ public class JdbcOperator {
       binder.bind(ps);
       return ps.executeUpdate();
     } catch (SQLException e) {
-      throw new DataAccessException(e);
+      throw translator.translate(e);
     }
   }
 
