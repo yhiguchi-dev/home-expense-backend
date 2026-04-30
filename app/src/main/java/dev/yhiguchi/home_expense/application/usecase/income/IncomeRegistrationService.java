@@ -1,38 +1,33 @@
 package dev.yhiguchi.home_expense.application.usecase.income;
 
-import dev.yhiguchi.home_expense.application.service.income.IncomeService;
-import dev.yhiguchi.home_expense.application.service.income.attribute.IncomeAttributeService;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
 public class IncomeRegistrationService {
 
-  IncomeService incomeService;
-  IncomeAttributeService incomeAttributeService;
+  IncomeRepository incomeRepository;
+  IncomeAttributeRepository incomeAttributeRepository;
 
   public IncomeRegistrationService(
-      IncomeService incomeService, IncomeAttributeService incomeAttributeService) {
-    this.incomeService = incomeService;
-    this.incomeAttributeService = incomeAttributeService;
+      IncomeRepository incomeRepository, IncomeAttributeRepository incomeAttributeRepository) {
+    this.incomeRepository = incomeRepository;
+    this.incomeAttributeRepository = incomeAttributeRepository;
   }
 
-  public IncomeIdentifier createAndRegister(
-      Description description,
-      Amount price,
-      ReceiveDate paymentDate,
-      IncomeAttributeIdentifier incomeAttributeIdentifier) {
-    Function<IncomeAttributeIdentifier, IncomeAttribute> getFn =
-        identifier -> incomeAttributeService.get(identifier);
-    Consumer<Income> registerFn = income -> incomeService.register(income);
-    IncomeCreator creator = new IncomeCreator(getFn, registerFn);
-    Income income = creator.create(description, price, paymentDate, incomeAttributeIdentifier);
+  public IncomeIdentifier register(IncomeRegistrationCommand command) {
+    IncomeAttribute attribute = incomeAttributeRepository.get(command.incomeAttributeIdentifier());
+    Income income =
+        Income.create(
+            command.description(),
+            command.amount(),
+            command.receiveDate(),
+            attribute.incomeAttributeIdentifier());
+    incomeRepository.register(income);
     return income.incomeIdentifier();
   }
 }

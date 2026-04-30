@@ -1,34 +1,30 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
-import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeName;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeUpdater;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeNameUniqueness;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
 public class ExpenseAttributeUpdateService {
 
-  ExpenseAttributeService expenseAttributeService;
+  ExpenseAttributeRepository expenseAttributeRepository;
+  ExpenseAttributeNameUniqueness expenseAttributeNameUniqueness;
 
-  public ExpenseAttributeUpdateService(ExpenseAttributeService expenseAttributeService) {
-    this.expenseAttributeService = expenseAttributeService;
+  public ExpenseAttributeUpdateService(ExpenseAttributeRepository expenseAttributeRepository) {
+    this.expenseAttributeRepository = expenseAttributeRepository;
+    this.expenseAttributeNameUniqueness =
+        new ExpenseAttributeNameUniqueness(expenseAttributeRepository);
   }
 
-  public void update(
-      ExpenseAttributeIdentifier expenseAttributeIdentifier,
-      ExpenseAttributeName expenseAttributeName,
-      ExpenseCategory expenseCategory) {
-    Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn =
-        identifier -> expenseAttributeService.get(identifier);
-    Consumer<ExpenseAttribute> updateFn = attribute -> expenseAttributeService.update(attribute);
-    ExpenseAttributeUpdater updater = new ExpenseAttributeUpdater(getFn, updateFn);
-    updater.update(expenseAttributeIdentifier, expenseAttributeName, expenseCategory);
+  public void update(ExpenseAttributeUpdateCommand command) {
+    ExpenseAttribute current = expenseAttributeRepository.get(command.expenseAttributeIdentifier());
+    expenseAttributeNameUniqueness.assertUniqueForUpdate(current, command.expenseAttributeName());
+    ExpenseAttribute updated = current.updateWith(command.expenseAttributeName());
+    if (current.hasChanges(updated)) {
+      expenseAttributeRepository.update(updated, command.version());
+    }
   }
 }

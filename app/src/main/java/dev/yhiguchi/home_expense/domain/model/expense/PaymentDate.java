@@ -4,29 +4,12 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /** 支払日 */
-public class PaymentDate {
-  LocalDate value;
-
-  public PaymentDate(LocalDate value) {
-    this.value = value;
+public record PaymentDate(LocalDate value) {
+  public PaymentDate {
+    Objects.requireNonNull(value, "支払日は必須です");
   }
 
-  PaymentDate() {}
-
-  public String value() {
+  public String asString() {
     return value.toString();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    PaymentDate that = (PaymentDate) o;
-    return Objects.equals(value, that.value);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(value);
   }
 }

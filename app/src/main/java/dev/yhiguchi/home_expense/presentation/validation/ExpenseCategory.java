@@ -1,6 +1,8 @@
 package dev.yhiguchi.home_expense.presentation.validation;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.RECORD_COMPONENT;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import jakarta.validation.Constraint;
@@ -9,10 +11,10 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-@Target({FIELD, PARAMETER})
+@Constraint(validatedBy = {ExpenseCategoryValidator.class})
+@Target({FIELD, PARAMETER, RECORD_COMPONENT})
 @Retention(RUNTIME)
 @Documented
-@Constraint(validatedBy = {ExpenseCategoryValidator.class})
 public @interface ExpenseCategory {
   String message() default "経費分類が正しくありません";
 

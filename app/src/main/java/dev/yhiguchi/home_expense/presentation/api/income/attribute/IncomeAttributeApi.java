@@ -1,19 +1,21 @@
 package dev.yhiguchi.home_expense.presentation.api.income.attribute;
 
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeDeletionService;
-import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeGettingService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeRegistrationService;
 import dev.yhiguchi.home_expense.application.usecase.income.IncomeAttributeUpdateService;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeAlreadyExistsException;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
-import dev.yhiguchi.home_expense.query.Page;
+import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
+import dev.yhiguchi.home_expense.presentation.validation.PageNumber;
+import dev.yhiguchi.home_expense.presentation.validation.PerPageSize;
+import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.Pagination;
-import dev.yhiguchi.home_expense.query.PerPage;
-import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummary;
-import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSummaryCriteria;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeDetail;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchCriteria;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResult;
+import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResultQuerier;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -21,89 +23,83 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
-import org.jboss.resteasy.reactive.RestResponse;
-import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 @Path("/v1/income-attributes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class IncomeAttributeApi implements LinkHeaderCreatable {
+public class IncomeAttributeApi {
 
   IncomeAttributeRegistrationService incomeAttributeRegistrationService;
   IncomeAttributeUpdateService incomeAttributeUpdateService;
   IncomeAttributeDeletionService incomeAttributeDeletionService;
-
-  IncomeAttributeGettingService incomeAttributeGettingService;
+  IncomeAttributeSearchResultQuerier incomeAttributeSearchResultQuerier;
 
   public IncomeAttributeApi(
       IncomeAttributeRegistrationService incomeAttributeRegistrationService,
       IncomeAttributeUpdateService incomeAttributeUpdateService,
       IncomeAttributeDeletionService incomeAttributeDeletionService,
-      IncomeAttributeGettingService incomeAttributeGettingService) {
+      IncomeAttributeSearchResultQuerier incomeAttributeSearchResultQuerier) {
     this.incomeAttributeRegistrationService = incomeAttributeRegistrationService;
     this.incomeAttributeUpdateService = incomeAttributeUpdateService;
     this.incomeAttributeDeletionService = incomeAttributeDeletionService;
-    this.incomeAttributeGettingService = incomeAttributeGettingService;
+    this.incomeAttributeSearchResultQuerier = incomeAttributeSearchResultQuerier;
   }
 
   @POST
+  @RunOnVirtualThread
   public Response post(@Valid IncomeAttributePostRequest request, @Context UriInfo uriInfo) {
     IncomeAttributeIdentifier incomeAttributeIdentifier =
-        incomeAttributeRegistrationService.createAndRegister(request.toIncomeAttributeName());
+        incomeAttributeRegistrationService.register(request.toIncomeAttributeName());
     URI uri = uriInfo.getAbsolutePathBuilder().path(incomeAttributeIdentifier.value()).build();
     return Response.created(uri).build();
   }
 
   @PUT
   @Path("{id}")
-  public Response put(@PathParam("id") String id, @Valid IncomeAttributePutRequest request) {
-    incomeAttributeUpdateService.update(
-        new IncomeAttributeIdentifier(id), request.toIncomeAttributeName());
+  @RunOnVirtualThread
+  public Response put(
+      @PathParam("id") @UuidFormat String id,
+      @Valid IncomeAttributePutRequest request,
+      @HeaderParam("If-Match") @IfMatch String ifMatch) {
+    incomeAttributeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
 
   @DELETE
   @Path("{id}")
-  public Response delete(@PathParam("id") String id) {
+  @RunOnVirtualThread
+  public Response delete(@PathParam("id") @UuidFormat String id) {
     incomeAttributeDeletionService.delete(new IncomeAttributeIdentifier(id));
     return Response.noContent().build();
   }
 
   @GET
+  @RunOnVirtualThread
   public Response get(
-      @QueryParam("page") @DefaultValue("1") Integer page,
-      @QueryParam("per_page") @DefaultValue("20") Integer perPage,
+      @QueryParam("page") @DefaultValue("1") @PageNumber Integer page,
+      @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
       @Context UriInfo uriInfo) {
-    Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    IncomeAttributeSummaryCriteria criteria = new IncomeAttributeSummaryCriteria(pagination);
-    IncomeAttributeSummary incomeAttributeSummary =
-        incomeAttributeGettingService.findSummary(criteria);
-    IncomeAttributeGetSummaryResponse response =
-        page <= incomeAttributeSummary.totalCount()
-            ? new IncomeAttributeGetSummaryResponse(incomeAttributeSummary)
-            : new IncomeAttributeGetSummaryResponse();
-    Response.ResponseBuilder responseBuilder = Response.ok(response);
-    responseBuilder.header(
-        "Link", create(uriInfo, pagination, incomeAttributeSummary.totalCount()));
-    return responseBuilder.build();
+    Pagination pagination = new Pagination(page, perPage);
+    IncomeAttributeSearchCriteria criteria = new IncomeAttributeSearchCriteria(pagination);
+    IncomeAttributeSearchResult incomeAttributeSearchResult =
+        incomeAttributeSearchResultQuerier.search(criteria);
+    IncomeAttributeGetListResponse response =
+        IncomeAttributeGetListResponse.from(incomeAttributeSearchResult, page);
+    return Response.ok(response)
+        .header(
+            "Link",
+            LinkHeaderCreatable.create(
+                uriInfo, pagination, incomeAttributeSearchResult.totalCount()))
+        .build();
   }
 
   @GET
   @Path("{id}")
-  public Response get(@PathParam("id") String id) {
-    IncomeAttribute incomeAttribute =
-        incomeAttributeGettingService.get(new IncomeAttributeIdentifier(id));
-    IncomeAttributeGetResponse response = IncomeAttributeGetResponse.from(incomeAttribute);
-    return Response.ok(response).build();
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<String> mapException(IncomeAttributeAlreadyExistsException e) {
-    return RestResponse.status(Response.Status.BAD_REQUEST, "既に登録されています");
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<String> mapException(IncomeAttributeConstraintException e) {
-    return RestResponse.status(Response.Status.BAD_REQUEST, "制約があるため削除できません");
+  @RunOnVirtualThread
+  public Response get(@PathParam("id") @UuidFormat String id) {
+    IncomeAttributeDetail detail =
+        incomeAttributeSearchResultQuerier.get(new IncomeAttributeIdentifier(id));
+    IncomeAttributeGetResponse response = IncomeAttributeGetResponse.from(detail);
+    return Response.ok(response).tag(String.valueOf(detail.version())).build();
   }
 }

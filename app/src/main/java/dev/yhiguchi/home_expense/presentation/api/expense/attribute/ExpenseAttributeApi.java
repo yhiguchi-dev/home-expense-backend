@@ -1,18 +1,22 @@
 package dev.yhiguchi.home_expense.presentation.api.expense.attribute;
 
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeDeletionService;
-import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeGettingService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeRegistrationService;
 import dev.yhiguchi.home_expense.application.usecase.expense.ExpenseAttributeUpdateService;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeAlreadyExistsException;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.presentation.api.IfMatchParser;
 import dev.yhiguchi.home_expense.presentation.api.LinkHeaderCreatable;
 import dev.yhiguchi.home_expense.presentation.validation.ExpenseCategory;
+import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
+import dev.yhiguchi.home_expense.presentation.validation.PageNumber;
+import dev.yhiguchi.home_expense.presentation.validation.PerPageSize;
+import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
 import dev.yhiguchi.home_expense.query.*;
-import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummary;
-import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSummaryCriteria;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeDetail;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchCriteria;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResult;
+import dev.yhiguchi.home_expense.query.expense.attribute.ExpenseAttributeSearchResultQuerier;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -20,99 +24,86 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
-import java.util.Objects;
-import org.jboss.resteasy.reactive.RestResponse;
-import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
 @Path("/v1/expense-attributes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ExpenseAttributeApi implements LinkHeaderCreatable {
+public class ExpenseAttributeApi {
 
   ExpenseAttributeRegistrationService expenseAttributeRegistrationService;
-  ExpenseAttributeGettingService expenseAttributeGettingService;
+  ExpenseAttributeSearchResultQuerier expenseAttributeSearchResultQuerier;
   ExpenseAttributeUpdateService expenseAttributeUpdateService;
 
   ExpenseAttributeDeletionService expenseAttributeDeletionService;
 
   public ExpenseAttributeApi(
       ExpenseAttributeRegistrationService expenseAttributeRegistrationService,
-      ExpenseAttributeGettingService expenseAttributeGettingService,
+      ExpenseAttributeSearchResultQuerier expenseAttributeSearchResultQuerier,
       ExpenseAttributeUpdateService expenseAttributeUpdateService,
       ExpenseAttributeDeletionService expenseAttributeDeletionService) {
     this.expenseAttributeRegistrationService = expenseAttributeRegistrationService;
-    this.expenseAttributeGettingService = expenseAttributeGettingService;
+    this.expenseAttributeSearchResultQuerier = expenseAttributeSearchResultQuerier;
     this.expenseAttributeUpdateService = expenseAttributeUpdateService;
     this.expenseAttributeDeletionService = expenseAttributeDeletionService;
   }
 
   @POST
+  @RunOnVirtualThread
   public Response post(@Valid ExpenseAttributePostRequest request, @Context UriInfo uriInfo) {
     ExpenseAttributeIdentifier expenseAttributeIdentifier =
-        expenseAttributeRegistrationService.createAndRegister(
-            request.toExpenseAttributeName(), request.toExpenseCategory());
+        expenseAttributeRegistrationService.register(request.toCommand());
     URI uri = uriInfo.getAbsolutePathBuilder().path(expenseAttributeIdentifier.value()).build();
     return Response.created(uri).build();
   }
 
   @PUT
   @Path("{id}")
-  public Response put(@PathParam("id") String id, @Valid ExpenseAttributePutRequest request) {
-    expenseAttributeUpdateService.update(
-        new ExpenseAttributeIdentifier(id),
-        request.toExpenseAttributeName(),
-        request.toExpenseCategory());
+  @RunOnVirtualThread
+  public Response put(
+      @PathParam("id") @UuidFormat String id,
+      @Valid ExpenseAttributePutRequest request,
+      @HeaderParam("If-Match") @IfMatch String ifMatch) {
+    expenseAttributeUpdateService.update(request.toCommand(id, IfMatchParser.parse(ifMatch)));
     return Response.noContent().build();
   }
 
   @DELETE
   @Path("{id}")
-  public Response delete(@PathParam("id") String id) {
+  @RunOnVirtualThread
+  public Response delete(@PathParam("id") @UuidFormat String id) {
     expenseAttributeDeletionService.delete(new ExpenseAttributeIdentifier(id));
     return Response.noContent().build();
   }
 
   @GET
+  @RunOnVirtualThread
   public Response get(
       @QueryParam("category") @ExpenseCategory String category,
-      @QueryParam("page") @DefaultValue("1") Integer page,
-      @QueryParam("per_page") @DefaultValue("20") Integer perPage,
+      @QueryParam("page") @DefaultValue("1") @PageNumber Integer page,
+      @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
       @Context UriInfo uriInfo) {
-    Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
-    ExpenseAttributeSummaryCriteria criteria =
-        Objects.nonNull(category)
-            ? new ExpenseAttributeSummaryCriteria(
-                dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory.of(category),
-                pagination)
-            : new ExpenseAttributeSummaryCriteria(pagination);
-    ExpenseAttributeSummary expenseAttributeSummary =
-        expenseAttributeGettingService.findSummary(criteria);
-    ExpenseAttributeGetSummaryResponse response =
-        page <= expenseAttributeSummary.totalCount()
-            ? new ExpenseAttributeGetSummaryResponse(expenseAttributeSummary)
-            : new ExpenseAttributeGetSummaryResponse();
-    Response.ResponseBuilder responseBuilder = Response.ok(response);
-    responseBuilder.header(
-        "Link", create(uriInfo, pagination, expenseAttributeSummary.totalCount()));
-    return responseBuilder.build();
+    Pagination pagination = new Pagination(page, perPage);
+    ExpenseAttributeSearchCriteria criteria =
+        new ExpenseAttributeSearchCriteria(category, pagination);
+    ExpenseAttributeSearchResult expenseAttributeSearchResult =
+        expenseAttributeSearchResultQuerier.search(criteria);
+    ExpenseAttributeGetListResponse response =
+        ExpenseAttributeGetListResponse.from(expenseAttributeSearchResult, page);
+    return Response.ok(response)
+        .header(
+            "Link",
+            LinkHeaderCreatable.create(
+                uriInfo, pagination, expenseAttributeSearchResult.totalCount()))
+        .build();
   }
 
   @GET
   @Path("{id}")
-  public Response get(@PathParam("id") String id) {
-    ExpenseAttribute expenseAttribute =
-        expenseAttributeGettingService.get(new ExpenseAttributeIdentifier(id));
-    ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(expenseAttribute);
-    return Response.ok(response).build();
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<String> mapException(ExpenseAttributeAlreadyExistsException e) {
-    return RestResponse.status(Response.Status.BAD_REQUEST, "既に登録されています");
-  }
-
-  @ServerExceptionMapper
-  public RestResponse<String> mapException(ExpenseAttributeConstraintException e) {
-    return RestResponse.status(Response.Status.BAD_REQUEST, "制約があるため削除できません");
+  @RunOnVirtualThread
+  public Response get(@PathParam("id") @UuidFormat String id) {
+    ExpenseAttributeDetail detail =
+        expenseAttributeSearchResultQuerier.get(new ExpenseAttributeIdentifier(id));
+    ExpenseAttributeGetResponse response = ExpenseAttributeGetResponse.from(detail);
+    return Response.ok(response).tag(String.valueOf(detail.version())).build();
   }
 }

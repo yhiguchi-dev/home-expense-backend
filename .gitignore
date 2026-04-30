@@ -36,3 +36,4 @@ Temporary Items
 .idea/
 .sdkmanrc
 *.iml
+node_modules

@@ -1,38 +1,34 @@
 package dev.yhiguchi.home_expense.application.usecase.expense;
 
-import dev.yhiguchi.home_expense.application.service.expense.ExpenseService;
-import dev.yhiguchi.home_expense.application.service.expense.attribute.ExpenseAttributeService;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ApplicationScoped
 @Transactional
 public class ExpenseRegistrationService {
 
-  ExpenseService expenseService;
-  ExpenseAttributeService expenseAttributeService;
+  ExpenseRepository expenseRepository;
+  ExpenseAttributeRepository expenseAttributeRepository;
 
   public ExpenseRegistrationService(
-      ExpenseService expenseService, ExpenseAttributeService expenseAttributeService) {
-    this.expenseService = expenseService;
-    this.expenseAttributeService = expenseAttributeService;
+      ExpenseRepository expenseRepository, ExpenseAttributeRepository expenseAttributeRepository) {
+    this.expenseRepository = expenseRepository;
+    this.expenseAttributeRepository = expenseAttributeRepository;
   }
 
-  public ExpenseIdentifier createAndRegister(
-      Description description,
-      Price price,
-      PaymentDate paymentDate,
-      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
-    Function<ExpenseAttributeIdentifier, ExpenseAttribute> getFn =
-        identifier -> expenseAttributeService.get(identifier);
-    Consumer<Expense> registerFn = expense -> expenseService.register(expense);
-    ExpenseCreator creator = new ExpenseCreator(getFn, registerFn);
-    Expense expense = creator.create(description, price, paymentDate, expenseAttributeIdentifier);
+  public ExpenseIdentifier register(ExpenseRegistrationCommand command) {
+    ExpenseAttribute attribute =
+        expenseAttributeRepository.get(command.expenseAttributeIdentifier());
+    Expense expense =
+        Expense.create(
+            command.description(),
+            command.amount(),
+            command.paymentDate(),
+            attribute.expenseAttributeIdentifier());
+    expenseRepository.register(expense);
     return expense.expenseIdentifier();
   }
 }

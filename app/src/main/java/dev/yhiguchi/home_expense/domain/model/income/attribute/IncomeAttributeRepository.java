@@ -1,14 +1,19 @@
 package dev.yhiguchi.home_expense.domain.model.income.attribute;
 
+import java.util.Optional;
+
 /** 収入属性リポジトリ */
-public interface IncomeAttributeRepository {
+public interface IncomeAttributeRepository extends IncomeAttributeNameLookup {
+
   void register(IncomeAttribute incomeAttribute);
 
-  void update(IncomeAttribute incomeAttribute);
+  Optional<IncomeAttribute> find(IncomeAttributeIdentifier incomeAttributeIdentifier);
 
-  void delete(IncomeAttributeIdentifier incomeAttributeIdentifier);
+  default IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
+    return find(incomeAttributeIdentifier).orElseThrow(IncomeAttributeNotFoundException::new);
+  }
 
-  IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier);
+  void update(IncomeAttribute incomeAttribute, long expectedVersion);
 
-  IncomeAttribute find(IncomeAttributeName incomeAttributeName);
+  void delete(IncomeAttribute incomeAttribute);
 }

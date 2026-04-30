@@ -1,20 +1,16 @@
 package dev.yhiguchi.home_expense.presentation.api.expense;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.yhiguchi.home_expense.query.expense.ExpenseSummary;
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResult;
 import java.util.List;
 
-@RegisterForReflection
-class ExpenseGetListResponse {
-  @JsonProperty("expenses")
-  List<ExpenseGetResponse> list;
+public record ExpenseGetListResponse(@JsonProperty("expenses") List<ExpenseGetResponse> list) {
 
-  ExpenseGetListResponse(ExpenseSummary summary) {
-    this.list = summary.list().stream().map(ExpenseGetResponse::from).toList();
-  }
-
-  ExpenseGetListResponse() {
-    this.list = List.of();
+  public static ExpenseGetListResponse from(ExpenseSearchResult searchResult, int page) {
+    if (page > searchResult.totalCount()) {
+      return new ExpenseGetListResponse(List.of());
+    }
+    return new ExpenseGetListResponse(
+        searchResult.list().stream().map(ExpenseGetResponse::from).toList());
   }
 }

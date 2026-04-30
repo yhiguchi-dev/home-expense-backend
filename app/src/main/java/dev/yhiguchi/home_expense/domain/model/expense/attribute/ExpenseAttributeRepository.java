@@ -1,14 +1,19 @@
 package dev.yhiguchi.home_expense.domain.model.expense.attribute;
 
+import java.util.Optional;
+
 /** 経費属性リポジトリ */
-public interface ExpenseAttributeRepository {
+public interface ExpenseAttributeRepository extends ExpenseAttributeNameLookup {
+
   void register(ExpenseAttribute expenseAttribute);
 
-  ExpenseAttribute get(ExpenseAttributeIdentifier expenseAttributeIdentifier);
+  Optional<ExpenseAttribute> find(ExpenseAttributeIdentifier expenseAttributeIdentifier);
 
-  ExpenseAttribute find(ExpenseAttributeName expenseAttributeName);
+  default ExpenseAttribute get(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    return find(expenseAttributeIdentifier).orElseThrow(ExpenseAttributeNotFoundException::new);
+  }
 
-  void update(ExpenseAttribute expenseAttribute);
+  void update(ExpenseAttribute expenseAttribute, long expectedVersion);
 
-  void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier);
+  void delete(ExpenseAttribute expenseAttribute);
 }

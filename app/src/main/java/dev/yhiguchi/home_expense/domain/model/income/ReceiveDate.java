@@ -1,18 +1,15 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 /** 受取日 */
-public class ReceiveDate {
-  LocalDate value;
-
-  public ReceiveDate(LocalDate value) {
-    this.value = value;
+public record ReceiveDate(LocalDate value) {
+  public ReceiveDate {
+    Objects.requireNonNull(value, "受取日は必須です");
   }
 
-  ReceiveDate() {}
-
-  public String value() {
+  public String asString() {
     return value.toString();
   }
 }

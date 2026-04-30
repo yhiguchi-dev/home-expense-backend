@@ -1,25 +1,21 @@
 package dev.yhiguchi.home_expense.presentation.api.income;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.yhiguchi.home_expense.domain.model.income.Income;
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import dev.yhiguchi.home_expense.query.income.IncomeDetail;
 
-@RegisterForReflection
-record IncomeGetResponse(
+public record IncomeGetResponse(
     @JsonProperty("id") String id,
     @JsonProperty("description") String description,
     @JsonProperty("amount") Integer amount,
     @JsonProperty("receive_date") String receiveDate,
-    @JsonProperty("income_attribute") IncomeAttributeResponse incomeAttributeResponse) {
+    @JsonProperty("income_attribute_id") String incomeAttributeId) {
 
-  static IncomeGetResponse from(Income income) {
-    IncomeAttributeResponse expenseAttributeResponse =
-        IncomeAttributeResponse.from(income.incomeAttribute());
+  static IncomeGetResponse from(IncomeDetail detail) {
     return new IncomeGetResponse(
-        income.incomeIdentifier().value(),
-        income.description().value(),
-        income.amount().value(),
-        income.receiveDate().value(),
-        expenseAttributeResponse);
+        detail.id(),
+        detail.description(),
+        detail.amount(),
+        detail.receiveDate().toString(),
+        detail.attributeId());
   }
 }

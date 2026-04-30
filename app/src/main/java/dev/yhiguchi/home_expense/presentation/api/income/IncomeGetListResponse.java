@@ -1,20 +1,16 @@
 package dev.yhiguchi.home_expense.presentation.api.income;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.yhiguchi.home_expense.query.income.IncomeSummary;
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import java.util.List;
 
-@RegisterForReflection
-class IncomeGetListResponse {
-  @JsonProperty("incomes")
-  List<IncomeGetResponse> list;
+public record IncomeGetListResponse(@JsonProperty("incomes") List<IncomeGetResponse> list) {
 
-  IncomeGetListResponse(IncomeSummary summary) {
-    this.list = summary.list().stream().map(IncomeGetResponse::from).toList();
-  }
-
-  IncomeGetListResponse() {
-    this.list = List.of();
+  public static IncomeGetListResponse from(IncomeSearchResult searchResult, int page) {
+    if (page > searchResult.totalCount()) {
+      return new IncomeGetListResponse(List.of());
+    }
+    return new IncomeGetListResponse(
+        searchResult.list().stream().map(IncomeGetResponse::from).toList());
   }
 }

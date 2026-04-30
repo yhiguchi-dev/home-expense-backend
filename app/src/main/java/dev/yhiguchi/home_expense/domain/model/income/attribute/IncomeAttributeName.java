@@ -3,29 +3,13 @@ package dev.yhiguchi.home_expense.domain.model.income.attribute;
 import java.util.Objects;
 
 /** 収入属性名 */
-public class IncomeAttributeName {
-  String value;
+public record IncomeAttributeName(String value) {
+  public static final int MAX_LENGTH = 512;
 
-  public IncomeAttributeName(String value) {
-    this.value = value;
-  }
-
-  IncomeAttributeName() {}
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    IncomeAttributeName that = (IncomeAttributeName) o;
-    return Objects.equals(value, that.value);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(value);
-  }
-
-  public String value() {
-    return value;
+  public IncomeAttributeName {
+    Objects.requireNonNull(value, "収入属性名は必須です");
+    if (value.length() > MAX_LENGTH) {
+      throw new IllegalArgumentException("収入属性名は" + MAX_LENGTH + "文字以内でなければなりません");
+    }
   }
 }

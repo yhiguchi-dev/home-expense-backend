@@ -1,17 +1,22 @@
 package dev.yhiguchi.home_expense.domain.model.income;
 
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
+import java.util.Optional;
 
 /** 収入リポジトリ */
 public interface IncomeRepository {
 
   void register(Income income);
 
-  void update(Income income);
+  Optional<Income> find(IncomeIdentifier incomeIdentifier);
 
-  void delete(IncomeIdentifier incomeIdentifier);
+  default Income get(IncomeIdentifier incomeIdentifier) {
+    return find(incomeIdentifier).orElseThrow(IncomeNotFoundException::new);
+  }
 
-  Income get(IncomeIdentifier incomeIdentifier);
+  boolean existsByAttributeIdentifier(IncomeAttributeIdentifier incomeAttributeIdentifier);
 
-  Incomes find(IncomeAttribute incomeAttribute);
+  void update(Income income, long expectedVersion);
+
+  void delete(Income income);
 }

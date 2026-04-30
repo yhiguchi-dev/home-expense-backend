@@ -1,57 +1,99 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.expense;
 
+import dev.yhiguchi.home_expense.domain.model.Amount;
+import dev.yhiguchi.home_expense.domain.model.Description;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
-import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttribute;
+import dev.yhiguchi.home_expense.domain.model.expense.attribute.ExpenseAttributeIdentifier;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.JdbcOperator;
+import dev.yhiguchi.home_expense.infrastructure.datasource.jdbc.ParameterBinder;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @ApplicationScoped
 public class ExpenseDataSource implements ExpenseRepository {
 
-  ExpenseMapper expenseMapper;
+  private static final long INITIAL_VERSION = 1L;
 
-  public ExpenseDataSource(ExpenseMapper expenseMapper) {
-    this.expenseMapper = expenseMapper;
+  private final JdbcOperator jdbc;
+
+  public ExpenseDataSource(JdbcOperator jdbc) {
+    this.jdbc = jdbc;
   }
 
   @Override
   public void register(Expense expense) {
-    expenseMapper.insert(expense);
-    if (expense.isFixed()) {
-      expenseMapper.insertFixedExpense(expense);
-    }
-    if (expense.isVariable()) {
-      expenseMapper.insertVariableExpense(expense);
-    }
+    jdbc.update(
+        "INSERT INTO expense.expense(id, description, amount, payment_date, attribute_id, version)"
+            + " VALUES (?, ?, ?, ?, ?, ?)",
+        ParameterBinder.of(
+            expense.expenseIdentifier().value(),
+            expense.description().value(),
+            expense.amount().value(),
+            expense.paymentDate().value(),
+            expense.expenseAttributeIdentifier().value(),
+            INITIAL_VERSION));
   }
 
   @Override
-  public Expense get(ExpenseIdentifier expenseIdentifier) {
-    Optional<Expense> expense = expenseMapper.selectBy(expenseIdentifier);
-    return expense.orElseThrow(ExpenseNotFoundException::new);
+  public Optional<Expense> find(ExpenseIdentifier expenseIdentifier) {
+    String sql =
+        """
+        SELECT id, description, amount, payment_date, attribute_id
+        FROM expense.expense
+        WHERE id = ?
+        """;
+    return jdbc.queryForOptional(
+        sql, ParameterBinder.of(expenseIdentifier.value()), ExpenseDataSource::mapExpense);
   }
 
   @Override
-  public Expense find(ExpenseIdentifier expenseIdentifier) {
-    Optional<Expense> expense = expenseMapper.selectBy(expenseIdentifier);
-    return expense.orElse(new Expense());
+  public boolean existsByAttributeIdentifier(
+      ExpenseAttributeIdentifier expenseAttributeIdentifier) {
+    String sql =
+        """
+        SELECT CASE WHEN EXISTS(
+          SELECT 1 FROM expense.expense WHERE attribute_id = ?
+        ) THEN TRUE ELSE FALSE END
+        FROM (VALUES (1)) AS t(x)
+        """;
+    return jdbc.queryForOptional(
+            sql, ParameterBinder.of(expenseAttributeIdentifier.value()), rs -> rs.getBoolean(1))
+        .orElse(false);
   }
 
   @Override
-  public Expenses find(ExpenseAttribute expenseAttribute) {
-    Optional<List<Expense>> expense = expenseMapper.selectByExpenseAttribute(expenseAttribute);
-    return expense.map(Expenses::new).orElseGet(Expenses::new);
+  public void update(Expense expense, long expectedVersion) {
+    jdbc.updateWithOptimisticLock(
+        """
+        UPDATE expense.expense
+        SET description = ?, amount = ?, payment_date = ?, attribute_id = ?, version = version + 1
+        WHERE id = ? AND version = ?
+        """,
+        ParameterBinder.of(
+            expense.description().value(),
+            expense.amount().value(),
+            expense.paymentDate().value(),
+            expense.expenseAttributeIdentifier().value(),
+            expense.expenseIdentifier().value(),
+            expectedVersion));
   }
 
   @Override
-  public void update(Expense expense) {
-    delete(expense.expenseIdentifier());
-    register(expense);
+  public void delete(Expense expense) {
+    jdbc.update(
+        "DELETE FROM expense.expense WHERE expense.id = ?",
+        ParameterBinder.of(expense.expenseIdentifier().value()));
   }
 
-  @Override
-  public void delete(ExpenseIdentifier expenseIdentifier) {
-    expenseMapper.delete(expenseIdentifier);
+  static Expense mapExpense(ResultSet rs) throws SQLException {
+    return new Expense(
+        new ExpenseIdentifier(rs.getString("id")),
+        new Description(rs.getString("description")),
+        new Amount(rs.getInt("amount")),
+        new PaymentDate(rs.getObject("payment_date", LocalDate.class)),
+        new ExpenseAttributeIdentifier(rs.getString("attribute_id")));
   }
 }
