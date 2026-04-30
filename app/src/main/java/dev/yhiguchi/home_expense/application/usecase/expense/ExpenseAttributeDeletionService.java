@@ -10,18 +10,19 @@ import jakarta.transaction.Transactional;
 public class ExpenseAttributeDeletionService {
 
   ExpenseAttributeRepository expenseAttributeRepository;
-  ExpenseAttributeDeletionPolicy expenseAttributeDeletionPolicy;
+  ExpenseRepository expenseRepository;
 
   public ExpenseAttributeDeletionService(
       ExpenseAttributeRepository expenseAttributeRepository, ExpenseRepository expenseRepository) {
     this.expenseAttributeRepository = expenseAttributeRepository;
-    this.expenseAttributeDeletionPolicy =
-        new ExpenseAttributeDeletionPolicy(expenseRepository::existsByAttributeIdentifier);
+    this.expenseRepository = expenseRepository;
   }
 
   public void delete(ExpenseAttributeIdentifier expenseAttributeIdentifier) {
     ExpenseAttribute attribute = expenseAttributeRepository.get(expenseAttributeIdentifier);
-    expenseAttributeDeletionPolicy.assertDeletable(attribute);
+    if (expenseRepository.existsByAttributeIdentifier(attribute.expenseAttributeIdentifier())) {
+      throw new ExpenseAttributeConstraintException();
+    }
     expenseAttributeRepository.delete(attribute);
   }
 }

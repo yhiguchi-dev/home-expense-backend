@@ -2,7 +2,7 @@ package dev.yhiguchi.home_expense.application.usecase.income;
 
 import dev.yhiguchi.home_expense.domain.model.income.IncomeRepository;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttribute;
-import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeDeletionPolicy;
+import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeConstraintException;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeIdentifier;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.IncomeAttributeRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,18 +13,19 @@ import jakarta.transaction.Transactional;
 public class IncomeAttributeDeletionService {
 
   IncomeAttributeRepository incomeAttributeRepository;
-  IncomeAttributeDeletionPolicy incomeAttributeDeletionPolicy;
+  IncomeRepository incomeRepository;
 
   public IncomeAttributeDeletionService(
       IncomeAttributeRepository incomeAttributeRepository, IncomeRepository incomeRepository) {
     this.incomeAttributeRepository = incomeAttributeRepository;
-    this.incomeAttributeDeletionPolicy =
-        new IncomeAttributeDeletionPolicy(incomeRepository::existsByAttributeIdentifier);
+    this.incomeRepository = incomeRepository;
   }
 
   public void delete(IncomeAttributeIdentifier incomeAttributeIdentifier) {
     IncomeAttribute attribute = incomeAttributeRepository.get(incomeAttributeIdentifier);
-    incomeAttributeDeletionPolicy.assertDeletable(attribute);
+    if (incomeRepository.existsByAttributeIdentifier(attribute.incomeAttributeIdentifier())) {
+      throw new IncomeAttributeConstraintException();
+    }
     incomeAttributeRepository.delete(attribute);
   }
 }
