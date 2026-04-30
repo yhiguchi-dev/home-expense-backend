@@ -10,9 +10,7 @@ import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
 import dev.yhiguchi.home_expense.presentation.validation.PageNumber;
 import dev.yhiguchi.home_expense.presentation.validation.PerPageSize;
 import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
-import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
-import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.income.IncomeDetail;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
@@ -82,7 +80,7 @@ public class IncomeApi {
       @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
       @QueryParam("year") @Min(value = 1, message = "yearは{value}以上を指定してください") Integer year,
       @Context UriInfo uriInfo) {
-    Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
+    Pagination pagination = new Pagination(page, perPage);
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, year);
     IncomeSearchResult incomeSearchResult = incomeSearchResultQuerier.search(criteria);
     IncomeGetListResponse response = IncomeGetListResponse.from(incomeSearchResult, page);

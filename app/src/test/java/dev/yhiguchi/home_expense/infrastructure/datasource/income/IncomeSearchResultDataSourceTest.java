@@ -7,9 +7,7 @@ import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.income.*;
 import dev.yhiguchi.home_expense.domain.model.income.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.income.attribute.IncomeAttributeDataSource;
-import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
-import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.IncomeSearchResult;
 import io.quarkus.test.junit.QuarkusTest;
@@ -52,7 +50,7 @@ class IncomeSearchResultDataSourceTest {
     registerIncome("4月給与", 300000, "2026-04-25", attribute);
     registerIncome("5月給与", 310000, "2026-05-25", attribute);
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, null);
     IncomeSearchResult result = sut.search(criteria);
 
@@ -66,7 +64,7 @@ class IncomeSearchResultDataSourceTest {
     registerIncome("2026年給与", 300000, "2026-04-25", attribute);
     registerIncome("2025年給与", 280000, "2025-04-25", attribute);
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, 2026);
     IncomeSearchResult result = sut.search(criteria);
 
@@ -81,7 +79,7 @@ class IncomeSearchResultDataSourceTest {
       registerIncome("収入" + i, i * 10000, "2026-04-%02d".formatted(i), attribute);
     }
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(2));
+    Pagination pagination = new Pagination(1, 2);
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, null);
     IncomeSearchResult result = sut.search(criteria);
 
@@ -91,7 +89,7 @@ class IncomeSearchResultDataSourceTest {
 
   @Test
   void データが存在しない場合は空の結果が返る() {
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     IncomeSearchCriteria criteria = new IncomeSearchCriteria(pagination, null);
     IncomeSearchResult result = sut.search(criteria);
 

@@ -11,7 +11,7 @@ public final class LinkHeaderCreatable {
 
   public static String create(UriInfo uriInfo, Pagination pagination, int totalCount) {
     ArrayList<String> linkList = new ArrayList<>();
-    linkList.add(linkOf(uriInfo, "current", pagination.currentPage(), pagination.perPage()));
+    linkList.add(linkOf(uriInfo, "current", pagination.page(), pagination.perPage()));
     linkList.add(linkOf(uriInfo, "last", pagination.lastPage(totalCount), pagination.perPage()));
     linkList.add(linkOf(uriInfo, "first", 1, pagination.perPage()));
     if (!pagination.isFirstPage()) {

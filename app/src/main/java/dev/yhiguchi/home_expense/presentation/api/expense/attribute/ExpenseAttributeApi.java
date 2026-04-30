@@ -82,7 +82,7 @@ public class ExpenseAttributeApi {
       @QueryParam("page") @DefaultValue("1") @PageNumber Integer page,
       @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
       @Context UriInfo uriInfo) {
-    Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
+    Pagination pagination = new Pagination(page, perPage);
     ExpenseAttributeSearchCriteria criteria =
         new ExpenseAttributeSearchCriteria(category, pagination);
     ExpenseAttributeSearchResult expenseAttributeSearchResult =

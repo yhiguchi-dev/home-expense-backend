@@ -10,9 +10,7 @@ import dev.yhiguchi.home_expense.presentation.validation.IfMatch;
 import dev.yhiguchi.home_expense.presentation.validation.PageNumber;
 import dev.yhiguchi.home_expense.presentation.validation.PerPageSize;
 import dev.yhiguchi.home_expense.presentation.validation.UuidFormat;
-import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
-import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeDetail;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchCriteria;
 import dev.yhiguchi.home_expense.query.income.attribute.IncomeAttributeSearchResult;
@@ -81,7 +79,7 @@ public class IncomeAttributeApi {
       @QueryParam("page") @DefaultValue("1") @PageNumber Integer page,
       @QueryParam("per_page") @DefaultValue("20") @PerPageSize Integer perPage,
       @Context UriInfo uriInfo) {
-    Pagination pagination = new Pagination(new Page(page), new PerPage(perPage));
+    Pagination pagination = new Pagination(page, perPage);
     IncomeAttributeSearchCriteria criteria = new IncomeAttributeSearchCriteria(pagination);
     IncomeAttributeSearchResult incomeAttributeSearchResult =
         incomeAttributeSearchResultQuerier.search(criteria);

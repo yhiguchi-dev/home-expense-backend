@@ -7,9 +7,7 @@ import dev.yhiguchi.home_expense.domain.model.Amount;
 import dev.yhiguchi.home_expense.domain.model.expense.*;
 import dev.yhiguchi.home_expense.domain.model.expense.attribute.*;
 import dev.yhiguchi.home_expense.infrastructure.datasource.expense.attribute.ExpenseAttributeDataSource;
-import dev.yhiguchi.home_expense.query.Page;
 import dev.yhiguchi.home_expense.query.Pagination;
-import dev.yhiguchi.home_expense.query.PerPage;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchCriteria;
 import dev.yhiguchi.home_expense.query.expense.ExpenseSearchResult;
 import io.quarkus.test.junit.QuarkusTest;
@@ -52,7 +50,7 @@ class ExpenseSearchResultDataSourceTest {
     registerExpense("ランチ", 1000, "2026-04-10", attribute);
     registerExpense("ディナー", 3000, "2026-04-10", attribute);
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     ExpenseSearchCriteria criteria = noFilterCriteria(pagination);
     ExpenseSearchResult result = sut.search(criteria);
 
@@ -66,7 +64,7 @@ class ExpenseSearchResultDataSourceTest {
     registerExpense("4月ランチ", 1000, "2026-04-10", attribute);
     registerExpense("5月ランチ", 1200, "2026-05-10", attribute);
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     ExpenseSearchCriteria criteria = yearMonthCriteria(pagination, 2026, 4);
     ExpenseSearchResult result = sut.search(criteria);
 
@@ -81,7 +79,7 @@ class ExpenseSearchResultDataSourceTest {
     registerExpense("4月家賃", 80000, "2026-04-01", fixedAttr);
     registerExpense("ランチ", 1000, "2026-04-10", varAttr);
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     ExpenseSearchCriteria criteria = categoryCriteria(pagination, ExpenseCategory.固定費);
     ExpenseSearchResult result = sut.search(criteria);
 
@@ -96,7 +94,7 @@ class ExpenseSearchResultDataSourceTest {
       registerExpense("経費" + i, i * 100, "2026-04-%02d".formatted(i), attribute);
     }
 
-    Pagination pagination = new Pagination(new Page(1), new PerPage(2));
+    Pagination pagination = new Pagination(1, 2);
     ExpenseSearchCriteria criteria = noFilterCriteria(pagination);
     ExpenseSearchResult result = sut.search(criteria);
 
@@ -106,7 +104,7 @@ class ExpenseSearchResultDataSourceTest {
 
   @Test
   void データが存在しない場合は空の結果が返る() {
-    Pagination pagination = new Pagination(new Page(1), new PerPage(10));
+    Pagination pagination = new Pagination(1, 10);
     ExpenseSearchCriteria criteria = noFilterCriteria(pagination);
     ExpenseSearchResult result = sut.search(criteria);
 
