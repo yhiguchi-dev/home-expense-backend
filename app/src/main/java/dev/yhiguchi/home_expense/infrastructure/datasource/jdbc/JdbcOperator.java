@@ -1,6 +1,8 @@
 package dev.yhiguchi.home_expense.infrastructure.datasource.jdbc;
 
 import dev.yhiguchi.home_expense.infrastructure.datasource.ConcurrentUpdateException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.DataAccessException;
+import dev.yhiguchi.home_expense.infrastructure.datasource.UniqueConstraintViolationException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,12 +14,12 @@ import javax.sql.DataSource;
 
 public class JdbcOperator {
 
-  private final DataSource dataSource;
-  private final SqlExceptionTranslator translator;
+  private static final String SQLSTATE_UNIQUE_VIOLATION = "23505";
 
-  public JdbcOperator(DataSource dataSource, SqlExceptionTranslator translator) {
+  private final DataSource dataSource;
+
+  public JdbcOperator(DataSource dataSource) {
     this.dataSource = dataSource;
-    this.translator = translator;
   }
 
   public <T> Optional<T> queryForOptional(String sql, ParameterBinder binder, RowMapper<T> mapper) {
@@ -28,7 +30,7 @@ public class JdbcOperator {
         return rs.next() ? Optional.ofNullable(mapper.map(rs)) : Optional.empty();
       }
     } catch (SQLException e) {
-      throw translator.translate(e);
+      throw translate(e);
     }
   }
 
@@ -44,7 +46,7 @@ public class JdbcOperator {
         return list;
       }
     } catch (SQLException e) {
-      throw translator.translate(e);
+      throw translate(e);
     }
   }
 
@@ -54,7 +56,7 @@ public class JdbcOperator {
       binder.bind(ps);
       return ps.executeUpdate();
     } catch (SQLException e) {
-      throw translator.translate(e);
+      throw translate(e);
     }
   }
 
@@ -62,5 +64,12 @@ public class JdbcOperator {
     if (update(sql, binder) == 0) {
       throw new ConcurrentUpdateException();
     }
+  }
+
+  private static DataAccessException translate(SQLException cause) {
+    if (SQLSTATE_UNIQUE_VIOLATION.equals(cause.getSQLState())) {
+      return new UniqueConstraintViolationException(cause);
+    }
+    return new DataAccessException(cause);
   }
 }

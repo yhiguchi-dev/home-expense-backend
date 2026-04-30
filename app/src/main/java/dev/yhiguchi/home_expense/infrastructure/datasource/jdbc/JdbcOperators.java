@@ -11,16 +11,14 @@ public class JdbcOperators {
 
   @Produces
   @ApplicationScoped
-  public JdbcOperator primary(DataSource dataSource, SqlExceptionTranslator translator) {
-    return new JdbcOperator(dataSource, translator);
+  public JdbcOperator primary(DataSource dataSource) {
+    return new JdbcOperator(dataSource);
   }
 
   @Produces
   @ApplicationScoped
   @ReadOnly
-  public JdbcOperator readonly(
-      @io.quarkus.agroal.DataSource("readonly") DataSource dataSource,
-      SqlExceptionTranslator translator) {
-    return new JdbcOperator(dataSource, translator);
+  public JdbcOperator readonly(@io.quarkus.agroal.DataSource("readonly") DataSource dataSource) {
+    return new JdbcOperator(dataSource);
   }
 }
