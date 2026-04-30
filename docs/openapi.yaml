@@ -195,7 +195,7 @@ paths:
               $ref: '#/components/headers/Location'
         "400":
           $ref: '#/components/responses/BadRequest'
-  /v1/expenses/statistics:
+  /v1/expense-statistics:
     get:
       tags:
         - Expense Statistics
