@@ -5,20 +5,15 @@ import dev.yhiguchi.home_expense.domain.model.expense.ExpenseCategory;
 /** 経費属性名の一意性を保証する */
 public class ExpenseAttributeNameUniqueness {
 
-  @FunctionalInterface
-  public interface ExistsByName {
-    boolean existsByName(ExpenseAttributeName name, ExpenseCategory category);
-  }
+  private final ExpenseAttributeNameLookup lookup;
 
-  private final ExistsByName existsByName;
-
-  public ExpenseAttributeNameUniqueness(ExistsByName existsByName) {
-    this.existsByName = existsByName;
+  public ExpenseAttributeNameUniqueness(ExpenseAttributeNameLookup lookup) {
+    this.lookup = lookup;
   }
 
   /** 新規登録時の一意性検査 */
   public void assertUniqueForRegistration(ExpenseAttributeName name, ExpenseCategory category) {
-    if (existsByName.existsByName(name, category)) {
+    if (lookup.existsByName(name, category)) {
       throw new ExpenseAttributeAlreadyExistsException();
     }
   }
@@ -28,7 +23,7 @@ public class ExpenseAttributeNameUniqueness {
     if (current.hasSameName(newName)) {
       return;
     }
-    if (existsByName.existsByName(newName, current.expenseCategory())) {
+    if (lookup.existsByName(newName, current.expenseCategory())) {
       throw new ExpenseAttributeAlreadyExistsException();
     }
   }

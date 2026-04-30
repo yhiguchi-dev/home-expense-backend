@@ -15,7 +15,7 @@ public class ExpenseAttributeRegistrationService {
       ExpenseAttributeRepository expenseAttributeRepository) {
     this.expenseAttributeRepository = expenseAttributeRepository;
     this.expenseAttributeNameUniqueness =
-        new ExpenseAttributeNameUniqueness(expenseAttributeRepository::existsByName);
+        new ExpenseAttributeNameUniqueness(expenseAttributeRepository);
   }
 
   public ExpenseAttributeIdentifier register(ExpenseAttributeRegistrationCommand command) {

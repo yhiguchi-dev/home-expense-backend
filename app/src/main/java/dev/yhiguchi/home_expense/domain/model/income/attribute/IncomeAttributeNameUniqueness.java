@@ -3,20 +3,15 @@ package dev.yhiguchi.home_expense.domain.model.income.attribute;
 /** 収入属性名の一意性を保証する */
 public class IncomeAttributeNameUniqueness {
 
-  @FunctionalInterface
-  public interface ExistsByName {
-    boolean existsByName(IncomeAttributeName name);
-  }
+  private final IncomeAttributeNameLookup lookup;
 
-  private final ExistsByName existsByName;
-
-  public IncomeAttributeNameUniqueness(ExistsByName existsByName) {
-    this.existsByName = existsByName;
+  public IncomeAttributeNameUniqueness(IncomeAttributeNameLookup lookup) {
+    this.lookup = lookup;
   }
 
   /** 新規登録時の一意性検査 */
   public void assertUniqueForRegistration(IncomeAttributeName name) {
-    if (existsByName.existsByName(name)) {
+    if (lookup.existsByName(name)) {
       throw new IncomeAttributeAlreadyExistsException();
     }
   }
@@ -26,7 +21,7 @@ public class IncomeAttributeNameUniqueness {
     if (current.hasSameName(newName)) {
       return;
     }
-    if (existsByName.existsByName(newName)) {
+    if (lookup.existsByName(newName)) {
       throw new IncomeAttributeAlreadyExistsException();
     }
   }

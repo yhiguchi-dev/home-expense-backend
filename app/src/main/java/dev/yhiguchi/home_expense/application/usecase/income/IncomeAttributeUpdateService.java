@@ -16,7 +16,7 @@ public class IncomeAttributeUpdateService {
   public IncomeAttributeUpdateService(IncomeAttributeRepository incomeAttributeRepository) {
     this.incomeAttributeRepository = incomeAttributeRepository;
     this.incomeAttributeNameUniqueness =
-        new IncomeAttributeNameUniqueness(incomeAttributeRepository::existsByName);
+        new IncomeAttributeNameUniqueness(incomeAttributeRepository);
   }
 
   public void update(IncomeAttributeUpdateCommand command) {

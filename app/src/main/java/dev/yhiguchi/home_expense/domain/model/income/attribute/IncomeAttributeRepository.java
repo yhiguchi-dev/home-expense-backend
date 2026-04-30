@@ -3,7 +3,7 @@ package dev.yhiguchi.home_expense.domain.model.income.attribute;
 import java.util.Optional;
 
 /** 収入属性リポジトリ */
-public interface IncomeAttributeRepository {
+public interface IncomeAttributeRepository extends IncomeAttributeNameLookup {
 
   void register(IncomeAttribute incomeAttribute);
 
@@ -12,8 +12,6 @@ public interface IncomeAttributeRepository {
   default IncomeAttribute get(IncomeAttributeIdentifier incomeAttributeIdentifier) {
     return find(incomeAttributeIdentifier).orElseThrow(IncomeAttributeNotFoundException::new);
   }
-
-  boolean existsByName(IncomeAttributeName incomeAttributeName);
 
   void update(IncomeAttribute incomeAttribute, long expectedVersion);
 
